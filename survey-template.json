@@ -1,0 +1,234 @@
+{
+  "SurveyEntry": {
+    "SurveyID": "SV_eV4B37e4cMfxP6K",
+    "SurveyName": "Sample Study - Templates",
+    "SurveyDescription": null,
+    "SurveyOwnerID": "UR_8k6S2momlBWhOp7",
+    "SurveyBrandID": "ucbpsych",
+    "DivisionID": null,
+    "SurveyLanguage": "EN",
+    "SurveyActiveResponseSet": "RS_cUZmutzGXaoQ67I",
+    "SurveyStatus": "Inactive",
+    "SurveyStartDate": "0000-00-00 00:00:00",
+    "SurveyExpirationDate": "0000-00-00 00:00:00",
+    "SurveyCreationDate": "2024-01-05 17:13:46",
+    "CreatorID": "UR_8k6S2momlBWhOp7",
+    "LastModified": "2024-01-05 17:43:21",
+    "LastAccessed": "0000-00-00 00:00:00",
+    "LastActivated": "0000-00-00 00:00:00",
+    "Deleted": null
+  },
+  "SurveyElements": [
+    {
+      "SurveyID": "SV_eV4B37e4cMfxP6K",
+      "Element": "BL",
+      "PrimaryAttribute": "Survey Blocks",
+      "SecondaryAttribute": null,
+      "TertiaryAttribute": null,
+      "Payload": {
+        "1": {
+          "Type": "Trash",
+          "Description": "Trash / Unused Questions",
+          "ID": "BL_3JdLyLZw3y0IEHs",
+          "BlockElements": [
+          ],
+          "Options": {
+            "BlockLocking": "false",
+            "RandomizeQuestions": "false",
+            "BlockVisibility": "Collapsed"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_eV4B37e4cMfxP6K",
+      "Element": "FL",
+      "PrimaryAttribute": "Survey Flow",
+      "SecondaryAttribute": null,
+      "TertiaryAttribute": null,
+      "Payload": {
+        "Type": "Root",
+        "FlowID": "FL_1",
+        "Flow": [
+          {
+            "Type": "BlockRandomizer",
+            "FlowID": "FL_24",
+            "SubSet": 0,
+            "EvenPresentation": true,
+            "Flow": [
+            ]
+          },
+          {
+            "Type": "EndSurvey",
+            "FlowID": "FL_13",
+            "EndingType": "Advanced",
+            "Options": {
+              "Advanced": "true",
+              "SurveyTermination": "DefaultMessage",
+              "EOSRedirectURL": "https://app.prolific.com/submissions/complete?cc=CLA8IBIT"
+            }
+          }
+        ],
+        "Properties": {
+          "Count": 24,
+          "RemovedFieldsets": []
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_eV4B37e4cMfxP6K",
+      "Element": "PL",
+      "PrimaryAttribute": "Preview Link",
+      "SecondaryAttribute": null,
+      "TertiaryAttribute": null,
+      "Payload": {
+        "PreviewType": "Brand",
+        "PreviewID": "6933ca66-6cc5-4c59-870f-e194ee2b9506"
+      }
+    },
+    {
+      "SurveyID": "SV_eV4B37e4cMfxP6K",
+      "Element": "RS",
+      "PrimaryAttribute": "RS_cUZmutzGXaoQ67I",
+      "SecondaryAttribute": null,
+      "TertiaryAttribute": null,
+      "Payload": null
+    },
+    {
+      "SurveyID": "SV_eV4B37e4cMfxP6K",
+      "Element": "SO",
+      "PrimaryAttribute": "Survey Options",
+      "SecondaryAttribute": null,
+      "TertiaryAttribute": null,
+      "Payload": {
+        "BackButton": "true",
+        "SaveAndContinue": "true",
+        "SurveyProtection": "PublicSurvey",
+        "BallotBoxStuffingPrevention": "false",
+        "NoIndex": "Yes",
+        "SecureResponseFiles": "true",
+        "SurveyExpiration": "None",
+        "SurveyTermination": "DisplayMessage",
+        "Header": "",
+        "Footer": "",
+        "ProgressBarDisplay": "NoText",
+        "PartialData": "+1 month",
+        "ValidationMessage": null,
+        "PreviousButton": "",
+        "NextButton": " → ",
+        "SurveyTitle": "Qualtrics Survey | Qualtrics Experience Management",
+        "SkinLibrary": "ucbpsych",
+        "SkinType": "MQ",
+        "Skin": "graybusiness1",
+        "NewScoring": 1,
+        "SurveyMetaDescription": "The most powerful, simple and trusted way to gather experience data. Start your journey to experience management and try a free account today.",
+        "ProtectSelectionIds": true,
+        "EOSMessage": null,
+        "ShowExportTags": "false",
+        "CollectGeoLocation": "false",
+        "PasswordProtection": "No",
+        "AnonymizeResponse": "No",
+        "RefererCheck": "No",
+        "BallotBoxStuffingPreventionBehavior": null,
+        "BallotBoxStuffingPreventionMessage": null,
+        "BallotBoxStuffingPreventionMessageLibrary": null,
+        "BallotBoxStuffingPreventionURL": null,
+        "RecaptchaV3": "false",
+        "ConfirmStart": false,
+        "AutoConfirmStart": false,
+        "RelevantID": "false",
+        "RelevantIDLockoutPeriod": "+30 days",
+        "UseCustomSurveyLinkCompletedMessage": null,
+        "SurveyLinkCompletedMessage": null,
+        "SurveyLinkCompletedMessageLibrary": null,
+        "ResponseSummary": "No",
+        "EOSMessageLibrary": null,
+        "EOSRedirectURL": null,
+        "EmailThankYou": "false",
+        "ThankYouEmailMessageLibrary": null,
+        "ThankYouEmailMessage": null,
+        "ValidateMessage": "false",
+        "ValidationMessageLibrary": null,
+        "InactiveSurvey": "DefaultMessage",
+        "PartialDeletion": null,
+        "PartialDataCloseAfter": "LastActivity",
+        "InactiveMessageLibrary": null,
+        "InactiveMessage": null,
+        "AvailableLanguages": {
+          "EN": []
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_eV4B37e4cMfxP6K",
+      "Element": "QGO",
+      "PrimaryAttribute": "QGO_QuotaGroupOrder",
+      "SecondaryAttribute": null,
+      "TertiaryAttribute": null,
+      "Payload": [
+        "QG_BgoN4nSaT9bjBny"
+      ]
+    },
+    {
+      "SurveyID": "SV_eV4B37e4cMfxP6K",
+      "Element": "SCO",
+      "PrimaryAttribute": "Scoring",
+      "SecondaryAttribute": null,
+      "TertiaryAttribute": null,
+      "Payload": {
+        "ScoringCategories": [],
+        "ScoringCategoryGroups": [],
+        "ScoringSummaryCategory": null,
+        "ScoringSummaryAfterQuestions": 0,
+        "ScoringSummaryAfterSurvey": 0,
+        "DefaultScoringCategory": null,
+        "AutoScoringCategory": null
+      }
+    },
+    {
+      "SurveyID": "SV_eV4B37e4cMfxP6K",
+      "Element": "PROJ",
+      "PrimaryAttribute": "CORE",
+      "SecondaryAttribute": null,
+      "TertiaryAttribute": "1.1.0",
+      "Payload": {
+        "ProjectCategory": "CORE",
+        "SchemaVersion": "1.1.0"
+      }
+    },
+    {
+      "SurveyID": "SV_eV4B37e4cMfxP6K",
+      "Element": "STAT",
+      "PrimaryAttribute": "Survey Statistics",
+      "SecondaryAttribute": null,
+      "TertiaryAttribute": null,
+      "Payload": {
+        "MobileCompatible": false,
+        "ID": "Survey Statistics"
+      }
+    },
+    {
+      "SurveyID": "SV_eV4B37e4cMfxP6K",
+      "Element": "QC",
+      "PrimaryAttribute": "Survey Question Count",
+      "SecondaryAttribute": "111",
+      "TertiaryAttribute": null,
+      "Payload": null
+    },
+    {
+      "SurveyID": "SV_eV4B37e4cMfxP6K",
+      "Element": "QG",
+      "PrimaryAttribute": "QG_BgoN4nSaT9bjBny",
+      "SecondaryAttribute": "Default Quota Group",
+      "TertiaryAttribute": null,
+      "Payload": {
+        "ID": "QG_BgoN4nSaT9bjBny",
+        "Name": "Default Quota Group",
+        "Selected": true,
+        "MultipleMatch": "PlaceInAll",
+        "Public": false,
+        "Quotas": []
+      }
+    }
+  ]
+}
