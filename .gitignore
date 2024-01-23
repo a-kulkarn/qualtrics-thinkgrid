@@ -1,5 +1,7 @@
 *~
 *.csv
+/invoice/*
+.DS_Store
 *#*#
 Thinking-grid-generated-squares.png
 output-survey.qsf
