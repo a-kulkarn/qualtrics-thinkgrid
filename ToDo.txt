@@ -1,0 +1,3 @@
+fix why N/A keeps appearing even when the function is not called?
+    - this could potentially fix the issue of having to create two separate json files
+fix randomizing blocks
