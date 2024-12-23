@@ -42,9 +42,9 @@ def read_json_file(fname):
 #
 ################################################################################
 
-const_survey_template   = read_json_file("survey-template.json")
-const_block_template    = read_json_file("block-template.json")
-const_question_template = read_json_file("question-template.json")
+const_survey_template   = read_json_file("json/survey-template.json")
+const_block_template    = read_json_file("json/block-template.json")
+const_question_template = read_json_file("json/question-template.json")
 
 ################################################################################
 #
