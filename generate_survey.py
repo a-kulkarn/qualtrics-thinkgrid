@@ -7,9 +7,13 @@
 #
 ################################################################################
 
-import pandas as pd
+import sys
 import json
 import copy
+import numpy as np
+import pandas as pd
+import skimage as ski
+import matplotlib.pyplot as plt
 
 # In order to add a thing to the qualtrics survey file, it appears to need updating in
 # three potential locations
@@ -48,8 +52,6 @@ const_question_template = read_json_file("question-template.json")
 #
 ################################################################################
 
-import numpy as np
-import skimage as ski
 
 def square_position(i, j, width = 50, gap = 25, origin_coordinates = [200, 420]):
     """
@@ -117,25 +119,41 @@ def draw_white_squares(regions):
                 img[y,x] = white
 
     # Draw the N/A square.
-    draw_NA_square(img, R)
+    img = draw_NA_square(img, R)
     
     # write to file
     ski.io.imsave("Thinking-grid-generated-squares.png", img)
     return
 
 
-import cv2
-def draw_NA_square(img, R):
-    font = cv2.FONT_HERSHEY_SIMPLEX
-    black = (0,0,0,255)
+# def draw_NA_square(img, R):
+#     font = cv2.FONT_HERSHEY_SIMPLEX
+#     black = (0,0,0,255)
 
+#     x = R["X"]
+#     y = R["Y"]
+#     w = R["Width"]
+#     d = int(w/2) 
+#     cv2.putText(img, 'N/A', (x + d - 30, y + d),  font,  1, black, 2)
+    
+
+def draw_NA_square(img, R):
     x = R["X"]
     y = R["Y"]
     w = R["Width"]
-    d = int(w/2) 
-    cv2.putText(img, 'N/A', (x + d - 30, y + d),  font,  1, black, 2)
-    
-    
+    d = int(w/2)
+
+    X = (x + d - 30) / img.shape[0]
+    Y = 1 - (y + d) / img.shape[1]
+
+    fig = plt.figure()
+    fig.figimage(img, resize=True)
+    fig.text(X, Y, "N/A", fontsize=12, va="top")
+    fig.canvas.draw()
+    annotated_img = np.asarray(fig.canvas.renderer.buffer_rgba())
+    plt.close(fig)
+    return annotated_img
+
 
 ################################################################################
 #
@@ -233,7 +251,6 @@ def add_question_to_survey(survey, question, block_id, participant_id):
 #
 ################################################################################
 
-import sys
 
 if __name__ == "__main__":
 
@@ -248,7 +265,7 @@ if __name__ == "__main__":
     #
     # After that, you need to pull the image ID on qualtrics and copy-paste that into
     # the "GraphicID" field in the `question-template.json` file.
-    generate_image_file = False    
+    generate_image_file = False
 
 
     # <COMMENT FOR ZAC> Change this to choose which questions are filtered into the survey.
