@@ -106,7 +106,7 @@ def correct_squares(gap = 25, width = 25, height = 25, origin_coordinates = [200
 def draw_white_squares(regions):
     white = [255, 255, 255, 255]
     
-    img = ski.io.imread("Thinking-grid-template.png")
+    img = ski.io.imread("imgs/Thinking-grid-template.png")
 
     for R in regions:
         desc = R["Description"]
