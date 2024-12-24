@@ -210,7 +210,7 @@ def add_question_to_survey(survey, question, block_id, participant_id):
     
     new_block_entry = {
       "Type": "Question",
-      "QuestionID": Q["Payload"]["QuestionID"]
+      "QuestionID": question["Payload"]["QuestionID"]
     }
 
     new_block["ID"] = block_id
@@ -247,26 +247,35 @@ def add_question_to_survey(survey, question, block_id, participant_id):
 
 ################################################################################
 #
-# Main script.
+# Main function.
 #
 ################################################################################
 
 
-if __name__ == "__main__":
-
-    # <COMMENT FOR ZAC> This is where you adjust parameters to generate the squares.
-    gap    = 25
-    width  = 50
-    height = width
-    origin_coordinates = [200, 420]
- 
-    # <COMMENT FOR ZAC> If you regenerate the squares, make sure to turn this on to
-    # create the image file. You'll then have to upload the image into qualtrics.
+def generate_survey(
+        limit=5,
+        gap=25,
+        width=50,
+        height=50,
+        origin_coordinates=[200, 420],
+        generate_image_file=False,
+        max_survey_size=None,
+):
+    """
+    # <COMMENT> If you regenerate the squares, make sure to set
+    #
+    #     `generate_image_file=True`
+    # 
+    # You'll then have to upload the image into qualtrics.
     #
     # After that, you need to pull the image ID on qualtrics and copy-paste that into
     # the "GraphicID" field in the `question-template.json` file.
-    generate_image_file = False
 
+    # `max_survey_size` controls the max survey size.
+    # once the counter ticks over this value, an additional survey file
+    # is generated to hold the next batch.
+    
+    """
 
     # <COMMENT FOR ZAC> Change this to choose which questions are filtered into the survey.
     def include_question_in_survey(csv_row):
@@ -283,22 +292,15 @@ if __name__ == "__main__":
         # Default is to include all questions.
         return True
     
-
-    # <COMMENT FOR ZAC> This parameter controls the max survey size.
-    # once the counter ticks over this value, an additional survey file
-    # is generated to hold the next batch.
-    max_survey_size = None
-
-
-    ########################################
-
-    
+    ########################################    
     # Determine correct squares and adjust the template.
-    correct_squares(gap    = gap,
-                    width  = width,
-                    height = height,
-                    origin_coordinates = origin_coordinates,
-                    generate_image_file = generate_image_file)
+    correct_squares(
+        gap=gap,
+        width=width,
+        height=height,
+        origin_coordinates=origin_coordinates,
+        generate_image_file=generate_image_file
+    )
     
     # Read the data file
     data_table = pd.read_csv("Datafile_nsf_pilot.csv")
@@ -306,17 +308,11 @@ if __name__ == "__main__":
     # Create the survey object
     survey = copy.deepcopy(const_survey_template)
 
-    # Parse command line option
-    if len(sys.argv) == 1:
-        LIMIT = 5
-    else:
-        LIMIT = int(sys.argv[1])
-
     num_questions_included = 0
     partition_number = 0
     for i, row in data_table.iterrows():
         
-        if i >= LIMIT: break
+        if i >= limit: break
 
         if max_survey_size and num_questions_included >= max_survey_size:
 
@@ -342,3 +338,15 @@ if __name__ == "__main__":
     with open("output-survey-{}.qsf".format(partition_number), "w") as F:
         json.dump(survey, F)
 
+    # Return a status.
+    return 0
+
+        
+################################################################################
+#
+# Main driver.
+#
+################################################################################
+
+if __name__ == "__main__":
+    generate_survey()
