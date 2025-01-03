@@ -247,7 +247,7 @@ def add_question_to_survey(survey, question, block_id, participant_id):
 
 ################################################################################
 #
-# Main function.
+# Main generate function.
 #
 ################################################################################
 
@@ -342,7 +342,7 @@ def generate_survey(
     # Return a status.
     return 0
 
-        
+
 ################################################################################
 #
 # Main driver.
