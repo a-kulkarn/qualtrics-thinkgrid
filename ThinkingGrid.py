@@ -3,7 +3,6 @@ import json
 import copy
 import numpy as np
 import skimage as ski
-import cv2
 
 class ThinkingGrid:
 

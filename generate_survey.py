@@ -253,6 +253,7 @@ def add_question_to_survey(survey, question, block_id, participant_id):
 
 
 def generate_survey(
+        survey_setup_file,
         limit=5,
         gap=25,
         width=50,
@@ -349,4 +350,5 @@ def generate_survey(
 ################################################################################
 
 if __name__ == "__main__":
-    generate_survey()
+    fname = "test_data/testQuestion.csv"
+    generate_survey(fname)
