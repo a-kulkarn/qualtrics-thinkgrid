@@ -162,23 +162,23 @@ def draw_NA_square(img, R):
 ################################################################################
 
 def question_text(row):
-    return row['thoughts']
+    return row['question']
 
 def participant_id(row):
     return row['id']
 
 def updated_square_string(participant_id, string):
-    return "ID{}_{}".format(participant_id, string[2:4])
+    return "UQID{}_{}".format(participant_id, string[2:4])
 
-def question_from_row(row, question_id, question_export_tag):
+def question_from_row(row, question_id, question_export_tag, questionText=True):
+
     Q = copy.deepcopy(const_question_template)
 
-    # Add question text.
-    text = question_text(row)
     pid = participant_id(row)
-
-    if not isinstance(text, str):
-        text = "NO RESPONSE RECORDED."
+    if questionText == False:
+        text = "Insert text here."
+    else:
+        text = question_text(row)
     
     # Assign payload attributes.
     Q["PrimaryAttribute"] = question_id
@@ -254,6 +254,8 @@ def add_question_to_survey(survey, question, block_id, participant_id):
 
 def generate_survey(
         survey_setup_file,
+        output_file_name,
+        question_text = True,
         limit=5,
         gap=25,
         width=50,
@@ -277,23 +279,59 @@ def generate_survey(
     # is generated to hold the next batch.
     
     """
-
-    # <COMMENT FOR ZAC> Change this to choose which questions are filtered into the survey.
-    def include_question_in_survey(csv_row):
-        """
-        Given a row of a csv table, return a boolean value on whether to include the
-        question into the survey. 
-        """
-        # Alias
-        row = csv_row
-
-        # You can filter on the fields in row, for example
-        # if row["thoughts"] == np.nan: return False
-
-        # Default is to include all questions.
-        return True
+    correct_squares(gap    = gap,
+                width  = width,
+                height = height,
+                origin_coordinates = origin_coordinates,
+                generate_image_file = generate_image_file)
     
-    ########################################    
+    survey = copy.deepcopy(const_survey_template)
+    num_questions_included = 0
+    partition_number = 0
+    setup = pd.read_csv(survey_setup_file) if survey_setup_file.endswith('.csv') else pd.read_excel(survey_setup_file)
+    for i, row in setup.iterrows():
+
+        if max_survey_size and num_questions_included >= max_survey_size:
+
+            # Write current batch
+            with open("{}.qsf".format(output_file_name), "w") as F:
+                json.dump(survey, F)
+
+            # Reset counters and survey object.
+            survey = copy.deepcopy(const_survey_template)
+            num_questions_included = 0
+            partition_number += 1
+
+
+        pid = participant_id(row)
+
+        # vishal: check the code below
+        Q = question_from_row(row, "QID{}".format(1000 + i), "ID_{}".format(row["id"]), question_text)
+        add_question_to_survey(survey, Q, "BL_MamboNo{}".format(i), pid)
+
+        # Update counter.
+        num_questions_included += 1
+            
+    # Write file
+    with open("{}.qsf".format(output_file), "w") as F:
+        json.dump(survey, F)
+
+# <COMMENT FOR ZAC> Change this to choose which questions are filtered into the survey.
+def include_question_in_survey(csv_row):
+    """
+    Given a row of a csv table, return a boolean value on whether to include the
+    question into the survey. 
+    """
+    # Alias
+    row = csv_row
+
+    # You can filter on the fields in row, for example
+    # if row["thoughts"] == np.nan: return False
+
+    # Default is to include all questions.
+    return True
+
+########################################    
     # Determine correct squares and adjust the template.
     correct_squares(
         gap=gap,
@@ -351,4 +389,6 @@ def generate_survey(
 
 if __name__ == "__main__":
     fname = "test_data/testQuestion.csv"
-    generate_survey(fname)
+    output = "output_survey"
+
+    generate_survey(fname, output)
