@@ -6,3 +6,7 @@
 *#*#
 Thinking-grid-generated-squares.png
 output-survey.qsf
+# Python temp files
+__pycache__/
+*.py[cod]
+*$py.class
