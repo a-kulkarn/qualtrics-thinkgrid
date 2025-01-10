@@ -313,7 +313,7 @@ def generate_survey(
         num_questions_included += 1
             
     # Write file
-    with open("{}.qsf".format(output_file), "w") as F:
+    with open("{}.qsf".format(output_file_name), "w") as F:
         json.dump(survey, F)
 
 # <COMMENT FOR ZAC> Change this to choose which questions are filtered into the survey.
@@ -387,8 +387,8 @@ def include_question_in_survey(csv_row):
 #
 ################################################################################
 
-if __name__ == "__main__":
-    fname = "test_data/testQuestion.csv"
-    output = "output_survey"
+# if __name__ == "__main__":
+#     fname = "test_data/testQuestion.csv"
+#     output = "output_survey"
 
-    generate_survey(fname, output)
+#     generate_survey(fname, output)

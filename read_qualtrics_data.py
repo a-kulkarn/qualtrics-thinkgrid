@@ -10,7 +10,7 @@ def subset_qualtrics(data, identifier):
     return data
 
 
-def read_survey_results(outputFileDir, setup):
+def read_qualtrics_data(outputFileDir, setup):
     # outputFileDir -- exported survery data from qualtrics.
     # setup -- setup file used to generate the survey. (Or possibly the list of identifiers.)
 
@@ -91,8 +91,8 @@ def read_survey_results(outputFileDir, setup):
 #
 ################################################################################
 
-if __name__ == "__main__":
-    setup_file = "test_data/testQuestion.csv"
-    data_file = "test_data/testQuestionOutput.csv"    
-    res = read_survey_results(data_file, setup_file)
-    print(res)
+# if __name__ == "__main__":
+#     setup_file = "test_data/testQuestion.csv"
+#     data_file = "test_data/testQuestionOutput.csv"    
+#     res = read_qualtrics_data(data_file, setup_file)
+#     print(res)
