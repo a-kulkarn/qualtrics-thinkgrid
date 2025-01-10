@@ -31,8 +31,7 @@ generate_survey <- function(survey_setup_file,
 #' @export
 read_qualtrics_data <- function(data_file, setup_file){
     mod <- reticulate::import_from_path("read_qualtrics_data", path = py_module_path())
-    mod$generate_survey(survey_setup_file, output_file_name, question_text)
-    return(res$read_qualtrics_data(data_file, setup_file))
+    return(mod$read_qualtrics_data(data_file, setup_file))
 }
 
 #' @export
