@@ -42,9 +42,9 @@ def read_json_file(fname):
 #
 ################################################################################
 
-const_survey_template   = read_json_file("json/survey-template.json")
-const_block_template    = read_json_file("json/block-template.json")
-const_question_template = read_json_file("json/question-template.json")
+const_survey_template   = read_json_file("/Users/vishalkuvar/Documents/research/templeton/qualtrics-thinkgrid/ThinkingGrid/inst/json/survey-template.json")
+const_block_template    = read_json_file("/Users/vishalkuvar/Documents/research/templeton/qualtrics-thinkgrid/ThinkingGrid/inst/json/block-template.json")
+const_question_template = read_json_file("/Users/vishalkuvar/Documents/research/templeton/qualtrics-thinkgrid/ThinkingGrid/inst/json/question-template.json")
 
 ################################################################################
 #
@@ -106,7 +106,7 @@ def correct_squares(gap = 25, width = 25, height = 25, origin_coordinates = [200
 def draw_white_squares(regions):
     white = [255, 255, 255, 255]
     
-    img = ski.io.imread("imgs/Thinking-grid-template.png")
+    img = ski.io.imread("../imgs/Thinking-grid-template.png")
 
     for R in regions:
         desc = R["Description"]
