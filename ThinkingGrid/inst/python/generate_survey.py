@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 import skimage as ski
 import matplotlib.pyplot as plt
+import importlib.resources
 
 # In order to add a thing to the qualtrics survey file, it appears to need updating in
 # three potential locations
@@ -32,7 +33,7 @@ import matplotlib.pyplot as plt
 ################################################################################
 
 def read_json_file(fname):
-    with open(fname, 'r') as F:
+    with importlib.resources.open_text(__name__, f"json/{fname}") as F:
         X = json.load(F)
     return X
 
@@ -42,9 +43,10 @@ def read_json_file(fname):
 #
 ################################################################################
 
-const_survey_template   = read_json_file("/Users/vishalkuvar/Documents/research/templeton/qualtrics-thinkgrid/ThinkingGrid/inst/json/survey-template.json")
-const_block_template    = read_json_file("/Users/vishalkuvar/Documents/research/templeton/qualtrics-thinkgrid/ThinkingGrid/inst/json/block-template.json")
-const_question_template = read_json_file("/Users/vishalkuvar/Documents/research/templeton/qualtrics-thinkgrid/ThinkingGrid/inst/json/question-template.json")
+const_survey_template   = read_json_file("survey-template.json")
+const_block_template    = read_json_file("block-template.json")
+const_question_template = read_json_file("question-template.json")
+
 
 ################################################################################
 #
@@ -316,22 +318,22 @@ def generate_survey(
     with open("{}.qsf".format(output_file_name), "w") as F:
         json.dump(survey, F)
 
-# <COMMENT FOR ZAC> Change this to choose which questions are filtered into the survey.
-def include_question_in_survey(csv_row):
-    """
-    Given a row of a csv table, return a boolean value on whether to include the
-    question into the survey. 
-    """
-    # Alias
-    row = csv_row
+    # <COMMENT FOR ZAC> Change this to choose which questions are filtered into the survey.
+    def include_question_in_survey(csv_row):
+        """
+        Given a row of a csv table, return a boolean value on whether to include the
+        question into the survey. 
+        """
+        # Alias
+        row = csv_row
 
-    # You can filter on the fields in row, for example
-    # if row["thoughts"] == np.nan: return False
+        # You can filter on the fields in row, for example
+        # if row["thoughts"] == np.nan: return False
 
-    # Default is to include all questions.
-    return True
+        # Default is to include all questions.
+        return True
 
-########################################    
+    ########################################    
     # Determine correct squares and adjust the template.
     correct_squares(
         gap=gap,
