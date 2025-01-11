@@ -12,7 +12,7 @@ test_that("generate_survey does not crash", {
     expect_equal(
         generate_survey(
             setup_file,
-            "../outputQSF/output_file",
+            "output_file",
             question_text = TRUE
         ),
         0

@@ -290,11 +290,14 @@ def generate_survey(
     survey = copy.deepcopy(const_survey_template)
     num_questions_included = 0
     partition_number = 0
-    setup = pd.read_csv(survey_setup_file) if survey_setup_file.endswith('.csv') else pd.read_excel(survey_setup_file)
+    setup = (
+        pd.read_csv(survey_setup_file)
+        if survey_setup_file.endswith('.csv')
+        else pd.read_excel(survey_setup_file)
+    )
+    
     for i, row in setup.iterrows():
-
         if max_survey_size and num_questions_included >= max_survey_size:
-
             # Write current batch
             with open("{}.qsf".format(output_file_name), "w") as F:
                 json.dump(survey, F)
@@ -304,11 +307,12 @@ def generate_survey(
             num_questions_included = 0
             partition_number += 1
 
-
         pid = participant_id(row)
 
         # vishal: check the code below
-        Q = question_from_row(row, "QID{}".format(1000 + i), "ID_{}".format(row["id"]), question_text)
+        Q = question_from_row(
+            row, "QID{}".format(1000 + i), "ID_{}".format(row["id"]), question_text
+        )
         add_question_to_survey(survey, Q, "BL_MamboNo{}".format(i), pid)
 
         # Update counter.
