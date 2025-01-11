@@ -80,8 +80,14 @@ def read_qualtrics_data(outputFileDir, setup):
 
     output = pd.DataFrame(
         list(zip(uid, probeid, dc, ac)),
-        columns=["uid", "Probe Identifier", "Deliberate Constraints", "Automatic Constraints"],
+        columns=["uid", "Probe.Identifier", "Deliberate.Constraints", "Automatic.Constraints"],
     )
+
+    # Cast types.
+    for col in ["Deliberate.Constraints", "Automatic.Constraints"]:
+        output[col] = output[col].astype(int)
+
+    # Return.
     return output
 
 

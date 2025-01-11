@@ -31,7 +31,11 @@ generate_survey <- function(survey_setup_file,
 #' @export
 read_qualtrics_data <- function(data_file, setup_file){
     mod <- reticulate::import_from_path("read_qualtrics_data", path = py_module_path())
-    return(mod$read_qualtrics_data(data_file, setup_file))
+    res <- reticulate::py_to_r(mod$read_qualtrics_data(data_file, setup_file))
+
+    ## Fixup attributes for comparison's sake.
+    attr(res, "pandas.index") <- NULL
+    return(res)
 }
 
 #' @export
