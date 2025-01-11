@@ -72,7 +72,7 @@ def correct_squares(gap = 25, width = 25, height = 25, origin_coordinates = [200
 
     dx = np.array([width,  0], dtype=int)
     dy = np.array([0, height], dtype=int)
-    
+
     for R in regions:
         # Qualtrics labels are 1-indexed.
         desc = R["Description"]
@@ -86,7 +86,7 @@ def correct_squares(gap = 25, width = 25, height = 25, origin_coordinates = [200
                             width = width,
                             gap = gap,
                             origin_coordinates=origin_coordinates)
-        
+
         coords = [v, v + dx, v + dx + dy, v + dy]
 
         # Assign values. Note we have to type cast back to python.
@@ -102,18 +102,18 @@ def correct_squares(gap = 25, width = 25, height = 25, origin_coordinates = [200
     # If we need to update the image file, do that.
     if generate_image_file:
         draw_white_squares(regions)
-        
+
     return
 
 def draw_white_squares(regions):
     white = [255, 255, 255, 255]
-    
+
     img = ski.io.imread("../imgs/Thinking-grid-template.png")
 
     for R in regions:
         desc = R["Description"]
         if desc == "s1NA": continue
-        
+
         a = R["X"]
         b = R["Y"]
         for x in range(a, a+R["Width"]):
@@ -122,7 +122,7 @@ def draw_white_squares(regions):
 
     # Draw the N/A square.
     img = draw_NA_square(img, R)
-    
+
     # write to file
     ski.io.imsave("Thinking-grid-generated-squares.png", img)
     return
@@ -135,9 +135,9 @@ def draw_white_squares(regions):
 #     x = R["X"]
 #     y = R["Y"]
 #     w = R["Width"]
-#     d = int(w/2) 
+#     d = int(w/2)
 #     cv2.putText(img, 'N/A', (x + d - 30, y + d),  font,  1, black, 2)
-    
+
 
 def draw_NA_square(img, R):
     x = R["X"]
@@ -181,11 +181,11 @@ def question_from_row(row, question_id, question_export_tag, questionText=True):
         text = "Insert text here."
     else:
         text = question_text(row)
-    
+
     # Assign payload attributes.
     Q["PrimaryAttribute"] = question_id
     Q["Payload"]["QuestionID"] = question_id
-    Q["Payload"]["QuestionDescription"] = "" 
+    Q["Payload"]["QuestionDescription"] = ""
     Q["Payload"]["QuestionText"] = text
     Q["Payload"]["DataExportTag"] = question_export_tag
 
@@ -198,7 +198,7 @@ def question_from_row(row, question_id, question_export_tag, questionText=True):
     regions = Q["Payload"]["Regions"]
     for R in regions:
         R["Description"] = updated_square_string(pid, R["Description"])
-    
+
     return Q
 
 
@@ -209,7 +209,7 @@ def add_question_to_survey(survey, question, block_id, participant_id):
 
     # Create a new block to harbor the question.
     new_block = copy.deepcopy(const_block_template)
-    
+
     new_block_entry = {
       "Type": "Question",
       "QuestionID": question["Payload"]["QuestionID"]
@@ -232,7 +232,7 @@ def add_question_to_survey(survey, question, block_id, participant_id):
     block_randomizer_flow = block_randomizer["Flow"]
     new_flow_count = base_flow_count + len(block_randomizer_flow)
 
-    
+
     new_flow_entry = {
         "Type": "Block",
         "ID": block_id,
@@ -242,7 +242,7 @@ def add_question_to_survey(survey, question, block_id, participant_id):
 
     block_randomizer_flow.append(new_flow_entry)
     block_randomizer["SubSet"] += 1
-    
+
     # NOTE: Might need to update the "Properties" field?
     flow_payload["Properties"]["Count"] = new_flow_count
     return
@@ -270,7 +270,7 @@ def generate_survey(
     # <COMMENT> If you regenerate the squares, make sure to set
     #
     #     `generate_image_file=True`
-    # 
+    #
     # You'll then have to upload the image into qualtrics.
     #
     # After that, you need to pull the image ID on qualtrics and copy-paste that into
@@ -279,54 +279,13 @@ def generate_survey(
     # `max_survey_size` controls the max survey size.
     # once the counter ticks over this value, an additional survey file
     # is generated to hold the next batch.
-    
+
     """
-    correct_squares(gap    = gap,
-                width  = width,
-                height = height,
-                origin_coordinates = origin_coordinates,
-                generate_image_file = generate_image_file)
-    
-    survey = copy.deepcopy(const_survey_template)
-    num_questions_included = 0
-    partition_number = 0
-    setup = (
-        pd.read_csv(survey_setup_file)
-        if survey_setup_file.endswith('.csv')
-        else pd.read_excel(survey_setup_file)
-    )
-    
-    for i, row in setup.iterrows():
-        if max_survey_size and num_questions_included >= max_survey_size:
-            # Write current batch
-            with open("{}.qsf".format(output_file_name), "w") as F:
-                json.dump(survey, F)
-
-            # Reset counters and survey object.
-            survey = copy.deepcopy(const_survey_template)
-            num_questions_included = 0
-            partition_number += 1
-
-        pid = participant_id(row)
-
-        # vishal: check the code below
-        Q = question_from_row(
-            row, "QID{}".format(1000 + i), "ID_{}".format(row["id"]), question_text
-        )
-        add_question_to_survey(survey, Q, "BL_MamboNo{}".format(i), pid)
-
-        # Update counter.
-        num_questions_included += 1
-            
-    # Write file
-    with open("{}.qsf".format(output_file_name), "w") as F:
-        json.dump(survey, F)
-
     # <COMMENT FOR ZAC> Change this to choose which questions are filtered into the survey.
     def include_question_in_survey(csv_row):
         """
         Given a row of a csv table, return a boolean value on whether to include the
-        question into the survey. 
+        question into the survey.
         """
         # Alias
         row = csv_row
@@ -337,7 +296,6 @@ def generate_survey(
         # Default is to include all questions.
         return True
 
-    ########################################    
     # Determine correct squares and adjust the template.
     correct_squares(
         gap=gap,
@@ -346,9 +304,6 @@ def generate_survey(
         origin_coordinates=origin_coordinates,
         generate_image_file=generate_image_file
     )
-    
-    # Read the data file
-    data_table = pd.read_csv("Datafile_nsf_pilot.csv")
 
     # Create the survey object
     survey = copy.deepcopy(const_survey_template)
@@ -356,11 +311,10 @@ def generate_survey(
     num_questions_included = 0
     partition_number = 0
     for i, row in data_table.iterrows():
-        
-        if i >= limit: break
+        if i >= limit:
+            break
 
         if max_survey_size and num_questions_included >= max_survey_size:
-
             # Write current batch
             with open("output-survey-{}.qsf".format(partition_number), "w") as F:
                 json.dump(survey, F)
@@ -373,12 +327,14 @@ def generate_survey(
 
         if include_question_in_survey(row):
             pid = participant_id(row)
-            Q = question_from_row(row, "QID{}".format(1000 + i), "ID_{}".format(row["id"]))
+            Q = question_from_row(
+                row, "QID{}".format(1000 + i), "ID_{}".format(row["id"]), question_text
+            )
             add_question_to_survey(survey, Q, "BL_MamboNo{}".format(i), pid)
 
             # Update counter.
             num_questions_included += 1
-            
+
     # Write file
     with open("output-survey-{}.qsf".format(partition_number), "w") as F:
         json.dump(survey, F)
