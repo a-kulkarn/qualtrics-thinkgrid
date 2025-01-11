@@ -1,9 +1,4 @@
-test_that("multiplication works", {
-  expect_equal(2 * 2, 4)
-})
-
-## # import the ThinkingGrid script
-## # source("ThinkingGrid.R")
+## Test that basic functionality works.
 
 setup_file <- system.file("test_data", "testQuestion.csv", package = "ThinkingGrid")
 data_file <- system.file("test_data", "testQuestionOutput.csv", package = "ThinkingGrid")
