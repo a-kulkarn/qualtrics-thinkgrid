@@ -305,12 +305,19 @@ def generate_survey(
         generate_image_file=generate_image_file
     )
 
+    # Load setup object.
+    setup = (
+        pd.read_csv(survey_setup_file)
+        if survey_setup_file.endswith('.csv')
+        else pd.read_excel(survey_setup_file)
+    )
+    
     # Create the survey object
     survey = copy.deepcopy(const_survey_template)
 
     num_questions_included = 0
     partition_number = 0
-    for i, row in data_table.iterrows():
+    for i, row in setup.iterrows():
         if i >= limit:
             break
 
