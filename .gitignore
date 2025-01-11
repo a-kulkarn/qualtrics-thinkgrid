@@ -12,3 +12,4 @@ __pycache__/
 *$py.class
 .vscode/
 qsf_output_files/
+install-test/github-token
