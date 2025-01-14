@@ -1,5 +1,9 @@
 FROM rocker/tidyverse
-# FROM r-base
-COPY . /usr/local/src/install_test
+
+# Copy files.
+COPY install.R /usr/local/src/install_test/install.R
+
+# Run the installation tests.
 WORKDIR /usr/local/src/install_test
-CMD ["Rscript", "install.R"]
+# CMD ["Rscript", "install.R"]
+
