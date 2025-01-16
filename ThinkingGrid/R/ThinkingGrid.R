@@ -18,6 +18,51 @@ py_module_path <- function(){
     return(system.file("python", package="ThinkingGrid"))
 }
 
+pandas <- NULL
+skimage <- NULL
+matplotlib <- NULL
+
+.onLoad <- function(libname, pkgname) {
+    # check if venv exists
+    check_and_create_env("r-reticulate")
+    use_virtualenv("r-reticulate", required = FALSE)
+    pandas <<- reticulate::import("pandas", delay_load = TRUE)
+    skimage <<- reticulate::import("skimage", delay_load = TRUE)
+    matplotlib <<- reticulate::import("matplotlib", delay_load = TRUE)
+}
+
+check_and_create_env <- function(env_name) {
+    if(reticulate::virtualenv_exists(envname = env_name) == FALSE) {
+        reticulate::virtualenv_create(env_name, packages = c("numpy", "pandas", "scikit-image", "matplotlib"))
+        print(paste("Created virtual environment", env_name))
+    } else {
+        print(paste("Virtual environment", env_name, "already exists"))
+        if(py_module_available('pandas') == FALSE){
+            py_install("pandas", envname = env_name)
+        }
+        if(py_module_available('skimage') == FALSE){
+            py_install("scikit-image", envname = env_name)
+        }
+        if(py_module_available('matplotlib') == FALSE){
+            py_install("matplotlib", envname = env_name)
+        }
+
+    }
+}
+
+#' @export
+check_python_available <- function(install_if_NA = FALSE){
+    if(!is.null(reticulate::py_discover_config()$python)){
+        py_ver <- py_discover_config()$version
+        print(paste("Python version", py_ver, "is available"))
+    } else {
+        print("Python is not available")
+        if(install_if_NA == TRUE){
+            reticulate::install_python(version = "3.13:latest",)
+            check_and_create_env("r-reticulate")
+        }
+    }
+}
 
 #' @export
 generate_survey <- function(survey_setup_file,

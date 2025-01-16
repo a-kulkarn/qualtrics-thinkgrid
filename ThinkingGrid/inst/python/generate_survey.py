@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 import skimage as ski
 import matplotlib.pyplot as plt
+import os
 import importlib.resources
 
 # In order to add a thing to the qualtrics survey file, it appears to need updating in
@@ -33,7 +34,8 @@ import importlib.resources
 ################################################################################
 
 def read_json_file(fname):
-    with importlib.resources.open_text(__name__, f"json/{fname}") as F:
+    #with importlib.resources.open_text(__name__, "json", f"{fname}") as F:
+    with open(os.path.dirname(__file__) + "/json/{}".format(fname), "r") as F:
         X = json.load(F)
     return X
 
