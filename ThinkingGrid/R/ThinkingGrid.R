@@ -1,4 +1,3 @@
-library(reticulate)
 
 # run terminal command in R
 # py_path <- system("python -c 'import os, sys; print(os.path.dirname(sys.executable))'", intern = TRUE)
@@ -23,31 +22,34 @@ skimage <- NULL
 matplotlib <- NULL
 
 .onLoad <- function(libname, pkgname) {
-    # check if venv exists
-    check_and_create_env("r-reticulate")
-    use_virtualenv("r-reticulate", required = FALSE)
-    pandas <<- reticulate::import("pandas", delay_load = TRUE)
-    skimage <<- reticulate::import("skimage", delay_load = TRUE)
-    matplotlib <<- reticulate::import("matplotlib", delay_load = TRUE)
+    reticulate::use_virtualenv("r-thinkgrid", required = FALSE)
 }
 
-check_and_create_env <- function(env_name) {
-    if(reticulate::virtualenv_exists(envname = env_name) == FALSE) {
-        reticulate::virtualenv_create(env_name, packages = c("numpy", "pandas", "scikit-image", "matplotlib"))
-        print(paste("Created virtual environment", env_name))
+install_thinkgrid <- function(envname = "r-thinkgrid") {
+    if(reticulate::virtualenv_exists(envname = envname) == FALSE) {
+        reticulate::virtualenv_create(
+                        envname,
+                        packages = c("numpy", "pandas", "scikit-image", "matplotlib")
+                    )
+        print(paste("Created virtual environment", envname))
     } else {
-        print(paste("Virtual environment", env_name, "already exists"))
-        if(py_module_available('pandas') == FALSE){
-            py_install("pandas", envname = env_name)
-        }
-        if(py_module_available('skimage') == FALSE){
-            py_install("scikit-image", envname = env_name)
-        }
-        if(py_module_available('matplotlib') == FALSE){
-            py_install("matplotlib", envname = env_name)
-        }
-
+        print(paste("Virtual environment", envname, "already exists"))
     }
+
+    ## Install dependencies.
+    reticulate::py_install("pandas", envname = envname)
+    reticulate::py_install("scikit-image", envname = envname)
+    reticulate::py_install("matplotlib", envname = envname)
+
+    ## Inform.
+    writeLines(
+        paste(
+            "",
+            "ThinkingGrid installed successfully! to activate, run",
+            "    library(ThinkingGrid)",
+            sep = "\n\n"
+        )
+    )
 }
 
 #' @export
@@ -59,7 +61,7 @@ check_python_available <- function(install_if_NA = FALSE){
         print("Python is not available")
         if(install_if_NA == TRUE){
             reticulate::install_python(version = "3.13:latest",)
-            check_and_create_env("r-reticulate")
+            install_thinkgrid("r-reticulate")
         }
     }
 }
