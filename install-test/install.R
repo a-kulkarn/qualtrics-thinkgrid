@@ -9,8 +9,8 @@ devtools::install_github("a-kulkarn/qualtrics-thinkgrid",
                          INSTALL_opts = "--install-tests")
 
 ## Run install.
-library(ThinkingGrid)
-reticulate::install_python(version = "3.13:latest")
+## library(ThinkingGrid)
+## reticulate::install_python(version = "3.13:latest")
 ThinkingGrid::install_thinkgrid()
 library(ThinkingGrid)
 
