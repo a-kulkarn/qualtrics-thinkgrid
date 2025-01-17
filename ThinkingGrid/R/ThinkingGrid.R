@@ -25,6 +25,7 @@ matplotlib <- NULL
     reticulate::use_virtualenv("r-thinkgrid", required = FALSE)
 }
 
+#' @export
 install_thinkgrid <- function(envname = "r-thinkgrid") {
     if(reticulate::virtualenv_exists(envname = envname) == FALSE) {
         reticulate::virtualenv_create(
