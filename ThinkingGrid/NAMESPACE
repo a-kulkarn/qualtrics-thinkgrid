@@ -2,5 +2,6 @@
 
 export(check_python_available)
 export(generate_survey)
+export(install_thinkgrid)
 export(read_qualtrics_data)
 export(test_func)
