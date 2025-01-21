@@ -25,6 +25,18 @@ matplotlib <- NULL
     reticulate::use_virtualenv("r-thinkgrid", required = FALSE)
 }
 
+#' Illustration of install_thinkgrid function
+#'
+#' Creates a virtual environment and installs the required python packages
+#'
+#' @param envname {character, optional} Name of the virtual environment to be created. Default is "r-thinkgrid".
+#'
+#' @return None
+#'
+#' @examples
+#' install_thinkgrid()
+#' install_thinkgrid("new_environment_name")
+#'
 #' @export
 install_thinkgrid <- function(envname = "r-thinkgrid") {
     if(reticulate::virtualenv_exists(envname = envname) == FALSE) {
@@ -53,6 +65,18 @@ install_thinkgrid <- function(envname = "r-thinkgrid") {
     )
 }
 
+#' Illustration of check_python_available function
+#'
+#' Checks if python is available. Installs python if appropriate flag is set.
+#'
+#' @param install_if_NA {logical, optional} If TRUE, installs python 3.13 and required packages. Default is FALSE.
+#'
+#' @return None
+#'
+#' @examples
+#' check_python_available()
+#' check_python_available(install_if_NA = TRUE)
+#'
 #' @export
 check_python_available <- function(install_if_NA = FALSE){
     if(!is.null(reticulate::py_discover_config()$python)){
@@ -67,6 +91,42 @@ check_python_available <- function(install_if_NA = FALSE){
     }
 }
 
+#' Illustration of generate_survey function
+#'
+#' @param survey_setup_file {character, required} Path to a csv file containing the survey setup. This file MUST have a column called "id". Each row in this column should be unique. Indivudial thinking grids will be created for each row in this column. The other column is called "question". This column contains the question text. Quotes around question text is not required. If the question text is not provided, the function will use default text. Please note that these columns are case sensitive.
+#' 
+#' File setup for csv file without question text. For this to work the question_text parameter should be set to FALSE. A placeholder text ("Insert text here.") will be used in this case.: 
+#' 
+#' id
+#' 
+#' ThinkingGrid1
+#' 
+#' ThinkingGrid2
+#' 
+#' ThinkingGrid3
+#' 
+#' File setup for csv file with question text:
+#' 
+#' id,question
+#' ThinkingGrid1,Report your thoughts on the thinking grid 1
+#' ThinkingGrid2,Report your thoughts on the thinking grid 2
+#' ThinkingGrid3,Report your thoughts on the thinking grid 3
+#' 
+#' The above file will create 3 thinking grids with the corresponding questions.
+#' 
+#' @param output_file_name {character, optional} Name of the output qsf file. Default is "output_survey". The extension qsf will be added automatically. If the desired file name is "my_qsf_output.qsf, the function should be called as generate_survey("path/to/setup/survey_setup_file.csv", "path/to/output/my_qsf_output"). Default name is "output_survey.qsf".
+#' If a file with the same name exists, it will be overwritten. 
+#'
+#' 
+#' @param question_text {logical, optional} If TRUE, the function will use the question text provided in the csv file. If FALSE, the function will use a default question text ("Insert text here."). Default is TRUE.
+#' 
+#' @return None
+#'
+#' @examples
+#' generate_survey("path/to/setup/survey_setup_file.csv")
+#' generate_survey("path/to/setup/survey_setup_file.csv", "path/to/output/my_qsf_output")
+#' generate_survey("path/to/setup/survey_setup_file.csv", "path/to/output/my_qsf_output", question_text = FALSE)
+#' 
 #' @export
 generate_survey <- function(survey_setup_file,
                             output_file_name="output_survey",
@@ -76,6 +136,26 @@ generate_survey <- function(survey_setup_file,
     return(0)
 }
 
+
+#' Illustration of read_qualtrics_data function
+#' 
+#' @param data_file {character, needed} The path to where the Qualtrics output is located. This should be a csv file that needs to be provided to this function UNEDITED. 
+#' 
+#' @param setup_file {character, needed} setup_file used to generate the survey. This file should be the same file that was used to generate the survey. This file should have the same format as the survey_setup_file used in the generate_survey function.
+#' 
+#' @return data frame containing the Qualtrics data. Columns include "uid", "Probe.Identifier", "Deliberate.Constraints", "Automatic.Constraints"
+#' 
+#' uid: Unique identifier for each participant. This correspons to the row number in the Qualtrics output file.
+#' 
+#' Probe.Identifier: Identifier for the probe. This is the same as the "id" column in the setup_file.
+#' 
+#' Deliberate.Constraints: The deliberate constraints provided by the participant. (X-axis on the thinking grid)
+#' 
+#' Automatic.Constraints: The automatic constraints provided by the participant. (Y-axis on the thinking grid)
+#' 
+#' @examples
+#' read_qualtrics_data("path/to/qualtrics/output.csv", "path/to/setup/survey_setup_file.csv")
+#' 
 #' @export
 read_qualtrics_data <- function(data_file, setup_file){
     mod <- reticulate::import_from_path("read_qualtrics_data", path = py_module_path())
