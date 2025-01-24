@@ -34,9 +34,11 @@ import importlib.resources
 ################################################################################
 
 def read_json_file(fname):
-    pkg_files = importlib.resources.files(__name__)
-    filepath = pkg_files.joinpath("json").joinpath(fname)
-    X = json.loads(filepath.read_text())
+    #pkg_files = importlib.resources.files(__name__)
+    #filepath = pkg_files.joinpath("json").joinpath(fname)
+    # X = json.loads(filepath.read_text())
+    abs_path = os.path.abspath(os.path.dirname(__file__))  + "/json/"
+    X = json.loads(open(abs_path + fname).read())
     return X
 
 ################################################################################
