@@ -22,7 +22,7 @@ $ GITHUB_PAT=YOUR_GENERATED_PAT_HERE
 ```
 Next, open an *R* session, and run the following:
 ```
-token = Sys.getenv("GITHUB_PAT")
+token = "GITHUB_PAT"
 devtools::install_github("a-kulkarn/qualtrics-thinkgrid",
                          subdir = "ThinkingGrid",
                          auth_token = token,
