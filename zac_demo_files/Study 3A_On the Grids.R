@@ -1,9 +1,9 @@
-# Remove all variables
+## Remove all variables
 rm(list = ls())
 ls()
 graphics.off()
 
-# Load libraries
+## Load libraries
 library(dplyr)
 library(ragg)
 library(magick)
@@ -17,23 +17,26 @@ library(tidyr)
 library(ggeffects)
 library(cowplot)
 
-# Read data and rename variables
-data <- read.csv("taxicab_Affect_Induction.csv")
+## Read data and rename variables
+## data <- read.csv("taxicab_Affect_Induction.csv")
+data <- read.csv("~/thinking-grid/demo-files/taxicab_Affect_Induction.csv")
 
 data <- data %>%
   rename(valence = val) %>%
   rename(id = pid)
 
-data <- data[data$totalCorrect == 3, ]
+data$total_correct <- data$directed_correct + data$sticky_correct + data$free_correct
+
+data <- data[data$total_correct == 3, ]
 
 
 
-# Create block variable
+## Create block variable
 data$probe <- as.numeric(as.character(data$probe))
 data$block <- factor(ifelse(data$probe < 3, "Emotional Task", "Rest"),
                      levels = c("Emotional Task", "Rest"))
 
-# Fit the models
+## Fit the models
 model3_free <- lmer(free ~ valence + I(valence^2) + block + block:valence + block:I(valence^2) +  (1 | id), data, 
                     control = lmerControl(optimizer = "bobyqa"))
 model3_sticky <- lmer(sticky ~ valence + I(valence^2) + block + block:valence + block:I(valence^2) + (1 | id), data, 
@@ -43,9 +46,9 @@ model3_directed <- lmer(directed ~ valence + I(valence^2) + block + block:valenc
 model3_salience_directed <- lmer(salience_directed ~ valence + I(valence^2) + block + block:valence + block:I(valence^2) + (1 | id), data, 
                                  control = lmerControl(optimizer = "bobyqa"))
 
-# New prediction function
+## New prediction function
 get_predictions <- function(model, newdata) {
-  # Create prediction data frames for both conditions
+  ## Create prediction data frames for both conditions
   pred_data_emotion <- data.frame(
     valence = newdata$valence,
     block = factor("Emotional Task", levels = c("Emotional Task", "Rest"))
@@ -56,11 +59,11 @@ get_predictions <- function(model, newdata) {
     block = factor("Rest", levels = c("Emotional Task", "Rest"))
   )
   
-  # Get predictions with standard errors
+  ## Get predictions with standard errors
   preds_emotion <- predict(model, newdata = pred_data_emotion, re.form = NA, se.fit = TRUE)
   preds_rest <- predict(model, newdata = pred_data_rest, re.form = NA, se.fit = TRUE)
   
-  # Return predictions and confidence intervals for both conditions
+  ## Return predictions and confidence intervals for both conditions
   list(
     emotion = data.frame(
       block = "Emotional Task",
@@ -217,6 +220,6 @@ final_plot <- grid_plot +
   annotation_custom(legend, xmin = 2.5, xmax = 4.5, ymin = -0.8, ymax = -0.5)
 
 # Save final plot
-ggsave("final_quadratic_overlay_with_interactions.png", final_plot, width = 13, height = 9, 
-       bg = "white", dpi = 300)
+## ggsave("final_quadratic_overlay_with_interactions.png", final_plot, width = 13, height = 9, 
+##        bg = "white", dpi = 300)
 
