@@ -131,6 +131,9 @@ create_subplot <- function(predictions, valence_seq, measure_name) {
     ))
 }
 
+##################################################
+## Quadrant background.
+
 thinkgrid_quadrant_background <- function() {
     ## Create 6x6 grid background
     df <- expand.grid(
@@ -152,14 +155,16 @@ thinkgrid_quadrant_background <- function() {
         coord_fixed() +
         theme_void() +
         theme(
-            axis.text = element_blank(),
-            plot.background = element_rect(fill = "white", color = "white"),
-            panel.background = element_rect(fill = "white", color = "white"),
+            ## axis.text = element_blank(),
+            ## plot.background = element_rect(fill = "white", color = "white"),
+            ## panel.background = element_rect(fill = "white", color = "white"),
+            plot.background = element_blank(),
+            panel.background = element_blank(),
             axis.title.x = element_text(face = "italic", color = "navy", size = 24, 
                                         margin = margin(t = 20)),
             axis.title.y = element_text(face = "italic", color = "#D35400", size = 24, 
                                         margin = margin(r = 20), angle = 90),
-            axis.ticks = element_blank(),
+            ## axis.ticks = element_blank()
             plot.margin = margin(20, 20, 20, 20)
         ) +
         labs(
@@ -173,9 +178,50 @@ thinkgrid_quadrant_background <- function() {
                  arrow = arrow(length = unit(0.5, "cm"), type = "closed"),
                  color = "red", size = 3)
 
+    grid_grob <- ggplotGrob(grid_plot)
+
+    print(grid_grob$grobs[[6]]$children)
+
+    ## Prepare the 3x3 sub-grids.
+    sdf <- expand.grid(
+        x = 1:3,
+        y = 1:3
+    )
+
+    P <- ggplot(sdf, aes(x = x, y = y)) + 
+        geom_tile(aes(fill = "#FFE6E6"), color = "white", size = 5) +
+        scale_fill_identity() +
+        coord_fixed() +
+        theme_void() +
+        theme(
+            ## axis.text = element_blank(),
+            ## plot.background = element_rect(fill = "white", color = "white"),
+            ## panel.background = element_rect(fill = "white", color = "white"),
+            plot.background = element_blank(),
+            panel.background = element_blank()
+        )
+
+    
+    ## Insert the four quadrants as a 2x2 grid.
+    ## P <- ggplot(mtcars, aes(x = wt, y = mpg, color = factor(gear))) +
+    ##     geom_point() +
+    ##     theme(
+    ##         plot.background = element_blank(),
+    ##         panel.background = element_blank(),
+    ##         legend.position = "none"
+    ##     )
+    two_x_two <- arrangeGrob(P, P, P, P, nrow=2, ncol=2)
+
+    grid_grob$grobs[[6]]$children[[3]] <- two_x_two
+
+    print(grid_grob$grobs[[6]]$children)
+    
     ## Return.
-    return(grid_plot)
+    return(grid_grob)
 }
+
+##################################################
+## Quadrant plot (Possibly obsolete).
 
 thinkgrid_quadrant_plot <- function(subplots) {
     ## Typecast arguments.
@@ -236,7 +282,7 @@ thinkgrid_quadrant_plot <- function(subplots) {
     )
 
     ## Assemble the final plot.
-    final_plot <- grid_plot
+    final_plot <- plot(grid_plot)
     for (key in names(subplots)) {
         P <- subplots[[key]]
         R <- subplot_ranges[[key]]
@@ -275,15 +321,21 @@ grid_arrange_shared_legend <- function(...) {
     legend <- g[[which(sapply(g, function(x) x$name) == "guide-box")]]
     lheight <- sum(legend$height)
     
-    inner <- do.call(arrangeGrob, lapply(plots, function(x)
-        x + theme(legend.position="none")))
-    
+    inner <- do.call(
+        arrangeGrob,
+        lapply(
+            plots,
+            function(x)
+                x +
+                theme(
+                    legend.position="none",
+                    plot.margin = margin(20,20,20,20)
+                )
+        )
+    )
+
     width <- sum(inner$width)
     height <- sum(inner$height)
-
-    print(lheight)
-    print(legend)
-    print(g)
     
     g1 <- arrangeGrob(
         inner,
@@ -295,7 +347,9 @@ grid_arrange_shared_legend <- function(...) {
     ## Construct the underlay image.
     ## img_grob <- rasterGrob(img, width = unit(1, "npc"), height = unit(1, "npc") - lheight)
     img_grob <- thinkgrid_quadrant_background()
-    
+
+    frame_grob <- thinkgrid_quadrant_background()
+    frame_grob$grobs[[6]] <- inner
     
     ## g2 <- arrangeGrob(
     ##     img_grob,
@@ -304,7 +358,7 @@ grid_arrange_shared_legend <- function(...) {
     ##     heights = unit.c(unit(1, "npc") - lheight, lheight)
     ## )
 
-    return(list(g1, img_grob))
+    return(list(frame_grob, img_grob))
 }
 
 
@@ -339,8 +393,9 @@ p_directed <- create_subplot(directed_preds, valence_seq, "directed")
 
 result <- grid_arrange_shared_legend(p_sticky, p_salience, p_free, p_directed)
 
-A = result[[1]]
+A <- result[[1]]
 B <- result[[2]]
 
+grid::grid.newpage()  # Clear the graphics device
 grid.draw(B)
 grid.draw(A)
