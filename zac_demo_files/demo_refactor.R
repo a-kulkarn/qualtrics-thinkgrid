@@ -136,17 +136,17 @@ create_subplot <- function(predictions, valence_seq, measure_name) {
 
 thinkgrid_quadrant_background <- function() {
     ## Create 6x6 grid background
-    df <- expand.grid(
-        x = 1:6,
-        y = 1:6
-    )
+    ## df <- expand.grid(
+    ##     x = 1:6,
+    ##     y = 1:6
+    ## )
 
-    df$color <- with(df, case_when(
-                             x <= 3 & y >= 4 ~ "#FFE6E6",  # Top left - Pink
-                             x > 3 & y >= 4 ~ "#F9EBEE",   # Top right - Light pink
-                             x <= 3 & y < 4 ~ "#E8F0F8",   # Bottom left - Blue
-                             TRUE ~ "#E6F3F2"              # Bottom right - Green
-                         ))
+    ## df$color <- with(df, case_when(
+    ##                          x <= 3 & y >= 4 ~ "#FFE6E6",  # Top left - Pink
+    ##                          x > 3 & y >= 4 ~ "#F9EBEE",   # Top right - Light pink
+    ##                          x <= 3 & y < 4 ~ "#E8F0F8",   # Bottom left - Blue
+    ##                          TRUE ~ "#E6F3F2"              # Bottom right - Green
+    ##                      ))
 
     ## Create background grid plot
     ## grid_plot <- ggplot(df, aes(x = x, y = y)) + 
@@ -192,21 +192,29 @@ thinkgrid_quadrant_background <- function() {
         y = 1:3
     )
 
-    P <- ggplot(sdf, aes(x = x, y = y)) + 
-        geom_tile(aes(fill = "#FFE6E6"), color = "white", size = 5) +
-        scale_fill_identity() +
-        ## coord_fixed() +
-        theme_void() +
-        theme(
-            ## axis.text = element_blank(),
-            ## plot.background = element_rect(fill = "white", color = "white"),
-            ## panel.background = element_rect(fill = "white", color = "white"),
-            plot.background = element_blank(),
-            panel.background = element_blank()
-        )
-    
+    quadrants <- vector("list", 4)
+    i <- 1
+    for (color in list("#FFE6E6", "#F9EBEE", "#E8F0F8", "#E6F3F2")) {
+        P <- ggplot(sdf, aes(x = x, y = y)) + 
+            geom_tile(aes(fill = color), color = "white", size = 5) +
+            scale_fill_identity() +
+            ## coord_fixed() +
+            theme_void() +
+            theme(
+                ## axis.text = element_blank(),
+                ## plot.background = element_rect(fill = "white", color = "white"),
+                ## panel.background = element_rect(fill = "white", color = "white"),
+                plot.background = element_blank(),
+                panel.background = element_blank()
+            )
+
+        ## Append.
+        quadrants[[i]] <- ggplotGrob(P)
+        i <- i + 1
+    }
+
     ## Insert the four quadrants as a 2x2 grid.
-    two_x_two <- arrangeGrob(P, P, P, P, nrow=2, ncol=2)
+    two_x_two <- do.call(arrangeGrob, append(quadrants, list(nrow=2, ncol=2)))
 
     ## Arrange the elements
     grid_grob <- arrangeGrob(
@@ -241,9 +249,9 @@ thinkgrid_quadrant_plot <- function(...) {
     ##     plots = plots[1]
     ## }
 
-    g <- ggplotGrob(plots[[1]] + theme(legend.position="bottom"))$grobs
+    g <- ggplotGrob(plots[[1]] + theme(legend.position="right"))$grobs
     legend <- g[[which(sapply(g, function(x) x$name) == "guide-box")]]
-    lheight <- sum(legend$height)
+    lwidth <- sum(legend$width)
     
     inner <- do.call(
         arrangeGrob,
@@ -261,28 +269,29 @@ thinkgrid_quadrant_plot <- function(...) {
     width <- sum(inner$width)
     height <- sum(inner$height)
     
-    g1 <- arrangeGrob(
-        inner,
-        legend,
-        ncol = 1,
-        heights = unit.c(unit(1, "npc") - lheight, lheight)
-    )
-
     ## Construct the Grob structure and background.
     img_grob <- thinkgrid_quadrant_background()
     frame_grob <- thinkgrid_quadrant_background()
 
     ## Insert plots into the appropriate place in the Grob structure.
     frame_grob$grobs[[3]] <- inner
-    
-    ## g2 <- arrangeGrob(
-    ##     img_grob,
-    ##     legend,
-    ##     ncol = 1,
-    ##     heights = unit.c(unit(1, "npc") - lheight, lheight)
-    ## )
 
-    return(list(frame_grob, img_grob))
+    g1 <- arrangeGrob(
+        frame_grob,
+        legend,
+        ncol = 2,
+        widths = unit.c(unit(1, "npc") - lwidth, lwidth)
+    )
+
+    g2 <- arrangeGrob(
+        img_grob,
+        legend,
+        ncol = 2,
+        widths = unit.c(unit(1, "npc") - lwidth, lwidth)
+    )
+
+    ## Return.
+    return(list(g1, g2))
 }
 
 
