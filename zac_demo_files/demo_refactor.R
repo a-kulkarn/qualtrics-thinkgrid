@@ -149,38 +149,42 @@ thinkgrid_quadrant_background <- function() {
                          ))
 
     ## Create background grid plot
-    grid_plot <- ggplot(df, aes(x = x, y = y)) + 
-        geom_tile(aes(fill = color), color = "white", size = 5) +
-        scale_fill_identity() +
-        coord_fixed() +
-        theme_void() +
-        theme(
-            ## axis.text = element_blank(),
-            ## plot.background = element_rect(fill = "white", color = "white"),
-            ## panel.background = element_rect(fill = "white", color = "white"),
-            plot.background = element_blank(),
-            panel.background = element_blank(),
-            axis.title.x = element_text(face = "italic", color = "navy", size = 24, 
-                                        margin = margin(t = 20)),
-            axis.title.y = element_text(face = "italic", color = "#D35400", size = 24, 
-                                        margin = margin(r = 20), angle = 90),
-            ## axis.ticks = element_blank()
-            plot.margin = margin(20, 20, 20, 20)
-        ) +
-        labs(
-            x = "Executive Control",
-            y = "Salience"
-        ) +
-        annotate("segment", x = 1, xend = 6, y = -0.2, yend = -0.2,
-                 arrow = arrow(length = unit(0.5, "cm"), type = "closed"),
-                 color = "navy", size = 3) +
-        annotate("segment", x = -0.2, xend = -0.2, y = 1, yend = 6,
-                 arrow = arrow(length = unit(0.5, "cm"), type = "closed"),
-                 color = "red", size = 3)
+    ## grid_plot <- ggplot(df, aes(x = x, y = y)) + 
+    ##     geom_tile(aes(fill = color), color = "white", size = 5) +
+    ##     ## scale_fill_identity() +
+    ##     ## coord_fixed() +
+    ##     theme_void() +
+    ##     theme(
+    ##         ## axis.text = element_blank(),
+    ##         ## plot.background = element_rect(fill = "white", color = "white"),
+    ##         ## panel.background = element_rect(fill = "white", color = "white"),
+    ##         plot.background = element_blank(),
+    ##         panel.background = element_blank(),
+    ##         ## axis.title.x = element_text(face = "italic", color = "navy", size = 24, 
+    ##         ##                             margin = margin(t = 20)),
+    ##         ## axis.title.y = element_text(face = "italic", color = "#D35400", size = 24, 
+    ##         ##                             margin = margin(r = 20), angle = 90),
+    ##         axis.title = element_blank(),
+    ##         ## axis.ticks = element_blank()
+    ##         plot.margin = margin(20, 20, 20, 20)
+    ##     )
+    
+    ## Create the axis labels and arrows manually.
+    labelx <- textGrob("Executive Control")
+    red_arrow <- segmentsGrob(
+        x0 = unit(0.1, "npc"), y0 = unit(0.5, "npc"),
+        x1 = unit(0.9, "npc"), y1 = unit(0.5, "npc"),
+        arrow = arrow(length = unit(0.5, "npc"), type = "closed"),
+        gp=gpar(col = "red", size = 3)
+    )
 
-    grid_grob <- ggplotGrob(grid_plot)
-
-    print(grid_grob$grobs[[6]]$children)
+    labely <- textGrob("Salience", rot = 90)
+    blue_arrow <- segmentsGrob(
+        x0 = unit(0.5, "npc"), y0 = unit(0.1, "npc"),
+        x1 = unit(0.5, "npc"), y1 = unit(0.9, "npc"),
+        arrow = arrow(length = unit(0.5, "npc"), type = "closed"),
+        gp=gpar(col = "navy", size = 3)
+    )
 
     ## Prepare the 3x3 sub-grids.
     sdf <- expand.grid(
@@ -191,7 +195,7 @@ thinkgrid_quadrant_background <- function() {
     P <- ggplot(sdf, aes(x = x, y = y)) + 
         geom_tile(aes(fill = "#FFE6E6"), color = "white", size = 5) +
         scale_fill_identity() +
-        coord_fixed() +
+        ## coord_fixed() +
         theme_void() +
         theme(
             ## axis.text = element_blank(),
@@ -200,115 +204,35 @@ thinkgrid_quadrant_background <- function() {
             plot.background = element_blank(),
             panel.background = element_blank()
         )
-
     
     ## Insert the four quadrants as a 2x2 grid.
-    ## P <- ggplot(mtcars, aes(x = wt, y = mpg, color = factor(gear))) +
-    ##     geom_point() +
-    ##     theme(
-    ##         plot.background = element_blank(),
-    ##         panel.background = element_blank(),
-    ##         legend.position = "none"
-    ##     )
     two_x_two <- arrangeGrob(P, P, P, P, nrow=2, ncol=2)
 
-    grid_grob$grobs[[6]]$children[[3]] <- two_x_two
-
-    print(grid_grob$grobs[[6]]$children)
+    ## Arrange the elements
+    grid_grob <- arrangeGrob(
+        labely,
+        blue_arrow,
+        two_x_two,
+        zeroGrob(),
+        zeroGrob(),        
+        red_arrow,
+        zeroGrob(),
+        zeroGrob(),
+        labelx,
+        nrow=3,
+        ncol=3,
+        widths = unit.c(unit(0.05, "npc"), unit(0.01, "npc"), unit(0.80, "npc")),
+        heights = unit.c(unit(0.80, "npc"), unit(0.01, "npc"), unit(0.05, "npc"))
+    )
     
     ## Return.
     return(grid_grob)
 }
 
 ##################################################
-## Quadrant plot (Possibly obsolete).
+## Quadrant plot.
 
-thinkgrid_quadrant_plot <- function(subplots) {
-    ## Typecast arguments.
-    if (!is.list(subplots) & is.vector(subplots)) {
-        subplots <- list(
-            sticky = subplots[1],
-            salience = subplots[2],
-            free = subplots[3],
-            directed = subplots[4]
-        )
-    }
-
-    if (!is.list(subplots)) {
-        stop(c(
-            "Error: 'subplots' must be a list with keys ",
-            "'(sticky, salience, free, directed)' or ",
-            "a vector of four plots."
-        ))
-    }
-    
-    ## Create a more robust legend plot with a single guide component
-    legend_data <- data.frame(
-        x = rep(1, 2),
-        y = rep(1, 2),
-        block = factor(c("Emotional Task", "Rest"), levels = c("Emotional Task", "Rest"))
-    )
-
-    legend_plot <- ggplot(legend_data, aes(x = x, y = y, color = block)) +
-        geom_point() +
-        scale_color_manual(values = c("Emotional Task" = "darkorange", "Rest" = "steelblue")) +
-        guides(color = guide_legend(title = NULL, nrow = 1)) +
-        theme_void() +
-        theme(
-            legend.position = "bottom",
-            legend.box = "horizontal",
-            legend.text = element_text(size = 12),
-            legend.spacing.x = unit(0.5, "cm")
-        )
-
-    ## Extract the legend using a more specific approach
-    legend <- cowplot::get_legend(
-                           legend_plot + 
-                           theme(
-                               legend.box.margin = margin(0, 0, 0, 0),
-                               legend.margin = margin(0, 0, 0, 0)
-                           )
-                       )
-
-    ## Create the background.
-    grid_plot <- thinkgrid_quadrant_background()
-
-    ## Create the subplot .
-    subplot_ranges <- list(
-        free = list(xmin = .5, xmax = 3.5, ymin = 3.5, ymax = 6.5),
-        sticky = list(xmin = 3.5, xmax = 6.5, ymin = 3.5, ymax = 6.5),
-        directed = list(xmin = .5, xmax = 3.5, ymin = .5, ymax = 3.5),
-        salience = list(xmin = 3.5, xmax = 6.5, ymin = .5, ymax = 3.5)
-    )
-
-    ## Assemble the final plot.
-    final_plot <- plot(grid_plot)
-    for (key in names(subplots)) {
-        P <- subplots[[key]]
-        R <- subplot_ranges[[key]]
-        
-        final_plot <- final_plot + annotation_custom(
-            P,
-            xmin = R[["xmin"]],
-            xmax = R[["xmax"]],
-            ymin = R[["ymin"]],
-            ymax = R[["ymax"]]
-        )
-    }
-    final_plot <- final_plot +
-        ## annotation_custom(legend, xmin = 2.5, xmax = 4.5, ymin = -0.8, ymax = -0.5)
-        annotation_custom(legend, xmin = 3.5, xmax = 6.5, ymin = .5, ymax = 3.5)
-
-    ## final_plot <- legend_plot
-    
-    ## Return.
-    return(final_plot)
-}
-
-##################################################
-## Grid arrange share legend.
-
-grid_arrange_shared_legend <- function(...) {
+thinkgrid_quadrant_plot <- function(...) {
     plots <- list(...)
 
     ## if (length(plots) == 1 & is.list(plots)) {
@@ -344,12 +268,12 @@ grid_arrange_shared_legend <- function(...) {
         heights = unit.c(unit(1, "npc") - lheight, lheight)
     )
 
-    ## Construct the underlay image.
-    ## img_grob <- rasterGrob(img, width = unit(1, "npc"), height = unit(1, "npc") - lheight)
+    ## Construct the Grob structure and background.
     img_grob <- thinkgrid_quadrant_background()
-
     frame_grob <- thinkgrid_quadrant_background()
-    frame_grob$grobs[[6]] <- inner
+
+    ## Insert plots into the appropriate place in the Grob structure.
+    frame_grob$grobs[[3]] <- inner
     
     ## g2 <- arrangeGrob(
     ##     img_grob,
@@ -391,7 +315,7 @@ p_directed <- create_subplot(directed_preds, valence_seq, "directed")
 
 # A <- thinkgrid_quadrant_plot(plots)
 
-result <- grid_arrange_shared_legend(p_sticky, p_salience, p_free, p_directed)
+result <- thinkgrid_quadrant_plot(p_sticky, p_salience, p_free, p_directed)
 
 A <- result[[1]]
 B <- result[[2]]
