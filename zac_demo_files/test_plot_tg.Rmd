@@ -1,0 +1,36 @@
+```{r}
+source("zac_demo_files/plot_tg.R")
+```
+
+```{r}
+data <- read.csv("zac_demo_files/study3A.csv")
+```   
+
+```{r}
+dc <- data$dc
+ac <- data$ac
+```
+
+```{r}
+plot_tg(dc, ac)
+```
+
+```{r}
+plot_tg(dc, ac, type = "quadrants")
+```
+
+```{r}
+plot_tg(dc, ac, type = "horizontal")
+```
+
+```{r}
+plot_tg(dc, ac, type = "vertical")
+```
+
+```{r}
+plot_tg(dc, ac, type = "constraints")
+```
+
+```{r}
+plot_tg(dc, ac, type = "depth")
+```
