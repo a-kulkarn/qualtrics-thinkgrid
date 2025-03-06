@@ -306,260 +306,259 @@ plot_tg <- function(dc, ac, type = "cells", color_palette = "Greens") {
             prop_data = setNames(constraint_props, constraint_levels)
         ))
     }
-    
+    else if (type == "depth") {
+        # Create a data frame for all cells with quadrant and depth info
+        quad_depth_data <- expand.grid(dc = 1:6, ac = 1:6)
 
-else if (type == "depth") {
-    # Create a data frame for all cells with quadrant and depth info
-    quad_depth_data <- expand.grid(dc = 1:6, ac = 1:6)
-    
-    # Assign quadrant to each cell
-    quad_depth_data$quadrant <- ifelse(quad_depth_data$dc <= 3 & quad_depth_data$ac <= 3, 1,
-                                   ifelse(quad_depth_data$dc > 3 & quad_depth_data$ac <= 3, 2,
-                                       ifelse(quad_depth_data$dc <= 3 & quad_depth_data$ac > 3, 3, 4)))
-    
-    # Calculate quadrant depths
-    q1_cells <- quad_depth_data$quadrant == 1
-    quad_depth_data$depth[q1_cells] <- 6 - (quad_depth_data$dc[q1_cells] + quad_depth_data$ac[q1_cells] - 1)
-    
-    q2_cells <- quad_depth_data$quadrant == 2
-    quad_depth_data$depth[q2_cells] <- 6 - ((7 - quad_depth_data$dc[q2_cells]) + quad_depth_data$ac[q2_cells] - 1)
-    
-    q3_cells <- quad_depth_data$quadrant == 3
-    quad_depth_data$depth[q3_cells] <- 6 - (quad_depth_data$dc[q3_cells] + (7 - quad_depth_data$ac[q3_cells]) - 1)
-    
-    q4_cells <- quad_depth_data$quadrant == 4
-    quad_depth_data$depth[q4_cells] <- 6 - ((7 - quad_depth_data$dc[q4_cells]) + (7 - quad_depth_data$ac[q4_cells]) - 1)
-    
-    # Add proportion values to each cell
-    quad_depth_data$proportion <- 0
-    for (i in 1:nrow(quad_depth_data)) {
-        dc_val <- quad_depth_data$dc[i]
-        ac_val <- quad_depth_data$ac[i]
-        quad_depth_data$proportion[i] <- prop_grid[ac_val, dc_val]
+        # Assign quadrant to each cell
+        quad_depth_data$quadrant <- ifelse(quad_depth_data$dc <= 3 & quad_depth_data$ac <= 3, 1,
+                                       ifelse(quad_depth_data$dc > 3 & quad_depth_data$ac <= 3, 2,
+                                           ifelse(quad_depth_data$dc <= 3 & quad_depth_data$ac > 3, 3, 4)))
+
+        # Calculate quadrant depths
+        q1_cells <- quad_depth_data$quadrant == 1
+        quad_depth_data$depth[q1_cells] <- 6 - (quad_depth_data$dc[q1_cells] + quad_depth_data$ac[q1_cells] - 1)
+
+        q2_cells <- quad_depth_data$quadrant == 2
+        quad_depth_data$depth[q2_cells] <- 6 - ((7 - quad_depth_data$dc[q2_cells]) + quad_depth_data$ac[q2_cells] - 1)
+
+        q3_cells <- quad_depth_data$quadrant == 3
+        quad_depth_data$depth[q3_cells] <- 6 - (quad_depth_data$dc[q3_cells] + (7 - quad_depth_data$ac[q3_cells]) - 1)
+
+        q4_cells <- quad_depth_data$quadrant == 4
+        quad_depth_data$depth[q4_cells] <- 6 - ((7 - quad_depth_data$dc[q4_cells]) + (7 - quad_depth_data$ac[q4_cells]) - 1)
+
+        # Add proportion values to each cell
+        quad_depth_data$proportion <- 0
+        for (i in 1:nrow(quad_depth_data)) {
+            dc_val <- quad_depth_data$dc[i]
+            ac_val <- quad_depth_data$ac[i]
+            quad_depth_data$proportion[i] <- prop_grid[ac_val, dc_val]
+        }
+
+        # Calculate proportions by quadrant and depth
+        quad_depth_summary <- aggregate(proportion ~ quadrant + depth, 
+                                      data = quad_depth_data, 
+                                      FUN = sum)
+
+        # Create an empty data frame to store polygon data
+        polygon_data <- data.frame()
+
+        diagonal_band_width <- sqrt(18) / 5 
+        axis_projection <- diagonal_band_width * sqrt(2)
+
+        # Create bands for bottom-left quadrant (quadrant 1)
+
+        # Depth 1 - triangle at center
+        polygon_data <- rbind(polygon_data, data.frame(
+            x = c(3.5, 3.5 - axis_projection, 3.5),
+            y = c(3.5, 3.5, 3.5 - axis_projection),
+            quadrant = 1,
+            depth = 1,
+            proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 1 & quad_depth_summary$depth == 1]
+        ))
+
+        # Depth 2 - parallelogram with proper 4 corners
+        polygon_data <- rbind(polygon_data, data.frame(
+            x = c(3.5 - axis_projection, 3.5 - 2*axis_projection, 3.5, 3.5),
+            y = c(3.5, 3.5, 3.5 - 2 * axis_projection, 3.5 - axis_projection),
+            quadrant = 1,
+            depth = 2,
+            proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 1 & quad_depth_summary$depth == 2]
+        ))
+
+        # Depth 3 - hexagon (middle)
+        polygon_data <- rbind(polygon_data, data.frame(
+            x = c(3.5 - 2*axis_projection, 0.5, 0.5, 0.5 + 2 * axis_projection, 3.5, 3.5),
+            y = c(3.5,3.5, 0.5 + 2* axis_projection, 0.5, 0.5, 3.5 - 2*axis_projection),
+            quadrant = 1,
+            depth = 3,
+            proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 1 & quad_depth_summary$depth == 3]
+        ))
+
+        # Depth 4 - parallelogram
+        polygon_data <- rbind(polygon_data, data.frame(
+            x = c(0.5, 0.5, 0.5 + 2*axis_projection, 0.5 + axis_projection),
+            y = c(0.5 + 2*axis_projection, 0.5, 0.5, 0.5 + axis_projection),
+            quadrant = 1,
+            depth = 4,
+            proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 1 & quad_depth_summary$depth == 4]
+        ))
+
+        # Depth 5 - triangle at corner
+        polygon_data <- rbind(polygon_data, data.frame(
+            x = c(0.5, 0.5 + axis_projection, 0.5),
+            y = c(0.5, 0.5, 0.5 + axis_projection),
+            quadrant = 1,
+            depth = 5,
+            proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 1 & quad_depth_summary$depth == 5]
+        ))
+
+        # Create bands for bottom-right quadrant (quadrant 2)
+
+        # Depth 1 - triangle at center
+        polygon_data <- rbind(polygon_data, data.frame(
+            x = c(3.5, 3.5 + axis_projection, 3.5),
+            y = c(3.5, 3.5, 3.5 - axis_projection),
+            quadrant = 2,
+            depth = 1,
+            proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 2 & quad_depth_summary$depth == 1]
+        ))
+
+        # Depth 2 - parallelogram with proper 4 corners
+        polygon_data <- rbind(polygon_data, data.frame(
+            x = c(3.5 + axis_projection, 3.5 + 2*axis_projection, 3.5, 3.5),
+            y = c(3.5, 3.5, 3.5 - 2*axis_projection, 3.5 - axis_projection),
+            quadrant = 2,
+            depth = 2,
+            proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 2 & quad_depth_summary$depth == 2]
+        ))
+
+        # Depth 3 - hexagon (middle)
+        polygon_data <- rbind(polygon_data, data.frame(
+            x = c(3.5 + 2*axis_projection, 6.5, 6.5, 6.5 - 2*axis_projection, 3.5, 3.5),
+            y = c(3.5, 3.5, 0.5 + 2*axis_projection, 0.5, 0.5, 3.5 - 2*axis_projection),
+            quadrant = 2,
+            depth = 3,
+            proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 2 & quad_depth_summary$depth == 3]
+        ))
+
+        # Depth 4 - parallelogram
+        polygon_data <- rbind(polygon_data, data.frame(
+            x = c(6.5, 6.5, 6.5 - 2*axis_projection, 6.5 - axis_projection),
+            y = c(0.5 + 2*axis_projection, 0.5, 0.5, 0.5 + axis_projection),
+            quadrant = 2,
+            depth = 4,
+            proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 2 & quad_depth_summary$depth == 4]
+        ))
+
+        # Depth 5 - triangle at corner
+        polygon_data <- rbind(polygon_data, data.frame(
+            x = c(6.5, 6.5 - axis_projection, 6.5),
+            y = c(0.5, 0.5, 0.5 + axis_projection),
+            quadrant = 2,
+            depth = 5,
+            proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 2 & quad_depth_summary$depth == 5]
+        ))
+
+        # Create bands for top-left quadrant (quadrant 3)
+
+        # Depth 1 - triangle at center
+        polygon_data <- rbind(polygon_data, data.frame(
+            x = c(3.5, 3.5 - axis_projection, 3.5),
+            y = c(3.5, 3.5, 3.5 + axis_projection),
+            quadrant = 3,
+            depth = 1,
+            proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 3 & quad_depth_summary$depth == 1]
+        ))
+
+        # Depth 2 - parallelogram with proper 4 corners
+        polygon_data <- rbind(polygon_data, data.frame(
+            x = c(3.5 - axis_projection, 3.5 - 2*axis_projection, 3.5, 3.5),
+            y = c(3.5, 3.5, 3.5 + 2*axis_projection, 3.5 + axis_projection),
+            quadrant = 3,
+            depth = 2,
+            proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 3 & quad_depth_summary$depth == 2]
+        ))
+
+        # Depth 3 - hexagon (middle)
+        polygon_data <- rbind(polygon_data, data.frame(
+            x = c(3.5 - 2*axis_projection, 0.5, 0.5, 0.5 + 2*axis_projection, 3.5, 3.5),
+            y = c(3.5, 3.5, 6.5 - 2*axis_projection, 6.5, 6.5, 3.5 + 2*axis_projection),
+            quadrant = 3,
+            depth = 3,
+            proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 3 & quad_depth_summary$depth == 3]
+        ))
+
+        # Depth 4 - parallelogram
+        polygon_data <- rbind(polygon_data, data.frame(
+            x = c(0.5, 0.5, 0.5 + 2*axis_projection, 0.5 + axis_projection),
+            y = c(6.5 - 2*axis_projection, 6.5, 6.5, 6.5 - axis_projection),
+            quadrant = 3,
+            depth = 4,
+            proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 3 & quad_depth_summary$depth == 4]
+        ))
+
+        # Depth 5 - triangle at corner
+        polygon_data <- rbind(polygon_data, data.frame(
+            x = c(0.5, 0.5 + axis_projection, 0.5),
+            y = c(6.5, 6.5, 6.5 - axis_projection),
+            quadrant = 3,
+            depth = 5,
+            proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 3 & quad_depth_summary$depth == 5]
+        ))
+
+        # Create bands for top-right quadrant (quadrant 4)
+
+        # Depth 1 - triangle at center
+        polygon_data <- rbind(polygon_data, data.frame(
+            x = c(3.5, 3.5 + axis_projection, 3.5),
+            y = c(3.5, 3.5, 3.5 + axis_projection),
+            quadrant = 4,
+            depth = 1,
+            proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 4 & quad_depth_summary$depth == 1]
+        ))
+
+        # Depth 2 - parallelogram with proper 4 corners
+        polygon_data <- rbind(polygon_data, data.frame(
+            x = c(3.5 + axis_projection, 3.5 + 2*axis_projection, 3.5, 3.5),
+            y = c(3.5, 3.5, 3.5 + 2*axis_projection, 3.5 + axis_projection),
+            quadrant = 4,
+            depth = 2,
+            proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 4 & quad_depth_summary$depth == 2]
+        ))
+
+        # Depth 3 - hexagon (middle)
+        polygon_data <- rbind(polygon_data, data.frame(
+            x = c(3.5 + 2*axis_projection, 6.5, 6.5, 6.5 - 2*axis_projection, 3.5, 3.5),
+            y = c(3.5, 3.5, 6.5 - 2*axis_projection, 6.5, 6.5, 3.5 + 2*axis_projection),
+            quadrant = 4,
+            depth = 3,
+            proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 4 & quad_depth_summary$depth == 3]
+        ))
+
+        # Depth 4 - parallelogram
+        polygon_data <- rbind(polygon_data, data.frame(
+            x = c(6.5, 6.5, 6.5 - 2*axis_projection, 6.5 - axis_projection),
+            y = c(6.5 - 2*axis_projection, 6.5, 6.5, 6.5 - axis_projection),
+            quadrant = 4,
+            depth = 4,
+            proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 4 & quad_depth_summary$depth == 4]
+        ))
+
+        # Depth 5 - triangle at corner
+        polygon_data <- rbind(polygon_data, data.frame(
+            x = c(6.5, 6.5 - axis_projection, 6.5),
+            y = c(6.5, 6.5, 6.5 - axis_projection),
+            quadrant = 4,
+            depth = 5,
+            proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 4 & quad_depth_summary$depth == 5]
+        ))
+
+        # Create factor variables for visualization
+        polygon_data$depth_factor <- factor(polygon_data$depth)
+        polygon_data$group_id <- paste(polygon_data$quadrant, polygon_data$depth, sep = "_")
+
+        # Create the visualization with axis labels and white dividing lines
+        p <- ggplot(polygon_data, aes(x = x, y = y, fill = proportion, group = group_id)) +
+            geom_polygon(color = "white", linewidth = 0.5) +
+            scale_fill_distiller(palette = color_palette, direction = 1, limits = c(0, max(polygon_data$proportion))) +
+            coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
+            scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+            scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+            # Add back axis labels
+            labs(x = "Directedness", y = "Stickiness") +
+            plot_theme +
+            theme(
+                plot.title = element_blank(),  # Remove title
+                panel.grid = element_blank()   # Remove any grid lines from theme
+            )
+
+        # Return the visualization
+        return(list(
+            diagonal_plot = p,
+            data = quad_depth_data
+        ))
     }
     
-    # Calculate proportions by quadrant and depth
-    quad_depth_summary <- aggregate(proportion ~ quadrant + depth, 
-                                  data = quad_depth_data, 
-                                  FUN = sum)
-    
-    # Create an empty data frame to store polygon data
-    polygon_data <- data.frame()
-    
-    diagonal_band_width <- sqrt(18) / 5 
-    axis_projection <- diagonal_band_width * sqrt(2)
-    
-    # Create bands for bottom-left quadrant (quadrant 1)
-    
-    # Depth 1 - triangle at center
-    polygon_data <- rbind(polygon_data, data.frame(
-        x = c(3.5, 3.5 - axis_projection, 3.5),
-        y = c(3.5, 3.5, 3.5 - axis_projection),
-        quadrant = 1,
-        depth = 1,
-        proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 1 & quad_depth_summary$depth == 1]
-    ))
-    
-    # Depth 2 - parallelogram with proper 4 corners
-    polygon_data <- rbind(polygon_data, data.frame(
-        x = c(3.5 - axis_projection, 3.5 - 2*axis_projection, 3.5, 3.5),
-        y = c(3.5, 3.5, 3.5 - 2 * axis_projection, 3.5 - axis_projection),
-        quadrant = 1,
-        depth = 2,
-        proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 1 & quad_depth_summary$depth == 2]
-    ))
-    
-    # Depth 3 - hexagon (middle)
-    polygon_data <- rbind(polygon_data, data.frame(
-        x = c(3.5 - 2*axis_projection, 0.5, 0.5, 0.5 + 2 * axis_projection, 3.5, 3.5),
-        y = c(3.5,3.5, 0.5 + 2* axis_projection, 0.5, 0.5, 3.5 - 2*axis_projection),
-        quadrant = 1,
-        depth = 3,
-        proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 1 & quad_depth_summary$depth == 3]
-    ))
-    
-    # Depth 4 - parallelogram
-    polygon_data <- rbind(polygon_data, data.frame(
-        x = c(0.5, 0.5, 0.5 + 2*axis_projection, 0.5 + axis_projection),
-        y = c(0.5 + 2*axis_projection, 0.5, 0.5, 0.5 + axis_projection),
-        quadrant = 1,
-        depth = 4,
-        proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 1 & quad_depth_summary$depth == 4]
-    ))
-    
-    # Depth 5 - triangle at corner
-    polygon_data <- rbind(polygon_data, data.frame(
-        x = c(0.5, 0.5 + axis_projection, 0.5),
-        y = c(0.5, 0.5, 0.5 + axis_projection),
-        quadrant = 1,
-        depth = 5,
-        proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 1 & quad_depth_summary$depth == 5]
-    ))
-    
-    # Create bands for bottom-right quadrant (quadrant 2)
-    
-    # Depth 1 - triangle at center
-    polygon_data <- rbind(polygon_data, data.frame(
-        x = c(3.5, 3.5 + axis_projection, 3.5),
-        y = c(3.5, 3.5, 3.5 - axis_projection),
-        quadrant = 2,
-        depth = 1,
-        proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 2 & quad_depth_summary$depth == 1]
-    ))
-    
-    # Depth 2 - parallelogram with proper 4 corners
-    polygon_data <- rbind(polygon_data, data.frame(
-        x = c(3.5 + axis_projection, 3.5 + 2*axis_projection, 3.5, 3.5),
-        y = c(3.5, 3.5, 3.5 - 2*axis_projection, 3.5 - axis_projection),
-        quadrant = 2,
-        depth = 2,
-        proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 2 & quad_depth_summary$depth == 2]
-    ))
-    
-    # Depth 3 - hexagon (middle)
-    polygon_data <- rbind(polygon_data, data.frame(
-        x = c(3.5 + 2*axis_projection, 6.5, 6.5, 6.5 - 2*axis_projection, 3.5, 3.5),
-        y = c(3.5, 3.5, 0.5 + 2*axis_projection, 0.5, 0.5, 3.5 - 2*axis_projection),
-        quadrant = 2,
-        depth = 3,
-        proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 2 & quad_depth_summary$depth == 3]
-    ))
-    
-    # Depth 4 - parallelogram
-    polygon_data <- rbind(polygon_data, data.frame(
-        x = c(6.5, 6.5, 6.5 - 2*axis_projection, 6.5 - axis_projection),
-        y = c(0.5 + 2*axis_projection, 0.5, 0.5, 0.5 + axis_projection),
-        quadrant = 2,
-        depth = 4,
-        proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 2 & quad_depth_summary$depth == 4]
-    ))
-    
-    # Depth 5 - triangle at corner
-    polygon_data <- rbind(polygon_data, data.frame(
-        x = c(6.5, 6.5 - axis_projection, 6.5),
-        y = c(0.5, 0.5, 0.5 + axis_projection),
-        quadrant = 2,
-        depth = 5,
-        proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 2 & quad_depth_summary$depth == 5]
-    ))
-    
-    # Create bands for top-left quadrant (quadrant 3)
-    
-    # Depth 1 - triangle at center
-    polygon_data <- rbind(polygon_data, data.frame(
-        x = c(3.5, 3.5 - axis_projection, 3.5),
-        y = c(3.5, 3.5, 3.5 + axis_projection),
-        quadrant = 3,
-        depth = 1,
-        proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 3 & quad_depth_summary$depth == 1]
-    ))
-    
-    # Depth 2 - parallelogram with proper 4 corners
-    polygon_data <- rbind(polygon_data, data.frame(
-        x = c(3.5 - axis_projection, 3.5 - 2*axis_projection, 3.5, 3.5),
-        y = c(3.5, 3.5, 3.5 + 2*axis_projection, 3.5 + axis_projection),
-        quadrant = 3,
-        depth = 2,
-        proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 3 & quad_depth_summary$depth == 2]
-    ))
-    
-    # Depth 3 - hexagon (middle)
-    polygon_data <- rbind(polygon_data, data.frame(
-        x = c(3.5 - 2*axis_projection, 0.5, 0.5, 0.5 + 2*axis_projection, 3.5, 3.5),
-        y = c(3.5, 3.5, 6.5 - 2*axis_projection, 6.5, 6.5, 3.5 + 2*axis_projection),
-        quadrant = 3,
-        depth = 3,
-        proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 3 & quad_depth_summary$depth == 3]
-    ))
-    
-    # Depth 4 - parallelogram
-    polygon_data <- rbind(polygon_data, data.frame(
-        x = c(0.5, 0.5, 0.5 + 2*axis_projection, 0.5 + axis_projection),
-        y = c(6.5 - 2*axis_projection, 6.5, 6.5, 6.5 - axis_projection),
-        quadrant = 3,
-        depth = 4,
-        proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 3 & quad_depth_summary$depth == 4]
-    ))
-    
-    # Depth 5 - triangle at corner
-    polygon_data <- rbind(polygon_data, data.frame(
-        x = c(0.5, 0.5 + axis_projection, 0.5),
-        y = c(6.5, 6.5, 6.5 - axis_projection),
-        quadrant = 3,
-        depth = 5,
-        proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 3 & quad_depth_summary$depth == 5]
-    ))
-    
-    # Create bands for top-right quadrant (quadrant 4)
-    
-    # Depth 1 - triangle at center
-    polygon_data <- rbind(polygon_data, data.frame(
-        x = c(3.5, 3.5 + axis_projection, 3.5),
-        y = c(3.5, 3.5, 3.5 + axis_projection),
-        quadrant = 4,
-        depth = 1,
-        proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 4 & quad_depth_summary$depth == 1]
-    ))
-    
-    # Depth 2 - parallelogram with proper 4 corners
-    polygon_data <- rbind(polygon_data, data.frame(
-        x = c(3.5 + axis_projection, 3.5 + 2*axis_projection, 3.5, 3.5),
-        y = c(3.5, 3.5, 3.5 + 2*axis_projection, 3.5 + axis_projection),
-        quadrant = 4,
-        depth = 2,
-        proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 4 & quad_depth_summary$depth == 2]
-    ))
-    
-    # Depth 3 - hexagon (middle)
-    polygon_data <- rbind(polygon_data, data.frame(
-        x = c(3.5 + 2*axis_projection, 6.5, 6.5, 6.5 - 2*axis_projection, 3.5, 3.5),
-        y = c(3.5, 3.5, 6.5 - 2*axis_projection, 6.5, 6.5, 3.5 + 2*axis_projection),
-        quadrant = 4,
-        depth = 3,
-        proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 4 & quad_depth_summary$depth == 3]
-    ))
-    
-    # Depth 4 - parallelogram
-    polygon_data <- rbind(polygon_data, data.frame(
-        x = c(6.5, 6.5, 6.5 - 2*axis_projection, 6.5 - axis_projection),
-        y = c(6.5 - 2*axis_projection, 6.5, 6.5, 6.5 - axis_projection),
-        quadrant = 4,
-        depth = 4,
-        proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 4 & quad_depth_summary$depth == 4]
-    ))
-    
-    # Depth 5 - triangle at corner
-    polygon_data <- rbind(polygon_data, data.frame(
-        x = c(6.5, 6.5 - axis_projection, 6.5),
-        y = c(6.5, 6.5, 6.5 - axis_projection),
-        quadrant = 4,
-        depth = 5,
-        proportion = quad_depth_summary$proportion[quad_depth_summary$quadrant == 4 & quad_depth_summary$depth == 5]
-    ))
-    
-    # Create factor variables for visualization
-    polygon_data$depth_factor <- factor(polygon_data$depth)
-    polygon_data$group_id <- paste(polygon_data$quadrant, polygon_data$depth, sep = "_")
-    
-    # Create the visualization with axis labels and white dividing lines
-    p <- ggplot(polygon_data, aes(x = x, y = y, fill = proportion, group = group_id)) +
-        geom_polygon(color = "white", linewidth = 0.5) +
-        scale_fill_distiller(palette = color_palette, direction = 1, limits = c(0, max(polygon_data$proportion))) +
-        coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-        scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-        scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-        # Add back axis labels
-        labs(x = "Directedness", y = "Stickiness") +
-        plot_theme +
-        theme(
-            plot.title = element_blank(),  # Remove title
-            panel.grid = element_blank()   # Remove any grid lines from theme
-        )
-    
-    # Return the visualization
-    return(list(
-        diagonal_plot = p,
-        data = quad_depth_data
-    ))
-}
 }
