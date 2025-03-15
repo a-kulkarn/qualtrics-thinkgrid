@@ -117,3 +117,8 @@ plot_tg(dc, ac, proportion_type = "overall", type = "vertical", max_legend=70, m
 plot_tg(dc, ac, proportion_type = "condition", type = "vertical", condition_col = condition, max_legend=50)
 plot_tg(dc, ac, proportion_type = "condition", type = "vertical", condition_col = condition, comparison_type = "difference", max_legend=10, min_legend=-10)
 ```
+
+```{r}
+plot_tg(dc, ac, proportion_type = "overall", type = "cells")
+plot_tg(dc, ac, proportion_type = "condition", type = "cells", condition_col = condition)
+```

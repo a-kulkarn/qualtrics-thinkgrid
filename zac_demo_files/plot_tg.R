@@ -1,18 +1,24 @@
-if (!requireNamespace("RColorBrewer", quietly = TRUE)) {
-    install.packages("RColorBrewer")
-}
-if (!requireNamespace("ggplot2", quietly = TRUE)) {
-    install.packages("ggplot2")
-}
-
-library(RColorBrewer)
-library(ggplot2)
-
 # Source the polygon coordinate functions
 source("zac_demo_files/get_polygons.R")
 source("zac_demo_files/plot_types.R")  # Source file with plot type functions
 
+check_install_package <- function(package_name) {
+    if (!requireNamespace(package_name, quietly = TRUE)) {
+        install_package <- readline(paste(package_name, "is required for this function. Would you like to install it? (y/n): "))
+        if (tolower(install_package) == "y") {
+            install.packages(package_name)
+        } else {
+            warning(paste(package_name, "is required for this function. Please install it before proceeding. Use command install.packages('", package_name, "') to install the package.", sep = ""))
+            return(NULL)
+        }
+    }
+}
+
 plot_tg <- function(dc, ac, proportion_type = "overall", type = "cells", color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", condition_col = NULL, comparison_type = "separate", pos_palette = "Greens", neg_palette = "Reds", max_legend = NULL, min_legend = NULL) {
+    
+    # Check required packages
+    check_install_package("RColorBrewer")
+    check_install_package("ggplot2")
     # Validate inputs
     # ---------------
     # Check if ac and dc are either both vectors or both matrices
@@ -52,15 +58,15 @@ plot_tg <- function(dc, ac, proportion_type = "overall", type = "cells", color_p
     }
     
     # Validate color palettes
-    if (!color_palette %in% rownames(brewer.pal.info)) {
+    if (!color_palette %in% rownames(RColorBrewer::brewer.pal.info)) {
         warning("Invalid color palette. Using default Greens palette.")
         color_palette <- "Greens"
     }
-    if (!pos_palette %in% rownames(brewer.pal.info)) {
+    if (!pos_palette %in% rownames(RColorBrewer::brewer.pal.info)) {
         warning("Invalid positive palette. Using default Greens palette.")
         pos_palette <- "Greens"
     }
-    if (!neg_palette %in% rownames(brewer.pal.info)) {
+    if (!neg_palette %in% rownames(RColorBrewer::brewer.pal.info)) {
         warning("Invalid negative palette. Using default Reds palette.")
         neg_palette <- "Reds"
     }
@@ -167,11 +173,17 @@ create_tg_animation <- function(dc, ac, condition_col, type = "cells", proportio
   
   # Check required packages
   if(!requireNamespace("gifski", quietly = TRUE)) {
-    stop("Please install the 'gifski' package: install.packages('gifski')")
+    utils::install.packages("gifski")
   }
   if(!requireNamespace("gganimate", quietly = TRUE)) {
-    stop("Please install the 'gganimate' package: install.packages('gganimate')")
+    utils::install.packages("gganimate")
   }
+
+  check_install_package("RColorBrewer")
+  check_install_package("ggplot2")
+  check_install_package("gganimate")
+  check_install_package("gifski")
+
   
   # Convert condition_col to factor
   df <- data.frame(dc = dc, ac = ac, condition = condition_col)
@@ -400,8 +412,8 @@ create_tg_animation <- function(dc, ac, condition_col, type = "cells", proportio
     
     # Add a title showing the condition
     p$plot <- p$plot + 
-      ggtitle(paste("Condition:", cond)) +
-      theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5))
+      ggplot2::ggtitle(paste("Condition:", cond)) +
+      ggplot2::theme(plot.title = ggplot2::element_text(size = 16, face = "bold", hjust = 0.5))
     
     # Add to list
     plot_list[[as.character(cond)]] <- p$plot
@@ -420,7 +432,7 @@ create_tg_animation <- function(dc, ac, condition_col, type = "cells", proportio
     for(i in seq_along(plot_list)) {
       cond <- names(plot_list)[i]
       file_path <- file.path(temp_dir, paste0("frame_", sprintf("%03d", i), ".png"))
-      ggsave(file_path, plot_list[[i]], width = width/100, height = height/100)
+      ggplot2::ggsave(file_path, plot_list[[i]], width = width/100, height = height/100)
       file_list <- c(file_list, file_path)
     }
     

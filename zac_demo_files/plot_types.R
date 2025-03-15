@@ -1,36 +1,26 @@
 # Load required packages
-if (!requireNamespace("ggplot2", quietly = TRUE)) {
-  install.packages("ggplot2")
-}
-if (!requireNamespace("RColorBrewer", quietly = TRUE)) {
-  install.packages("RColorBrewer")
-}
-
-library(ggplot2)
-library(RColorBrewer)
-
 # Function for cells plot type
 create_cells_plot <- function(prop_grid, proportion_type = "overall", color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", condition_grids = NULL, comparison_type = "separate", pos_palette = "Greens", neg_palette = "Reds", max_legend = NULL, min_legend = NULL) {
   
   # Common plot theme settings
-  plot_theme <- theme_minimal() +
-    theme(
-      axis.text = element_text(size = 12),
-      axis.title = element_text(size = 14, face = "italic"),
-      legend.title = element_text(size = 12),
-      panel.grid = element_blank(),
-      plot.margin = unit(c(1, 1, 2, 2), "lines")
+  plot_theme <- ggplot2::theme_minimal() +
+    ggplot2::theme(
+      axis.text = ggplot2::element_text(size = 12),
+      axis.title = ggplot2::element_text(size = 14, face = "italic"),
+      legend.title = ggplot2::element_text(size = 12),
+      panel.grid = ggplot2::element_blank(),
+      plot.margin = grid::unit(c(1, 1, 2, 2), "lines")
     )
   
   # Get color palettes
-  pal_colors <- brewer.pal(9, color_palette)
-  pos_colors <- brewer.pal(9, pos_palette)
-  neg_colors <- brewer.pal(9, neg_palette)
+  pal_colors <- RColorBrewer::brewer.pal(9, color_palette)
+  pos_colors <- RColorBrewer::brewer.pal(9, pos_palette)
+  neg_colors <- RColorBrewer::brewer.pal(9, neg_palette)
   
   # Handle different proportion types
   if (proportion_type == "overall") {
     # Simple cells visualization for overall proportions
-    plot_data <- expand.grid(dc = 1:6, ac = 1:6)
+    plot_data <- base::expand.grid(dc = 1:6, ac = 1:6)
     plot_data$proportion <- as.vector(t(prop_grid))
     
     # Determine the limits for the legend
@@ -55,14 +45,14 @@ create_cells_plot <- function(prop_grid, proportion_type = "overall", color_pale
       }
     }
     
-    p <- ggplot(plot_data, aes(x = dc, y = ac, fill = proportion)) +
-      geom_tile(color = "white", linewidth = 0.5) +
-      scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
+    p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = dc, y = ac, fill = proportion)) +
+      ggplot2::geom_tile(color = "white", linewidth = 0.5) +
+      ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
                         midpoint = (min_value + max_value)/2, limits = c(min_value, max_value)) +
-      coord_fixed() +
-      scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-      scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-      labs(x = x_label, y = y_label, fill = "Percentage (%)") +
+      ggplot2::coord_fixed() +
+      ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+      ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+      ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)") +
       plot_theme
     
     return(list(plot = p, prop_data = prop_grid))
@@ -104,12 +94,12 @@ create_cells_plot <- function(prop_grid, proportion_type = "overall", color_pale
         }
         
         # Create plot data for condition 1
-        plot_data1 <- expand.grid(dc = 1:6, ac = 1:6)
+        plot_data1 <- base::expand.grid(dc = 1:6, ac = 1:6)
         plot_data1$proportion <- as.vector(t(condition_grids[[cond1]]))
         plot_data1$condition <- cond1
         
         # Create plot data for condition 2
-        plot_data2 <- expand.grid(dc = 1:6, ac = 1:6)
+        plot_data2 <- base::expand.grid(dc = 1:6, ac = 1:6)
         plot_data2$proportion <- as.vector(t(condition_grids[[cond2]]))
         plot_data2$condition <- cond2
         
@@ -117,15 +107,15 @@ create_cells_plot <- function(prop_grid, proportion_type = "overall", color_pale
         combined_data <- rbind(plot_data1, plot_data2)
         
         # Create faceted plot
-        p <- ggplot(combined_data, aes(x = dc, y = ac, fill = proportion)) +
-          geom_tile(color = "white", linewidth = 0.5) +
-          scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
+        p <- ggplot2::ggplot(combined_data, ggplot2::aes(x = dc, y = ac, fill = proportion)) +
+          ggplot2::geom_tile(color = "white", linewidth = 0.5) +
+          ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
                             midpoint = (min_prop + max_prop)/2, limits = c(min_prop, max_prop)) +
-          facet_wrap(~ condition, ncol = 2) +
-          coord_fixed() +
-          scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-          scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-          labs(x = x_label, y = y_label, fill = "Percentage (%)") +
+          ggplot2::facet_wrap(~ condition, ncol = 2) +
+          ggplot2::coord_fixed() +
+          ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+          ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+          ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)") +
           plot_theme
         
         return(list(
@@ -158,17 +148,17 @@ create_cells_plot <- function(prop_grid, proportion_type = "overall", color_pale
         }
         
         for (cond in unique_conditions) {
-          plot_data <- expand.grid(dc = 1:6, ac = 1:6)
+          plot_data <- base::expand.grid(dc = 1:6, ac = 1:6)
           plot_data$proportion <- as.vector(t(condition_grids[[cond]]))
           
-          p <- ggplot(plot_data, aes(x = dc, y = ac, fill = proportion)) +
-            geom_tile(color = "white", linewidth = 0.5) +
-            scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
+          p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = dc, y = ac, fill = proportion)) +
+            ggplot2::geom_tile(color = "white", linewidth = 0.5) +
+            ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
                               midpoint = (min_prop + max_prop)/2, limits = c(min_prop, max_prop)) +
-            coord_fixed() +
-            scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-            scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-            labs(x = x_label, y = y_label, 
+            ggplot2::coord_fixed() +
+            ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+            ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+            ggplot2::labs(x = x_label, y = y_label, 
                  title = paste("Condition:", cond),
                  fill = "Percentage (%)") +
             plot_theme
@@ -194,7 +184,7 @@ create_cells_plot <- function(prop_grid, proportion_type = "overall", color_pale
       # Calculate difference grid
       diff_grid <- condition_grids[[first_cond]] - condition_grids[[second_cond]]
       
-      plot_data <- expand.grid(dc = 1:6, ac = 1:6)
+      plot_data <- base::expand.grid(dc = 1:6, ac = 1:6)
       plot_data$difference <- as.vector(t(diff_grid))
       
       # Get max absolute difference for symmetric color scale
@@ -220,15 +210,15 @@ create_cells_plot <- function(prop_grid, proportion_type = "overall", color_pale
       }
       
       # Create diverging plot
-      p <- ggplot(plot_data, aes(x = dc, y = ac, fill = difference)) +
-        geom_tile(color = "white", linewidth = 0.5) +
-        scale_fill_gradient2(low = neg_colors[9], mid = "white", high = pos_colors[9],
+      p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = dc, y = ac, fill = difference)) +
+        ggplot2::geom_tile(color = "white", linewidth = 0.5) +
+        ggplot2::scale_fill_gradient2(low = neg_colors[9], mid = "white", high = pos_colors[9],
                            midpoint = 0,
                            limits = c(-max_diff, max_diff)) +
-        coord_fixed() +
-        scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-        scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-        labs(x = x_label, y = y_label, 
+        ggplot2::coord_fixed() +
+        ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+        ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+        ggplot2::labs(x = x_label, y = y_label, 
              title = paste("Difference (%):", first_cond, "-", second_cond),
              fill = "Difference (%)") +
         plot_theme
@@ -250,19 +240,19 @@ create_cells_plot <- function(prop_grid, proportion_type = "overall", color_pale
 create_quadrants_plot <- function(prop_grid, proportion_type = "overall", color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", condition_grids = NULL, comparison_type = "separate", pos_palette = "Greens", neg_palette = "Reds", max_legend = NULL, min_legend = NULL) {
   
   # Common plot theme settings
-  plot_theme <- theme_minimal() +
-    theme(
-      axis.text = element_text(size = 12),
-      axis.title = element_text(size = 14, face = "italic"),
-      legend.title = element_text(size = 12),
-      panel.grid = element_blank(),
-      plot.margin = unit(c(1, 1, 2, 2), "lines")
+  plot_theme <- ggplot2::theme_minimal() +
+    ggplot2::theme(
+      axis.text = ggplot2::element_text(size = 12),
+      axis.title = ggplot2::element_text(size = 14, face = "italic"),
+      legend.title = ggplot2::element_text(size = 12),
+      panel.grid = ggplot2::element_blank(),
+      plot.margin = grid::unit(c(1, 1, 2, 2), "lines")
     )
   
   # Get color palettes
-  pal_colors <- brewer.pal(9, color_palette)
-  pos_colors <- brewer.pal(9, pos_palette)
-  neg_colors <- brewer.pal(9, neg_palette)
+  pal_colors <- RColorBrewer::brewer.pal(9, color_palette)
+  pos_colors <- RColorBrewer::brewer.pal(9, pos_palette)
+  neg_colors <- RColorBrewer::brewer.pal(9, neg_palette)
   
   # Calculate quadrant proportions
   calculate_quadrant_props <- function(grid) {
@@ -313,15 +303,15 @@ create_quadrants_plot <- function(prop_grid, proportion_type = "overall", color_
     }
     
     # Create plot for quadrants
-    p <- ggplot(quad_data, aes(x = dc_quad, y = ac_quad, fill = proportion)) +
-      geom_tile(color = "white", linewidth = 0.5) +
-      scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
+    p <- ggplot2::ggplot(quad_data, ggplot2::aes(x = dc_quad, y = ac_quad, fill = proportion)) +
+      ggplot2::geom_tile(color = "white", linewidth = 0.5) +
+      ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
                          midpoint = (min_value + max_value)/2, 
                          limits = c(min_value, max_value)) +
-      coord_fixed(ratio = 1, xlim = c(0.5, 2.5), ylim = c(0.5, 2.5)) +
-      scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-      scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-      labs(x = x_label, y = y_label, fill = "Percentage (%)") +
+      ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 2.5), ylim = c(0.5, 2.5)) +
+      ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+      ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+      ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)") +
       plot_theme
     
     return(list(plot = p, prop_data = quadrant_grid))
@@ -389,16 +379,16 @@ create_quadrants_plot <- function(prop_grid, proportion_type = "overall", color_
         combined_data <- rbind(quad_data1, quad_data2)
         
         # Create faceted plot
-        p <- ggplot(combined_data, aes(x = dc_quad, y = ac_quad, fill = proportion)) +
-          geom_tile(color = "white", linewidth = 0.5) +
-          scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
+        p <- ggplot2::ggplot(combined_data, ggplot2::aes(x = dc_quad, y = ac_quad, fill = proportion)) +
+          ggplot2::geom_tile(color = "white", linewidth = 0.5) +
+          ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
                              midpoint = (min_prop + max_prop)/2, 
                              limits = c(min_prop, max_prop)) +
-          facet_wrap(~ condition, ncol = 2) +
-          coord_fixed(ratio = 1, xlim = c(0.5, 2.5), ylim = c(0.5, 2.5)) +
-          scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-          scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-          labs(x = x_label, y = y_label, fill = "Percentage (%)") +
+          ggplot2::facet_wrap(~ condition, ncol = 2) +
+          ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 2.5), ylim = c(0.5, 2.5)) +
+          ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+          ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+          ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)") +
           plot_theme
         
         return(list(
@@ -441,15 +431,15 @@ create_quadrants_plot <- function(prop_grid, proportion_type = "overall", color_
             proportion = c(quad_grid[1,1], quad_grid[2,1], quad_grid[1,2], quad_grid[2,2])
           )
           
-          p <- ggplot(quad_data, aes(x = dc_quad, y = ac_quad, fill = proportion)) +
-            geom_tile(color = "white", linewidth = 0.5) +
-            scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
+          p <- ggplot2::ggplot(quad_data, ggplot2::aes(x = dc_quad, y = ac_quad, fill = proportion)) +
+            ggplot2::geom_tile(color = "white", linewidth = 0.5) +
+            ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
                                midpoint = (min_prop + max_prop)/2, 
                                limits = c(min_prop, max_prop)) +
-            coord_fixed(ratio = 1, xlim = c(0.5, 2.5), ylim = c(0.5, 2.5)) +
-            scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-            scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-            labs(x = x_label, y = y_label, 
+            ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 2.5), ylim = c(0.5, 2.5)) +
+            ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+            ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+            ggplot2::labs(x = x_label, y = y_label, 
                  title = paste("Condition:", cond),
                  fill = "Percentage (%)") +
             plot_theme
@@ -506,15 +496,15 @@ create_quadrants_plot <- function(prop_grid, proportion_type = "overall", color_
       }
       
       # Create diverging plot
-      p <- ggplot(diff_data, aes(x = dc_quad, y = ac_quad, fill = difference)) +
-        geom_tile(color = "white", linewidth = 0.5) +
-        scale_fill_gradient2(low = neg_colors[9], mid = "white", high = pos_colors[9],
+      p <- ggplot2::ggplot(diff_data, ggplot2::aes(x = dc_quad, y = ac_quad, fill = difference)) +
+        ggplot2::geom_tile(color = "white", linewidth = 0.5) +
+        ggplot2::scale_fill_gradient2(low = neg_colors[9], mid = "white", high = pos_colors[9],
                            midpoint = 0,
                            limits = c(-max_diff, max_diff)) +
-        coord_fixed(ratio = 1, xlim = c(0.5, 2.5), ylim = c(0.5, 2.5)) +
-        scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-        scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-        labs(x = x_label, y = y_label, 
+        ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 2.5), ylim = c(0.5, 2.5)) +
+        ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+        ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+        ggplot2::labs(x = x_label, y = y_label, 
              title = paste("Difference (%):", first_cond, "-", second_cond),
              fill = "Difference (%)") +
         plot_theme
@@ -536,19 +526,19 @@ create_quadrants_plot <- function(prop_grid, proportion_type = "overall", color_
 create_horizontal_plot <- function(prop_grid, proportion_type = "overall", color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", condition_grids = NULL, comparison_type = "separate", pos_palette = "Greens", neg_palette = "Reds", max_legend = NULL, min_legend = NULL) {
   
   # Common plot theme settings
-  plot_theme <- theme_minimal() +
-    theme(
-      axis.text = element_text(size = 12),
-      axis.title = element_text(size = 14, face = "italic"),
-      legend.title = element_text(size = 12),
-      panel.grid = element_blank(),
-      plot.margin = unit(c(1, 1, 2, 2), "lines")
+  plot_theme <- ggplot2::theme_minimal() +
+    ggplot2::theme(
+      axis.text = ggplot2::element_text(size = 12),
+      axis.title = ggplot2::element_text(size = 14, face = "italic"),
+      legend.title = ggplot2::element_text(size = 12),
+      panel.grid = ggplot2::element_blank(),
+      plot.margin = grid::unit(c(1, 1, 2, 2), "lines")
     )
   
   # Get color palettes
-  pal_colors <- brewer.pal(9, color_palette)
-  pos_colors <- brewer.pal(9, pos_palette)
-  neg_colors <- brewer.pal(9, neg_palette)
+  pal_colors <- RColorBrewer::brewer.pal(9, color_palette)
+  pos_colors <- RColorBrewer::brewer.pal(9, pos_palette)
+  neg_colors <- RColorBrewer::brewer.pal(9, neg_palette)
   
   # Calculate horizontal proportions
   calculate_horizontal_props <- function(grid) {
@@ -591,15 +581,15 @@ create_horizontal_plot <- function(prop_grid, proportion_type = "overall", color
     )
     
     # Create plot with horizontal bands
-    p <- ggplot(horizontal_data, aes(y = ac, fill = proportion)) +
-      geom_tile(aes(x = 3.5, width = 6), color = "white", linewidth = 0.5) +
-      scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
+    p <- ggplot2::ggplot(horizontal_data, ggplot2::aes(y = ac, fill = proportion)) +
+      ggplot2::geom_tile(ggplot2::aes(x = 3.5, width = 6), color = "white", linewidth = 0.5) +
+      ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
                         midpoint = (min_value + max_value)/2, 
                         limits = c(min_value, max_value)) +
-      coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-      scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-      scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-      labs(x = x_label, y = y_label, fill = "Percentage (%)") +
+      ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
+      ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+      ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+      ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)") +
       plot_theme
     
     return(list(plot = p, prop_data = row_sums))
@@ -665,16 +655,16 @@ create_horizontal_plot <- function(prop_grid, proportion_type = "overall", color
         combined_data <- rbind(horz_data1, horz_data2)
         
         # Create faceted plot
-        p <- ggplot(combined_data, aes(y = ac, fill = proportion)) +
-          geom_tile(aes(x = 3.5, width = 6), color = "white", linewidth = 0.5) +
-          scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
+        p <- ggplot2::ggplot(combined_data, ggplot2::aes(y = ac, fill = proportion)) +
+          ggplot2::geom_tile(ggplot2::aes(x = 3.5, width = 6), color = "white", linewidth = 0.5) +
+          ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
                              midpoint = (min_prop + max_prop)/2, 
                              limits = c(min_prop, max_prop)) +
-          facet_wrap(~ condition, ncol = 2) +
-          coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-          scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-          scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-          labs(x = x_label, y = y_label, fill = "Percentage (%)") +
+          ggplot2::facet_wrap(~ condition, ncol = 2) +
+          ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
+          ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+          ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+          ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)") +
           plot_theme
         
         return(list(
@@ -716,15 +706,15 @@ create_horizontal_plot <- function(prop_grid, proportion_type = "overall", color
             proportion = horz_props
           )
           
-          p <- ggplot(horz_data, aes(y = ac, fill = proportion)) +
-            geom_tile(aes(x = 3.5, width = 6), color = "white", linewidth = 0.5) +
-            scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
+          p <- ggplot2::ggplot(horz_data, ggplot2::aes(y = ac, fill = proportion)) +
+            ggplot2::geom_tile(ggplot2::aes(x = 3.5, width = 6), color = "white", linewidth = 0.5) +
+            ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
                                midpoint = (min_prop + max_prop)/2, 
                                limits = c(min_prop, max_prop)) +
-            coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-            scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-            scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-            labs(x = x_label, y = y_label, 
+            ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
+            ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+            ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+            ggplot2::labs(x = x_label, y = y_label, 
                  title = paste("Condition:", cond),
                  fill = "Percentage (%)") +
             plot_theme
@@ -779,15 +769,15 @@ create_horizontal_plot <- function(prop_grid, proportion_type = "overall", color
       }
       
       # Create diverging plot
-      p <- ggplot(diff_data, aes(y = ac, fill = difference)) +
-        geom_tile(aes(x = 3.5, width = 6), color = "white", linewidth = 0.5) +
-        scale_fill_gradient2(low = neg_colors[9], mid = "white", high = pos_colors[9],
+      p <- ggplot2::ggplot(diff_data, ggplot2::aes(y = ac, fill = difference)) +
+        ggplot2::geom_tile(ggplot2::aes(x = 3.5, width = 6), color = "white", linewidth = 0.5) +
+        ggplot2::scale_fill_gradient2(low = neg_colors[9], mid = "white", high = pos_colors[9],
                            midpoint = 0,
                            limits = c(-max_diff, max_diff)) +
-        coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-        scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-        scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-        labs(x = x_label, y = y_label, 
+        ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
+        ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+        ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+        ggplot2::labs(x = x_label, y = y_label, 
              title = paste("Difference (%):", first_cond, "-", second_cond),
              fill = "Difference (%)") +
         plot_theme
@@ -808,19 +798,19 @@ create_horizontal_plot <- function(prop_grid, proportion_type = "overall", color
 create_vertical_plot <- function(prop_grid, proportion_type = "overall", color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", condition_grids = NULL, comparison_type = "separate", pos_palette = "Greens", neg_palette = "Reds", max_legend = NULL, min_legend = NULL) {
   
   # Common plot theme settings
-  plot_theme <- theme_minimal() +
-    theme(
-      axis.text = element_text(size = 12),
-      axis.title = element_text(size = 14, face = "italic"),
-      legend.title = element_text(size = 12),
-      panel.grid = element_blank(),
-      plot.margin = unit(c(1, 1, 2, 2), "lines")
+  plot_theme <- ggplot2::theme_minimal() +
+    ggplot2::theme(
+      axis.text = ggplot2::element_text(size = 12),
+      axis.title = ggplot2::element_text(size = 14, face = "italic"),
+      legend.title = ggplot2::element_text(size = 12),
+      panel.grid = ggplot2::element_blank(),
+      plot.margin = grid::unit(c(1, 1, 2, 2), "lines")
     )
   
   # Get color palettes
-  pal_colors <- brewer.pal(9, color_palette)
-  pos_colors <- brewer.pal(9, pos_palette)
-  neg_colors <- brewer.pal(9, neg_palette)
+  pal_colors <- RColorBrewer::brewer.pal(9, color_palette)
+  pos_colors <- RColorBrewer::brewer.pal(9, pos_palette)
+  neg_colors <- RColorBrewer::brewer.pal(9, neg_palette)
   
   # Calculate vertical proportions
   calculate_vertical_props <- function(grid) {
@@ -863,15 +853,15 @@ create_vertical_plot <- function(prop_grid, proportion_type = "overall", color_p
     )
     
     # Create plot with vertical bands
-    p <- ggplot(vertical_data, aes(x = dc, fill = proportion)) +
-      geom_tile(aes(y = 3.5, height = 6), color = "white", linewidth = 0.5) +
-      scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
+    p <- ggplot2::ggplot(vertical_data, ggplot2::aes(x = dc, fill = proportion)) +
+      ggplot2::geom_tile(ggplot2::aes(y = 3.5, height = 6), color = "white", linewidth = 0.5) +
+      ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
                         midpoint = (min_value + max_value)/2, 
                         limits = c(min_value, max_value)) +
-      coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-      scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-      scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-      labs(x = x_label, y = y_label, fill = "Percentage (%)") +
+      ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
+      ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+      ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+      ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)") +
       plot_theme
     
     return(list(plot = p, prop_data = col_sums))
@@ -937,16 +927,16 @@ create_vertical_plot <- function(prop_grid, proportion_type = "overall", color_p
         combined_data <- rbind(vert_data1, vert_data2)
         
         # Create faceted plot
-        p <- ggplot(combined_data, aes(x = dc, fill = proportion)) +
-          geom_tile(aes(y = 3.5, height = 6), color = "white", linewidth = 0.5) +
-          scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
+        p <- ggplot2::ggplot(combined_data, ggplot2::aes(x = dc, fill = proportion)) +
+          ggplot2::geom_tile(ggplot2::aes(y = 3.5, height = 6), color = "white", linewidth = 0.5) +
+          ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
                              midpoint = (min_prop + max_prop)/2, 
                              limits = c(min_prop, max_prop)) +
-          facet_wrap(~ condition, ncol = 2) +
-          coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-          scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-          scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-          labs(x = x_label, y = y_label, fill = "Percentage (%)") +
+          ggplot2::facet_wrap(~ condition, ncol = 2) +
+          ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
+          ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+          ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+          ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)") +
           plot_theme
         
         return(list(
@@ -988,15 +978,15 @@ create_vertical_plot <- function(prop_grid, proportion_type = "overall", color_p
             proportion = vert_props
           )
           
-          p <- ggplot(vert_data, aes(x = dc, fill = proportion)) +
-            geom_tile(aes(y = 3.5, height = 6), color = "white", linewidth = 0.5) +
-            scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
+          p <- ggplot2::ggplot(vert_data, ggplot2::aes(x = dc, fill = proportion)) +
+            ggplot2::geom_tile(ggplot2::aes(y = 3.5, height = 6), color = "white", linewidth = 0.5) +
+            ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
                                midpoint = (min_prop + max_prop)/2, 
                                limits = c(min_prop, max_prop)) +
-            coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-            scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-            scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-            labs(x = x_label, y = y_label, 
+            ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
+            ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+            ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+            ggplot2::labs(x = x_label, y = y_label, 
                  title = paste("Condition:", cond),
                  fill = "Percentage (%)") +
             plot_theme
@@ -1051,15 +1041,15 @@ create_vertical_plot <- function(prop_grid, proportion_type = "overall", color_p
       }
       
       # Create diverging plot
-      p <- ggplot(diff_data, aes(x = dc, fill = difference)) +
-        geom_tile(aes(y = 3.5, height = 6), color = "white", linewidth = 0.5) +
-        scale_fill_gradient2(low = neg_colors[9], mid = "white", high = pos_colors[9],
+      p <- ggplot2::ggplot(diff_data, ggplot2::aes(x = dc, fill = difference)) +
+        ggplot2::geom_tile(ggplot2::aes(y = 3.5, height = 6), color = "white", linewidth = 0.5) +
+        ggplot2::scale_fill_gradient2(low = neg_colors[9], mid = "white", high = pos_colors[9],
                            midpoint = 0,
                            limits = c(-max_diff, max_diff)) +
-        coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-        scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-        scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-        labs(x = x_label, y = y_label, 
+        ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
+        ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+        ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+        ggplot2::labs(x = x_label, y = y_label, 
              title = paste("Difference (%):", first_cond, "-", second_cond),
              fill = "Difference (%)") +
         plot_theme
@@ -1081,19 +1071,19 @@ create_vertical_plot <- function(prop_grid, proportion_type = "overall", color_p
 create_constraints_plot <- function(prop_grid, proportion_type = "overall", color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", condition_grids = NULL, comparison_type = "separate", pos_palette = "Greens", neg_palette = "Reds", max_legend = NULL, min_legend = NULL) {
   
   # Common plot theme settings
-  plot_theme <- theme_minimal() +
-    theme(
-      axis.text = element_text(size = 12),
-      axis.title = element_text(size = 14, face = "italic"),
-      legend.title = element_text(size = 12),
-      panel.grid = element_blank(),
-      plot.margin = unit(c(1, 1, 2, 2), "lines")
+  plot_theme <- ggplot2::theme_minimal() +
+    ggplot2::theme(
+      axis.text = ggplot2::element_text(size = 12),
+      axis.title = ggplot2::element_text(size = 14, face = "italic"),
+      legend.title = ggplot2::element_text(size = 12),
+      panel.grid = ggplot2::element_blank(),
+      plot.margin = grid::unit(c(1, 1, 2, 2), "lines")
     )
   
   # Get color palettes
-  pal_colors <- brewer.pal(9, color_palette)
-  pos_colors <- brewer.pal(9, pos_palette)
-  neg_colors <- brewer.pal(9, neg_palette)
+  pal_colors <- RColorBrewer::brewer.pal(9, color_palette)
+  pos_colors <- RColorBrewer::brewer.pal(9, pos_palette)
+  neg_colors <- RColorBrewer::brewer.pal(9, neg_palette)
   
   # Calculate constraint proportions in a more explicit way
   calculate_constraint_props <- function(grid) {
@@ -1184,17 +1174,17 @@ create_constraints_plot <- function(prop_grid, proportion_type = "overall", colo
     plot_data <- merge(constraint_polygons, constraint_data, by = "constraint")
     
     # Create plot with constraints
-    p <- ggplot() +
-      geom_polygon(data = plot_data, 
-                  aes(x = x, y = y, fill = proportion, group = constraint),
+    p <- ggplot2::ggplot() +
+      ggplot2::geom_polygon(data = plot_data, 
+                  ggplot2::aes(x = x, y = y, fill = proportion, group = constraint),
                   color = "white", linewidth = 0.5) +
-      scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
+      ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
                          midpoint = (min_value + max_value)/2, 
                          limits = c(min_value, max_value)) +
-      coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-      scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-      scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-      labs(x = x_label, y = y_label, fill = "Percentage (%)") +
+      ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
+      ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+      ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+      ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)") +
       plot_theme
     
     return(list(plot = p, prop_data = constraint_props))
@@ -1263,18 +1253,18 @@ create_constraints_plot <- function(prop_grid, proportion_type = "overall", colo
         plot_data <- merge(constraint_polygons, combined_const_data, by = "constraint")
         
         # Create faceted plot
-        p <- ggplot() +
-          geom_polygon(data = plot_data, 
-                      aes(x = x, y = y, fill = proportion, group = interaction(constraint, condition)),
+        p <- ggplot2::ggplot() +
+          ggplot2::geom_polygon(data = plot_data, 
+                      ggplot2::aes(x = x, y = y, fill = proportion, group = interaction(constraint, condition)),
                       color = "white", linewidth = 0.5) +
-          scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
+          ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
                              midpoint = (min_prop + max_prop)/2, 
                              limits = c(min_prop, max_prop)) +
-          facet_wrap(~ condition, ncol = 2) +
-          coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-          scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-          scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-          labs(x = x_label, y = y_label, fill = "Percentage (%)") +
+          ggplot2::facet_wrap(~ condition, ncol = 2) +
+          ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
+          ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+          ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+          ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)") +
           plot_theme
         
         return(list(
@@ -1320,17 +1310,17 @@ create_constraints_plot <- function(prop_grid, proportion_type = "overall", colo
           # Merge with polygon data
           plot_data <- merge(constraint_polygons, const_data, by = "constraint")
           
-          p <- ggplot() +
-            geom_polygon(data = plot_data, 
-                        aes(x = x, y = y, fill = proportion, group = constraint),
+          p <- ggplot2::ggplot() +
+            ggplot2::geom_polygon(data = plot_data, 
+                        ggplot2::aes(x = x, y = y, fill = proportion, group = constraint),
                         color = "white", linewidth = 0.5) +
-            scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
+            ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
                                midpoint = (min_prop + max_prop)/2, 
                                limits = c(min_prop, max_prop)) +
-            coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-            scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-            scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-            labs(x = x_label, y = y_label, 
+            ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
+            ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+            ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+            ggplot2::labs(x = x_label, y = y_label, 
                  title = paste("Condition:", cond),
                  fill = "Percentage (%)") +
             plot_theme
@@ -1388,17 +1378,17 @@ create_constraints_plot <- function(prop_grid, proportion_type = "overall", colo
       }
       
       # Create diverging plot
-      p <- ggplot() +
-        geom_polygon(data = plot_data, 
-                    aes(x = x, y = y, fill = difference, group = constraint),
+      p <- ggplot2::ggplot() +
+        ggplot2::geom_polygon(data = plot_data, 
+                    ggplot2::aes(x = x, y = y, fill = difference, group = constraint),
                     color = "white", linewidth = 0.5) +
-        scale_fill_gradient2(low = neg_colors[9], mid = "white", high = pos_colors[9],
+        ggplot2::scale_fill_gradient2(low = neg_colors[9], mid = "white", high = pos_colors[9],
                            midpoint = 0,
                            limits = c(-max_diff, max_diff)) +
-        coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-        scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-        scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-        labs(x = x_label, y = y_label, 
+        ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
+        ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+        ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+        ggplot2::labs(x = x_label, y = y_label, 
              title = paste("Difference (%):", first_cond, "-", second_cond),
              fill = "Difference (%)") +
         plot_theme
@@ -1420,19 +1410,19 @@ create_constraints_plot <- function(prop_grid, proportion_type = "overall", colo
 create_depth_plot <- function(prop_grid, proportion_type = "overall", color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", condition_grids = NULL, comparison_type = "separate", pos_palette = "Greens", neg_palette = "Reds", max_legend = NULL, min_legend = NULL) {
   
   # Common plot theme settings
-  plot_theme <- theme_minimal() +
-    theme(
-      axis.text = element_text(size = 12),
-      axis.title = element_text(size = 14, face = "italic"),
-      legend.title = element_text(size = 12),
-      panel.grid = element_blank(),
-      plot.margin = unit(c(1, 1, 2, 2), "lines")
+  plot_theme <- ggplot2::theme_minimal() +
+    ggplot2::theme(
+      axis.text = ggplot2::element_text(size = 12),
+      axis.title = ggplot2::element_text(size = 14, face = "italic"),
+      legend.title = ggplot2::element_text(size = 12),
+      panel.grid = ggplot2::element_blank(),
+      plot.margin = grid::unit(c(1, 1, 2, 2), "lines")
     )
   
   # Get color palettes
-  pal_colors <- brewer.pal(9, color_palette)
-  pos_colors <- brewer.pal(9, pos_palette)
-  neg_colors <- brewer.pal(9, neg_palette)
+  pal_colors <- RColorBrewer::brewer.pal(9, color_palette)
+  pos_colors <- RColorBrewer::brewer.pal(9, pos_palette)
+  neg_colors <- RColorBrewer::brewer.pal(9, neg_palette)
   
   # Calculate depth proportions
   calculate_depth_props <- function(grid) {
@@ -1519,18 +1509,18 @@ create_depth_plot <- function(prop_grid, proportion_type = "overall", color_pale
     }
     
     # Create plot with depth polygons
-    p <- ggplot() +
-      geom_polygon(data = plot_data, 
-                  aes(x = x, y = y, fill = proportion, 
+    p <- ggplot2::ggplot() +
+      ggplot2::geom_polygon(data = plot_data, 
+                  ggplot2::aes(x = x, y = y, fill = proportion, 
                       group = interaction(quadrant, depth)),
                   color = "white", linewidth = 0.5) +
-      scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
+      ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
                         midpoint = (min_value + max_value)/2, 
                         limits = c(min_value, max_value)) +
-      coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-      scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-      scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-      labs(x = x_label, y = y_label, fill = "Percentage (%)") +
+      ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
+      ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+      ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+      ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)") +
       plot_theme
     
     return(list(plot = p, prop_data = depth_props))
@@ -1606,19 +1596,19 @@ create_depth_plot <- function(prop_grid, proportion_type = "overall", color_pale
         combined_depth_data <- rbind(depth_polygons1, depth_polygons2)
         
         # Create faceted plot
-        p <- ggplot() +
-          geom_polygon(data = combined_depth_data, 
-                      aes(x = x, y = y, fill = proportion, 
+        p <- ggplot2::ggplot() +
+          ggplot2::geom_polygon(data = combined_depth_data, 
+                      ggplot2::aes(x = x, y = y, fill = proportion, 
                           group = interaction(quadrant, depth, condition)),
                       color = "white", linewidth = 0.5) +
-          scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
+          ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
                              midpoint = (min_prop + max_prop)/2, 
                              limits = c(min_prop, max_prop)) +
-          facet_wrap(~ condition, ncol = 2) +
-          coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-          scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-          scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-          labs(x = x_label, y = y_label, fill = "Percentage (%)") +
+          ggplot2::facet_wrap(~ condition, ncol = 2) +
+          ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
+          ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+          ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+          ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)") +
           plot_theme
         
         return(list(
@@ -1667,18 +1657,18 @@ create_depth_plot <- function(prop_grid, proportion_type = "overall", color_pale
             }
           }
           
-          p <- ggplot() +
-            geom_polygon(data = cond_polygons, 
-                        aes(x = x, y = y, fill = proportion, 
+          p <- ggplot2::ggplot() +
+            ggplot2::geom_polygon(data = cond_polygons, 
+                        ggplot2::aes(x = x, y = y, fill = proportion, 
                             group = interaction(quadrant, depth)),
                         color = "white", linewidth = 0.5) +
-            scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
+            ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
                                midpoint = (min_prop + max_prop)/2, 
                                limits = c(min_prop, max_prop)) +
-            coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-            scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-            scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-            labs(x = x_label, y = y_label, 
+            ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
+            ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+            ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+            ggplot2::labs(x = x_label, y = y_label, 
                  title = paste("Condition:", cond),
                  fill = "Percentage (%)") +
             plot_theme
@@ -1742,18 +1732,18 @@ create_depth_plot <- function(prop_grid, proportion_type = "overall", color_pale
       }
       
       # Create diverging plot
-      p <- ggplot() +
-        geom_polygon(data = diff_polygons, 
-                    aes(x = x, y = y, fill = difference, 
+      p <- ggplot2::ggplot() +
+        ggplot2::geom_polygon(data = diff_polygons, 
+                    ggplot2::aes(x = x, y = y, fill = difference, 
                         group = interaction(quadrant, depth)),
                     color = "white", linewidth = 0.5) +
-        scale_fill_gradient2(low = neg_colors[9], mid = "white", high = pos_colors[9],
+        ggplot2::scale_fill_gradient2(low = neg_colors[9], mid = "white", high = pos_colors[9],
                            midpoint = 0,
                            limits = c(-max_diff, max_diff)) +
-        coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-        scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-        scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-        labs(x = x_label, y = y_label, 
+        ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
+        ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+        ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+        ggplot2::labs(x = x_label, y = y_label, 
              title = paste("Difference (%):", first_cond, "-", second_cond),
              fill = "Difference (%)") +
         plot_theme
