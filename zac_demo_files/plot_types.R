@@ -33,10 +33,32 @@ create_cells_plot <- function(prop_grid, proportion_type = "overall", color_pale
     plot_data <- expand.grid(dc = 1:6, ac = 1:6)
     plot_data$proportion <- as.vector(t(prop_grid))
     
+    # Determine the limits for the legend
+    max_value <- max(prop_grid)
+    min_value <- 0
+    
+    # Check if max_legend is provided and valid
+    if (!is.null(max_legend)) {
+      if (max_legend < max_value) {
+        warning("max_legend value is less than the maximum proportion. Using the maximum proportion instead.")
+      } else {
+        max_value <- max_legend
+      }
+    }
+    
+    # Check if min_legend is provided and valid
+    if (!is.null(min_legend)) {
+      if (min_legend > min_value) {
+        warning("min_legend value is greater than the minimum proportion. Using the minimum proportion instead.")
+      } else {
+        min_value <- min_legend
+      }
+    }
+    
     p <- ggplot(plot_data, aes(x = dc, y = ac, fill = proportion)) +
       geom_tile(color = "white", linewidth = 0.5) +
       scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                        midpoint = max(prop_grid)/2, limits = c(0, max(prop_grid))) +
+                        midpoint = (min_value + max_value)/2, limits = c(min_value, max_value)) +
       coord_fixed() +
       scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
       scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
@@ -61,6 +83,25 @@ create_cells_plot <- function(prop_grid, proportion_type = "overall", color_pale
         
         # Find maximum proportion across both conditions for consistent color scale
         max_prop <- max(max(condition_grids[[cond1]]), max(condition_grids[[cond2]]))
+        min_prop <- 0
+        
+        # Check max_legend
+        if (!is.null(max_legend)) {
+          if (max_legend < max_prop) {
+            warning("max_legend value is less than the maximum proportion. Using the maximum proportion instead.")
+          } else {
+            max_prop <- max_legend
+          }
+        }
+        
+        # Check min_legend
+        if (!is.null(min_legend)) {
+          if (min_legend > min_prop) {
+            warning("min_legend value is greater than the minimum proportion. Using the minimum proportion instead.")
+          } else {
+            min_prop <- min_legend
+          }
+        }
         
         # Create plot data for condition 1
         plot_data1 <- expand.grid(dc = 1:6, ac = 1:6)
@@ -79,7 +120,7 @@ create_cells_plot <- function(prop_grid, proportion_type = "overall", color_pale
         p <- ggplot(combined_data, aes(x = dc, y = ac, fill = proportion)) +
           geom_tile(color = "white", linewidth = 0.5) +
           scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                            midpoint = max_prop/2, limits = c(0, max_prop)) +
+                            midpoint = (min_prop + max_prop)/2, limits = c(min_prop, max_prop)) +
           facet_wrap(~ condition, ncol = 2) +
           coord_fixed() +
           scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
@@ -96,6 +137,25 @@ create_cells_plot <- function(prop_grid, proportion_type = "overall", color_pale
         # Return a list of separate plots for more than 2 conditions
         condition_plots <- list()
         max_prop <- max(unlist(lapply(condition_grids, max)))
+        min_prop <- 0
+        
+        # Check max_legend
+        if (!is.null(max_legend)) {
+          if (max_legend < max_prop) {
+            warning("max_legend value is less than the maximum proportion. Using the maximum proportion instead.")
+          } else {
+            max_prop <- max_legend
+          }
+        }
+        
+        # Check min_legend
+        if (!is.null(min_legend)) {
+          if (min_legend > min_prop) {
+            warning("min_legend value is greater than the minimum proportion. Using the minimum proportion instead.")
+          } else {
+            min_prop <- min_legend
+          }
+        }
         
         for (cond in unique_conditions) {
           plot_data <- expand.grid(dc = 1:6, ac = 1:6)
@@ -104,7 +164,7 @@ create_cells_plot <- function(prop_grid, proportion_type = "overall", color_pale
           p <- ggplot(plot_data, aes(x = dc, y = ac, fill = proportion)) +
             geom_tile(color = "white", linewidth = 0.5) +
             scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                              midpoint = max_prop/2, limits = c(0, max_prop)) +
+                              midpoint = (min_prop + max_prop)/2, limits = c(min_prop, max_prop)) +
             coord_fixed() +
             scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
             scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
@@ -140,6 +200,25 @@ create_cells_plot <- function(prop_grid, proportion_type = "overall", color_pale
       # Get max absolute difference for symmetric color scale
       max_diff <- max(abs(diff_grid))
       
+      # Check max_legend for difference view
+      if (!is.null(max_legend)) {
+        if (max_legend < max_diff) {
+          warning("max_legend value is less than the maximum difference. Using the maximum difference instead.")
+        } else {
+          max_diff <- max_legend
+        }
+      }
+      
+      # Check min_legend for difference view (should be negative of max for diverging scale)
+      if (!is.null(min_legend)) {
+        if (min_legend > -max_diff) {
+          warning("min_legend value is greater than the negative maximum difference. Using the symmetric range instead.")
+        } else {
+          # Only use min_legend if it's explicitly set and valid
+          max_diff <- max(max_diff, abs(min_legend))
+        }
+      }
+      
       # Create diverging plot
       p <- ggplot(plot_data, aes(x = dc, y = ac, fill = difference)) +
         geom_tile(color = "white", linewidth = 0.5) +
@@ -168,7 +247,7 @@ create_cells_plot <- function(prop_grid, proportion_type = "overall", color_pale
 }
 
 
-create_quadrants_plot <- function(prop_grid, proportion_type = "overall", color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", condition_grids = NULL, comparison_type = "separate", pos_palette = "Greens", neg_palette = "Reds") {
+create_quadrants_plot <- function(prop_grid, proportion_type = "overall", color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", condition_grids = NULL, comparison_type = "separate", pos_palette = "Greens", neg_palette = "Reds", max_legend = NULL, min_legend = NULL) {
   
   # Common plot theme settings
   plot_theme <- theme_minimal() +
@@ -211,12 +290,34 @@ create_quadrants_plot <- function(prop_grid, proportion_type = "overall", color_
                     quadrant_grid[1,2], quadrant_grid[2,2])
     )
     
+    # Determine the limits for the legend
+    max_value <- max(quad_data$proportion)
+    min_value <- 0
+    
+    # Check if max_legend is provided and valid
+    if (!is.null(max_legend)) {
+      if (max_legend < max_value) {
+        warning("max_legend value is less than the maximum proportion. Using the maximum proportion instead.")
+      } else {
+        max_value <- max_legend
+      }
+    }
+    
+    # Check if min_legend is provided and valid
+    if (!is.null(min_legend)) {
+      if (min_legend > min_value) {
+        warning("min_legend value is greater than the minimum proportion. Using the minimum proportion instead.")
+      } else {
+        min_value <- min_legend
+      }
+    }
+    
     # Create plot for quadrants
     p <- ggplot(quad_data, aes(x = dc_quad, y = ac_quad, fill = proportion)) +
       geom_tile(color = "white", linewidth = 0.5) +
       scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                         midpoint = max(quad_data$proportion)/2, 
-                         limits = c(0, max(quad_data$proportion))) +
+                         midpoint = (min_value + max_value)/2, 
+                         limits = c(min_value, max_value)) +
       coord_fixed(ratio = 1, xlim = c(0.5, 2.5), ylim = c(0.5, 2.5)) +
       scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
       scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
@@ -248,6 +349,25 @@ create_quadrants_plot <- function(prop_grid, proportion_type = "overall", color_
         
         # Find maximum proportion across both conditions for consistent color scale
         max_prop <- max(max(quad_grid1), max(quad_grid2))
+        min_prop <- 0
+        
+        # Check max_legend
+        if (!is.null(max_legend)) {
+          if (max_legend < max_prop) {
+            warning("max_legend value is less than the maximum proportion. Using the maximum proportion instead.")
+          } else {
+            max_prop <- max_legend
+          }
+        }
+        
+        # Check min_legend
+        if (!is.null(min_legend)) {
+          if (min_legend > min_prop) {
+            warning("min_legend value is greater than the minimum proportion. Using the minimum proportion instead.")
+          } else {
+            min_prop <- min_legend
+          }
+        }
         
         # Create plot data for condition 1
         quad_data1 <- data.frame(
@@ -272,7 +392,8 @@ create_quadrants_plot <- function(prop_grid, proportion_type = "overall", color_
         p <- ggplot(combined_data, aes(x = dc_quad, y = ac_quad, fill = proportion)) +
           geom_tile(color = "white", linewidth = 0.5) +
           scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                             midpoint = max_prop/2, limits = c(0, max_prop)) +
+                             midpoint = (min_prop + max_prop)/2, 
+                             limits = c(min_prop, max_prop)) +
           facet_wrap(~ condition, ncol = 2) +
           coord_fixed(ratio = 1, xlim = c(0.5, 2.5), ylim = c(0.5, 2.5)) +
           scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
@@ -291,6 +412,25 @@ create_quadrants_plot <- function(prop_grid, proportion_type = "overall", color_
         
         # Find maximum proportion across all conditions
         max_prop <- max(unlist(lapply(condition_quad_grids, max)))
+        min_prop <- 0
+        
+        # Check max_legend
+        if (!is.null(max_legend)) {
+          if (max_legend < max_prop) {
+            warning("max_legend value is less than the maximum proportion. Using the maximum proportion instead.")
+          } else {
+            max_prop <- max_legend
+          }
+        }
+        
+        # Check min_legend
+        if (!is.null(min_legend)) {
+          if (min_legend > min_prop) {
+            warning("min_legend value is greater than the minimum proportion. Using the minimum proportion instead.")
+          } else {
+            min_prop <- min_legend
+          }
+        }
         
         for (cond in unique_conditions) {
           quad_grid <- condition_quad_grids[[cond]]
@@ -304,7 +444,8 @@ create_quadrants_plot <- function(prop_grid, proportion_type = "overall", color_
           p <- ggplot(quad_data, aes(x = dc_quad, y = ac_quad, fill = proportion)) +
             geom_tile(color = "white", linewidth = 0.5) +
             scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                               midpoint = max_prop/2, limits = c(0, max_prop)) +
+                               midpoint = (min_prop + max_prop)/2, 
+                               limits = c(min_prop, max_prop)) +
             coord_fixed(ratio = 1, xlim = c(0.5, 2.5), ylim = c(0.5, 2.5)) +
             scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
             scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
@@ -345,6 +486,25 @@ create_quadrants_plot <- function(prop_grid, proportion_type = "overall", color_
       # Get max absolute difference for symmetric color scale
       max_diff <- max(abs(diff_data$difference))
       
+      # Check max_legend for difference view
+      if (!is.null(max_legend)) {
+        if (max_legend < max_diff) {
+          warning("max_legend value is less than the maximum difference. Using the maximum difference instead.")
+        } else {
+          max_diff <- max_legend
+        }
+      }
+      
+      # Check min_legend for difference view (should be negative of max for diverging scale)
+      if (!is.null(min_legend)) {
+        if (min_legend > -max_diff) {
+          warning("min_legend value is greater than the negative maximum difference. Using the symmetric range instead.")
+        } else {
+          # Only use min_legend if it's explicitly set and valid
+          max_diff <- max(max_diff, abs(min_legend))
+        }
+      }
+      
       # Create diverging plot
       p <- ggplot(diff_data, aes(x = dc_quad, y = ac_quad, fill = difference)) +
         geom_tile(color = "white", linewidth = 0.5) +
@@ -367,10 +527,13 @@ create_quadrants_plot <- function(prop_grid, proportion_type = "overall", color_
       ))
     }
   }
+  
+  # If we reach here, there's an unsupported combination
+  stop("Unsupported combination of proportion_type and comparison_type")
 }
 
 
-create_horizontal_plot <- function(prop_grid, proportion_type = "overall", color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", condition_grids = NULL, comparison_type = "separate", pos_palette = "Greens", neg_palette = "Reds") {
+create_horizontal_plot <- function(prop_grid, proportion_type = "overall", color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", condition_grids = NULL, comparison_type = "separate", pos_palette = "Greens", neg_palette = "Reds", max_legend = NULL, min_legend = NULL) {
   
   # Common plot theme settings
   plot_theme <- theme_minimal() +
@@ -399,6 +562,28 @@ create_horizontal_plot <- function(prop_grid, proportion_type = "overall", color
     # Calculate horizontal proportions
     row_sums <- calculate_horizontal_props(prop_grid)
     
+    # Determine the limits for the legend
+    max_value <- max(row_sums)
+    min_value <- 0
+    
+    # Check if max_legend is provided and valid
+    if (!is.null(max_legend)) {
+      if (max_legend < max_value) {
+        warning("max_legend value is less than the maximum proportion. Using the maximum proportion instead.")
+      } else {
+        max_value <- max_legend
+      }
+    }
+    
+    # Check if min_legend is provided and valid
+    if (!is.null(min_legend)) {
+      if (min_legend > min_value) {
+        warning("min_legend value is greater than the minimum proportion. Using the minimum proportion instead.")
+      } else {
+        min_value <- min_legend
+      }
+    }
+    
     # Create data frame for horizontal bands
     horizontal_data <- data.frame(
       ac = 1:6,
@@ -409,7 +594,8 @@ create_horizontal_plot <- function(prop_grid, proportion_type = "overall", color
     p <- ggplot(horizontal_data, aes(y = ac, fill = proportion)) +
       geom_tile(aes(x = 3.5, width = 6), color = "white", linewidth = 0.5) +
       scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                        midpoint = max(row_sums)/2, limits = c(0, max(row_sums))) +
+                        midpoint = (min_value + max_value)/2, 
+                        limits = c(min_value, max_value)) +
       coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
       scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
       scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
@@ -441,6 +627,25 @@ create_horizontal_plot <- function(prop_grid, proportion_type = "overall", color
         
         # Find maximum proportion across both conditions for consistent color scale
         max_prop <- max(max(horz_props1), max(horz_props2))
+        min_prop <- 0
+        
+        # Check max_legend
+        if (!is.null(max_legend)) {
+          if (max_legend < max_prop) {
+            warning("max_legend value is less than the maximum proportion. Using the maximum proportion instead.")
+          } else {
+            max_prop <- max_legend
+          }
+        }
+        
+        # Check min_legend
+        if (!is.null(min_legend)) {
+          if (min_legend > min_prop) {
+            warning("min_legend value is greater than the minimum proportion. Using the minimum proportion instead.")
+          } else {
+            min_prop <- min_legend
+          }
+        }
         
         # Create plot data for condition 1
         horz_data1 <- data.frame(
@@ -463,7 +668,8 @@ create_horizontal_plot <- function(prop_grid, proportion_type = "overall", color
         p <- ggplot(combined_data, aes(y = ac, fill = proportion)) +
           geom_tile(aes(x = 3.5, width = 6), color = "white", linewidth = 0.5) +
           scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                             midpoint = max_prop/2, limits = c(0, max_prop)) +
+                             midpoint = (min_prop + max_prop)/2, 
+                             limits = c(min_prop, max_prop)) +
           facet_wrap(~ condition, ncol = 2) +
           coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
           scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
@@ -482,6 +688,25 @@ create_horizontal_plot <- function(prop_grid, proportion_type = "overall", color
         
         # Find maximum proportion across all conditions
         max_prop <- max(unlist(lapply(condition_horizontal_props, max)))
+        min_prop <- 0
+        
+        # Check max_legend
+        if (!is.null(max_legend)) {
+          if (max_legend < max_prop) {
+            warning("max_legend value is less than the maximum proportion. Using the maximum proportion instead.")
+          } else {
+            max_prop <- max_legend
+          }
+        }
+        
+        # Check min_legend
+        if (!is.null(min_legend)) {
+          if (min_legend > min_prop) {
+            warning("min_legend value is greater than the minimum proportion. Using the minimum proportion instead.")
+          } else {
+            min_prop <- min_legend
+          }
+        }
         
         for (cond in unique_conditions) {
           horz_props <- condition_horizontal_props[[cond]]
@@ -494,7 +719,8 @@ create_horizontal_plot <- function(prop_grid, proportion_type = "overall", color
           p <- ggplot(horz_data, aes(y = ac, fill = proportion)) +
             geom_tile(aes(x = 3.5, width = 6), color = "white", linewidth = 0.5) +
             scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                               midpoint = max_prop/2, limits = c(0, max_prop)) +
+                               midpoint = (min_prop + max_prop)/2, 
+                               limits = c(min_prop, max_prop)) +
             coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
             scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
             scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
@@ -533,6 +759,25 @@ create_horizontal_plot <- function(prop_grid, proportion_type = "overall", color
       # Get max absolute difference for symmetric color scale
       max_diff <- max(abs(diff_data$difference))
       
+      # Check max_legend for difference view
+      if (!is.null(max_legend)) {
+        if (max_legend < max_diff) {
+          warning("max_legend value is less than the maximum difference. Using the maximum difference instead.")
+        } else {
+          max_diff <- max_legend
+        }
+      }
+      
+      # Check min_legend for difference view (should be negative of max for diverging scale)
+      if (!is.null(min_legend)) {
+        if (min_legend > -max_diff) {
+          warning("min_legend value is greater than the negative maximum difference. Using the symmetric range instead.")
+        } else {
+          # Only use min_legend if it's explicitly set and valid
+          max_diff <- max(max_diff, abs(min_legend))
+        }
+      }
+      
       # Create diverging plot
       p <- ggplot(diff_data, aes(y = ac, fill = difference)) +
         geom_tile(aes(x = 3.5, width = 6), color = "white", linewidth = 0.5) +
@@ -560,7 +805,7 @@ create_horizontal_plot <- function(prop_grid, proportion_type = "overall", color
   stop("Unsupported combination of proportion_type and comparison_type")
 }
 
-create_vertical_plot <- function(prop_grid, proportion_type = "overall", color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", condition_grids = NULL, comparison_type = "separate", pos_palette = "Greens", neg_palette = "Reds") {
+create_vertical_plot <- function(prop_grid, proportion_type = "overall", color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", condition_grids = NULL, comparison_type = "separate", pos_palette = "Greens", neg_palette = "Reds", max_legend = NULL, min_legend = NULL) {
   
   # Common plot theme settings
   plot_theme <- theme_minimal() +
@@ -589,6 +834,28 @@ create_vertical_plot <- function(prop_grid, proportion_type = "overall", color_p
     # Calculate vertical proportions
     col_sums <- calculate_vertical_props(prop_grid)
     
+    # Determine the limits for the legend
+    max_value <- max(col_sums)
+    min_value <- 0
+    
+    # Check if max_legend is provided and valid
+    if (!is.null(max_legend)) {
+      if (max_legend < max_value) {
+        warning("max_legend value is less than the maximum proportion. Using the maximum proportion instead.")
+      } else {
+        max_value <- max_legend
+      }
+    }
+    
+    # Check if min_legend is provided and valid
+    if (!is.null(min_legend)) {
+      if (min_legend > min_value) {
+        warning("min_legend value is greater than the minimum proportion. Using the minimum proportion instead.")
+      } else {
+        min_value <- min_legend
+      }
+    }
+    
     # Create data frame for vertical bands
     vertical_data <- data.frame(
       dc = 1:6,
@@ -599,7 +866,8 @@ create_vertical_plot <- function(prop_grid, proportion_type = "overall", color_p
     p <- ggplot(vertical_data, aes(x = dc, fill = proportion)) +
       geom_tile(aes(y = 3.5, height = 6), color = "white", linewidth = 0.5) +
       scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                        midpoint = max(col_sums)/2, limits = c(0, max(col_sums))) +
+                        midpoint = (min_value + max_value)/2, 
+                        limits = c(min_value, max_value)) +
       coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
       scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
       scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
@@ -631,6 +899,25 @@ create_vertical_plot <- function(prop_grid, proportion_type = "overall", color_p
         
         # Find maximum proportion across both conditions for consistent color scale
         max_prop <- max(max(vert_props1), max(vert_props2))
+        min_prop <- 0
+        
+        # Check max_legend
+        if (!is.null(max_legend)) {
+          if (max_legend < max_prop) {
+            warning("max_legend value is less than the maximum proportion. Using the maximum proportion instead.")
+          } else {
+            max_prop <- max_legend
+          }
+        }
+        
+        # Check min_legend
+        if (!is.null(min_legend)) {
+          if (min_legend > min_prop) {
+            warning("min_legend value is greater than the minimum proportion. Using the minimum proportion instead.")
+          } else {
+            min_prop <- min_legend
+          }
+        }
         
         # Create plot data for condition 1
         vert_data1 <- data.frame(
@@ -653,7 +940,8 @@ create_vertical_plot <- function(prop_grid, proportion_type = "overall", color_p
         p <- ggplot(combined_data, aes(x = dc, fill = proportion)) +
           geom_tile(aes(y = 3.5, height = 6), color = "white", linewidth = 0.5) +
           scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                             midpoint = max_prop/2, limits = c(0, max_prop)) +
+                             midpoint = (min_prop + max_prop)/2, 
+                             limits = c(min_prop, max_prop)) +
           facet_wrap(~ condition, ncol = 2) +
           coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
           scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
@@ -672,6 +960,25 @@ create_vertical_plot <- function(prop_grid, proportion_type = "overall", color_p
         
         # Find maximum proportion across all conditions
         max_prop <- max(unlist(lapply(condition_vertical_props, max)))
+        min_prop <- 0
+        
+        # Check max_legend
+        if (!is.null(max_legend)) {
+          if (max_legend < max_prop) {
+            warning("max_legend value is less than the maximum proportion. Using the maximum proportion instead.")
+          } else {
+            max_prop <- max_legend
+          }
+        }
+        
+        # Check min_legend
+        if (!is.null(min_legend)) {
+          if (min_legend > min_prop) {
+            warning("min_legend value is greater than the minimum proportion. Using the minimum proportion instead.")
+          } else {
+            min_prop <- min_legend
+          }
+        }
         
         for (cond in unique_conditions) {
           vert_props <- condition_vertical_props[[cond]]
@@ -684,7 +991,8 @@ create_vertical_plot <- function(prop_grid, proportion_type = "overall", color_p
           p <- ggplot(vert_data, aes(x = dc, fill = proportion)) +
             geom_tile(aes(y = 3.5, height = 6), color = "white", linewidth = 0.5) +
             scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                               midpoint = max_prop/2, limits = c(0, max_prop)) +
+                               midpoint = (min_prop + max_prop)/2, 
+                               limits = c(min_prop, max_prop)) +
             coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
             scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
             scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
@@ -723,6 +1031,25 @@ create_vertical_plot <- function(prop_grid, proportion_type = "overall", color_p
       # Get max absolute difference for symmetric color scale
       max_diff <- max(abs(diff_data$difference))
       
+      # Check max_legend for difference view
+      if (!is.null(max_legend)) {
+        if (max_legend < max_diff) {
+          warning("max_legend value is less than the maximum difference. Using the maximum difference instead.")
+        } else {
+          max_diff <- max_legend
+        }
+      }
+      
+      # Check min_legend for difference view (should be negative of max for diverging scale)
+      if (!is.null(min_legend)) {
+        if (min_legend > -max_diff) {
+          warning("min_legend value is greater than the negative maximum difference. Using the symmetric range instead.")
+        } else {
+          # Only use min_legend if it's explicitly set and valid
+          max_diff <- max(max_diff, abs(min_legend))
+        }
+      }
+      
       # Create diverging plot
       p <- ggplot(diff_data, aes(x = dc, fill = difference)) +
         geom_tile(aes(y = 3.5, height = 6), color = "white", linewidth = 0.5) +
@@ -751,7 +1078,7 @@ create_vertical_plot <- function(prop_grid, proportion_type = "overall", color_p
 }
 
 
-create_constraints_plot <- function(prop_grid, proportion_type = "overall", color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", condition_grids = NULL, comparison_type = "separate", pos_palette = "Greens", neg_palette = "Reds") {
+create_constraints_plot <- function(prop_grid, proportion_type = "overall", color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", condition_grids = NULL, comparison_type = "separate", pos_palette = "Greens", neg_palette = "Reds", max_legend = NULL, min_legend = NULL) {
   
   # Common plot theme settings
   plot_theme <- theme_minimal() +
@@ -825,6 +1152,28 @@ create_constraints_plot <- function(prop_grid, proportion_type = "overall", colo
     # Calculate constraint proportions
     constraint_props <- calculate_constraint_props(prop_grid)
     
+    # Determine the limits for the legend
+    max_value <- max(constraint_props)
+    min_value <- 0
+    
+    # Check if max_legend is provided and valid
+    if (!is.null(max_legend)) {
+      if (max_legend < max_value) {
+        warning("max_legend value is less than the maximum proportion. Using the maximum proportion instead.")
+      } else {
+        max_value <- max_legend
+      }
+    }
+    
+    # Check if min_legend is provided and valid
+    if (!is.null(min_legend)) {
+      if (min_legend > min_value) {
+        warning("min_legend value is greater than the minimum proportion. Using the minimum proportion instead.")
+      } else {
+        min_value <- min_legend
+      }
+    }
+    
     # Create data frame for constraints
     constraint_data <- data.frame(
       constraint = 2:12,
@@ -840,8 +1189,8 @@ create_constraints_plot <- function(prop_grid, proportion_type = "overall", colo
                   aes(x = x, y = y, fill = proportion, group = constraint),
                   color = "white", linewidth = 0.5) +
       scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                         midpoint = max(constraint_props)/2, 
-                         limits = c(0, max(constraint_props))) +
+                         midpoint = (min_value + max_value)/2, 
+                         limits = c(min_value, max_value)) +
       coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
       scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
       scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
@@ -873,6 +1222,25 @@ create_constraints_plot <- function(prop_grid, proportion_type = "overall", colo
         
         # Find maximum proportion across both conditions for consistent color scale
         max_prop <- max(max(const_props1), max(const_props2))
+        min_prop <- 0
+        
+        # Check max_legend
+        if (!is.null(max_legend)) {
+          if (max_legend < max_prop) {
+            warning("max_legend value is less than the maximum proportion. Using the maximum proportion instead.")
+          } else {
+            max_prop <- max_legend
+          }
+        }
+        
+        # Check min_legend
+        if (!is.null(min_legend)) {
+          if (min_legend > min_prop) {
+            warning("min_legend value is greater than the minimum proportion. Using the minimum proportion instead.")
+          } else {
+            min_prop <- min_legend
+          }
+        }
         
         # Create data frame for condition 1
         const_data1 <- data.frame(
@@ -900,7 +1268,8 @@ create_constraints_plot <- function(prop_grid, proportion_type = "overall", colo
                       aes(x = x, y = y, fill = proportion, group = interaction(constraint, condition)),
                       color = "white", linewidth = 0.5) +
           scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                             midpoint = max_prop/2, limits = c(0, max_prop)) +
+                             midpoint = (min_prop + max_prop)/2, 
+                             limits = c(min_prop, max_prop)) +
           facet_wrap(~ condition, ncol = 2) +
           coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
           scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
@@ -919,6 +1288,25 @@ create_constraints_plot <- function(prop_grid, proportion_type = "overall", colo
         
         # Find maximum proportion across all conditions
         max_prop <- max(unlist(lapply(condition_constraint_props, max)))
+        min_prop <- 0
+        
+        # Check max_legend
+        if (!is.null(max_legend)) {
+          if (max_legend < max_prop) {
+            warning("max_legend value is less than the maximum proportion. Using the maximum proportion instead.")
+          } else {
+            max_prop <- max_legend
+          }
+        }
+        
+        # Check min_legend
+        if (!is.null(min_legend)) {
+          if (min_legend > min_prop) {
+            warning("min_legend value is greater than the minimum proportion. Using the minimum proportion instead.")
+          } else {
+            min_prop <- min_legend
+          }
+        }
         
         for (cond in unique_conditions) {
           const_props <- condition_constraint_props[[cond]]
@@ -937,7 +1325,8 @@ create_constraints_plot <- function(prop_grid, proportion_type = "overall", colo
                         aes(x = x, y = y, fill = proportion, group = constraint),
                         color = "white", linewidth = 0.5) +
             scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                               midpoint = max_prop/2, limits = c(0, max_prop)) +
+                               midpoint = (min_prop + max_prop)/2, 
+                               limits = c(min_prop, max_prop)) +
             coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
             scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
             scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
@@ -979,6 +1368,25 @@ create_constraints_plot <- function(prop_grid, proportion_type = "overall", colo
       # Get max absolute difference for symmetric color scale
       max_diff <- max(abs(diff_const))
       
+      # Check max_legend for difference view
+      if (!is.null(max_legend)) {
+        if (max_legend < max_diff) {
+          warning("max_legend value is less than the maximum difference. Using the maximum difference instead.")
+        } else {
+          max_diff <- max_legend
+        }
+      }
+      
+      # Check min_legend for difference view (should be negative of max for diverging scale)
+      if (!is.null(min_legend)) {
+        if (min_legend > -max_diff) {
+          warning("min_legend value is greater than the negative maximum difference. Using the symmetric range instead.")
+        } else {
+          # Only use min_legend if it's explicitly set and valid
+          max_diff <- max(max_diff, abs(min_legend))
+        }
+      }
+      
       # Create diverging plot
       p <- ggplot() +
         geom_polygon(data = plot_data, 
@@ -1009,7 +1417,7 @@ create_constraints_plot <- function(prop_grid, proportion_type = "overall", colo
 }
 
 
-create_depth_plot <- function(prop_grid, proportion_type = "overall", color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", condition_grids = NULL, comparison_type = "separate", pos_palette = "Greens", neg_palette = "Reds") {
+create_depth_plot <- function(prop_grid, proportion_type = "overall", color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", condition_grids = NULL, comparison_type = "separate", pos_palette = "Greens", neg_palette = "Reds", max_legend = NULL, min_legend = NULL) {
   
   # Common plot theme settings
   plot_theme <- theme_minimal() +
@@ -1074,6 +1482,28 @@ create_depth_plot <- function(prop_grid, proportion_type = "overall", color_pale
     # Calculate depth proportions
     depth_props <- calculate_depth_props(prop_grid)
     
+    # Determine the limits for the legend
+    max_value <- max(depth_props)
+    min_value <- 0
+    
+    # Check if max_legend is provided and valid
+    if (!is.null(max_legend)) {
+      if (max_legend < max_value) {
+        warning("max_legend value is less than the maximum proportion. Using the maximum proportion instead.")
+      } else {
+        max_value <- max_legend
+      }
+    }
+    
+    # Check if min_legend is provided and valid
+    if (!is.null(min_legend)) {
+      if (min_legend > min_value) {
+        warning("min_legend value is greater than the minimum proportion. Using the minimum proportion instead.")
+      } else {
+        min_value <- min_legend
+      }
+    }
+    
     # Copy polygon data for modification
     plot_data <- depth_polygons
     
@@ -1095,8 +1525,8 @@ create_depth_plot <- function(prop_grid, proportion_type = "overall", color_pale
                       group = interaction(quadrant, depth)),
                   color = "white", linewidth = 0.5) +
       scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                        midpoint = max(depth_props)/2, 
-                        limits = c(0, max(depth_props))) +
+                        midpoint = (min_value + max_value)/2, 
+                        limits = c(min_value, max_value)) +
       coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
       scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
       scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
@@ -1128,6 +1558,25 @@ create_depth_plot <- function(prop_grid, proportion_type = "overall", color_pale
         
         # Find maximum proportion across both conditions for consistent color scale
         max_prop <- max(max(depth_props1), max(depth_props2))
+        min_prop <- 0
+        
+        # Check max_legend
+        if (!is.null(max_legend)) {
+          if (max_legend < max_prop) {
+            warning("max_legend value is less than the maximum proportion. Using the maximum proportion instead.")
+          } else {
+            max_prop <- max_legend
+          }
+        }
+        
+        # Check min_legend
+        if (!is.null(min_legend)) {
+          if (min_legend > min_prop) {
+            warning("min_legend value is greater than the minimum proportion. Using the minimum proportion instead.")
+          } else {
+            min_prop <- min_legend
+          }
+        }
         
         # Create polygon data for each condition
         depth_polygons1 <- depth_polygons
@@ -1163,7 +1612,8 @@ create_depth_plot <- function(prop_grid, proportion_type = "overall", color_pale
                           group = interaction(quadrant, depth, condition)),
                       color = "white", linewidth = 0.5) +
           scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                             midpoint = max_prop/2, limits = c(0, max_prop)) +
+                             midpoint = (min_prop + max_prop)/2, 
+                             limits = c(min_prop, max_prop)) +
           facet_wrap(~ condition, ncol = 2) +
           coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
           scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
@@ -1183,6 +1633,25 @@ create_depth_plot <- function(prop_grid, proportion_type = "overall", color_pale
         # Find maximum proportion across all conditions
         all_max <- unlist(lapply(condition_depth_props, function(x) max(x)))
         max_prop <- max(all_max)
+        min_prop <- 0
+        
+        # Check max_legend
+        if (!is.null(max_legend)) {
+          if (max_legend < max_prop) {
+            warning("max_legend value is less than the maximum proportion. Using the maximum proportion instead.")
+          } else {
+            max_prop <- max_legend
+          }
+        }
+        
+        # Check min_legend
+        if (!is.null(min_legend)) {
+          if (min_legend > min_prop) {
+            warning("min_legend value is greater than the minimum proportion. Using the minimum proportion instead.")
+          } else {
+            min_prop <- min_legend
+          }
+        }
         
         for (cond in unique_conditions) {
           depth_props <- condition_depth_props[[cond]]
@@ -1204,7 +1673,8 @@ create_depth_plot <- function(prop_grid, proportion_type = "overall", color_pale
                             group = interaction(quadrant, depth)),
                         color = "white", linewidth = 0.5) +
             scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                               midpoint = max_prop/2, limits = c(0, max_prop)) +
+                               midpoint = (min_prop + max_prop)/2, 
+                               limits = c(min_prop, max_prop)) +
             coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
             scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
             scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
@@ -1251,6 +1721,25 @@ create_depth_plot <- function(prop_grid, proportion_type = "overall", color_pale
       
       # Get max absolute difference for symmetric color scale
       max_diff <- max(abs(diff_depth))
+      
+      # Check max_legend for difference view
+      if (!is.null(max_legend)) {
+        if (max_legend < max_diff) {
+          warning("max_legend value is less than the maximum difference. Using the maximum difference instead.")
+        } else {
+          max_diff <- max_legend
+        }
+      }
+      
+      # Check min_legend for difference view (should be negative of max for diverging scale)
+      if (!is.null(min_legend)) {
+        if (min_legend > -max_diff) {
+          warning("min_legend value is greater than the negative maximum difference. Using the symmetric range instead.")
+        } else {
+          # Only use min_legend if it's explicitly set and valid
+          max_diff <- max(max_diff, abs(min_legend))
+        }
+      }
       
       # Create diverging plot
       p <- ggplot() +

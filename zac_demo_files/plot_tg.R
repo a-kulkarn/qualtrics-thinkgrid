@@ -12,7 +12,7 @@ library(ggplot2)
 source("zac_demo_files/get_polygons.R")
 source("zac_demo_files/plot_types.R")  # Source file with plot type functions
 
-plot_tg <- function(dc, ac, proportion_type = "overall", type = "cells", color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", condition_col = NULL, comparison_type = "separate", pos_palette = "Greens", neg_palette = "Reds") {
+plot_tg <- function(dc, ac, proportion_type = "overall", type = "cells", color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", condition_col = NULL, comparison_type = "separate", pos_palette = "Greens", neg_palette = "Reds", max_legend = NULL, min_legend = NULL) {
     # Validate inputs
     # ---------------
     # Check if ac and dc are either both vectors or both matrices
@@ -157,13 +157,13 @@ plot_tg <- function(dc, ac, proportion_type = "overall", type = "cells", color_p
     
     # All plot types now support condition-based visualization
     return(plot_fn(prop_grid, proportion_type, color_palette, x_label, y_label,
-                 condition_grids, comparison_type, pos_palette, neg_palette))
+                 condition_grids, comparison_type, pos_palette, neg_palette, max_legend, min_legend))
 }
 
 
 
 
-create_tg_animation <- function(dc, ac, condition_col, type = "cells", proportion_type = "overall", filename = "tg_animation.gif", duration = 1, width = 800, height = 800, sorted_conditions = NULL, color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness") {
+create_tg_animation <- function(dc, ac, condition_col, type = "cells", proportion_type = "overall", filename = "tg_animation.gif", duration = 1, width = 800, height = 800, sorted_conditions = NULL, color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", max_legend = NULL, min_legend = NULL) {
   
   # Check required packages
   if(!requireNamespace("gifski", quietly = TRUE)) {
@@ -209,6 +209,178 @@ create_tg_animation <- function(dc, ac, condition_col, type = "cells", proportio
     }
   }
   
+  # Define helper functions to calculate proportions based on plot type
+  # (These correspond to the functions in plot_types.R)
+  
+  # Helper function to create basic proportion grid
+  create_grid <- function(dc_subset, ac_subset) {
+    # Initialize grid
+    grid <- matrix(0, nrow = 6, ncol = 6)
+    
+    # Count occurrences
+    for (i in 1:length(dc_subset)) {
+      if (dc_subset[i] >= 1 && dc_subset[i] <= 6 && 
+          ac_subset[i] >= 1 && ac_subset[i] <= 6) {
+        grid[ac_subset[i], dc_subset[i]] <- grid[ac_subset[i], dc_subset[i]] + 1
+      }
+    }
+    
+    # Calculate proportions as percentages
+    total <- sum(grid)
+    if (total > 0) {
+      prop_grid <- grid / total * 100  # Convert to percentage
+    } else {
+      prop_grid <- grid
+    }
+    
+    return(prop_grid)
+  }
+  
+  # Function to calculate quadrant proportions
+  calculate_quadrant_props <- function(grid) {
+    quadrant_grid <- matrix(0, nrow = 2, ncol = 2)
+    
+    # Define quadrants (bottom-left, bottom-right, top-left, top-right)
+    quadrant_grid[1,1] <- sum(grid[1:3, 1:3])  # Bottom-left
+    quadrant_grid[1,2] <- sum(grid[1:3, 4:6])  # Bottom-right
+    quadrant_grid[2,1] <- sum(grid[4:6, 1:3])  # Top-left
+    quadrant_grid[2,2] <- sum(grid[4:6, 4:6])  # Top-right
+    
+    return(quadrant_grid)
+  }
+  
+  # Function to calculate horizontal proportions
+  calculate_horizontal_props <- function(grid) {
+    # Sum across each row (ac value)
+    row_sums <- rowSums(grid)
+    return(row_sums)
+  }
+  
+  # Function to calculate vertical proportions
+  calculate_vertical_props <- function(grid) {
+    # Sum across each column (dc value)
+    col_sums <- colSums(grid)
+    return(col_sums)
+  }
+  
+  # Function to calculate constraint proportions
+  calculate_constraint_props <- function(grid) {
+    # Initialize vector for constraint proportions
+    constraint_props <- numeric(11)  # For constraints 2-12
+    
+    # Constraint 2 (ac=1, dc=1)
+    constraint_props[1] <- grid[1, 1]
+    
+    # Constraint 3 (ac=1,dc=2 and ac=2,dc=1)
+    constraint_props[2] <- grid[1, 2] + grid[2, 1]
+    
+    # Constraint 4 (ac=1,dc=3 and ac=2,dc=2 and ac=3,dc=1)
+    constraint_props[3] <- grid[1, 3] + grid[2, 2] + grid[3, 1]
+    
+    # Constraint 5 (ac=1,dc=4 and ac=2,dc=3 and ac=3,dc=2 and ac=4,dc=1)
+    constraint_props[4] <- grid[1, 4] + grid[2, 3] + grid[3, 2] + grid[4, 1]
+    
+    # Constraint 6 (ac=1,dc=5 and ac=2,dc=4 and ac=3,dc=3 and ac=4,dc=2 and ac=5,dc=1)
+    constraint_props[5] <- grid[1, 5] + grid[2, 4] + grid[3, 3] + grid[4, 2] + grid[5, 1]
+    
+    # Constraint 7 (ac=1,dc=6 and ac=2,dc=5 and ac=3,dc=4 and ac=4,dc=3 and ac=5,dc=2 and ac=6,dc=1)
+    constraint_props[6] <- grid[1, 6] + grid[2, 5] + grid[3, 4] + grid[4, 3] + grid[5, 2] + grid[6, 1]
+    
+    # Constraint 8 (ac=2,dc=6 and ac=3,dc=5 and ac=4,dc=4 and ac=5,dc=3 and ac=6,dc=2)
+    constraint_props[7] <- grid[2, 6] + grid[3, 5] + grid[4, 4] + grid[5, 3] + grid[6, 2]
+    
+    # Constraint 9 (ac=3,dc=6 and ac=4,dc=5 and ac=5,dc=4 and ac=6,dc=3)
+    constraint_props[8] <- grid[3, 6] + grid[4, 5] + grid[5, 4] + grid[6, 3]
+    
+    # Constraint 10 (ac=4,dc=6 and ac=5,dc=5 and ac=6,dc=4)
+    constraint_props[9] <- grid[4, 6] + grid[5, 5] + grid[6, 4]
+    
+    # Constraint 11 (ac=5,dc=6 and ac=6,dc=5)
+    constraint_props[10] <- grid[5, 6] + grid[6, 5]
+    
+    # Constraint 12 (ac=6,dc=6)
+    constraint_props[11] <- grid[6, 6]
+    
+    return(constraint_props)
+  }
+  
+  # Function to calculate depth proportions
+  calculate_depth_props <- function(grid) {
+    # Initialize matrix to store depth proportions for each quadrant (4 quadrants, 5 depths)
+    depth_props <- matrix(0, nrow = 4, ncol = 5)
+    
+    # Quadrant 1 (bottom-left, dc 1-3, ac 1-3)
+    depth_props[1, 1] <- grid[3, 3]  # Depth 1 - cell (3,3)
+    depth_props[1, 2] <- grid[3, 2] + grid[2, 3]  # Depth 2 - cells (3,2) and (2,3)
+    depth_props[1, 3] <- grid[3, 1] + grid[2, 2] + grid[1, 3]  # Depth 3 - cells (3,1), (2,2), (1,3)
+    depth_props[1, 4] <- grid[2, 1] + grid[1, 2]  # Depth 4 - cells (2,1) and (1,2)
+    depth_props[1, 5] <- grid[1, 1]  # Depth 5 - cell (1,1)
+    
+    # Quadrant 2 (bottom-right, dc 4-6, ac 1-3)
+    depth_props[2, 1] <- grid[3, 4]  # Depth 1
+    depth_props[2, 2] <- grid[3, 5] + grid[2, 4]  # Depth 2
+    depth_props[2, 3] <- grid[3, 6] + grid[2, 5] + grid[1, 4]  # Depth 3
+    depth_props[2, 4] <- grid[2, 6] + grid[1, 5]  # Depth 4
+    depth_props[2, 5] <- grid[1, 6]  # Depth 5
+    
+    # Quadrant 3 (top-left, dc 1-3, ac 4-6)
+    depth_props[3, 1] <- grid[4, 3]  # Depth 1
+    depth_props[3, 2] <- grid[4, 2] + grid[5, 3]  # Depth 2
+    depth_props[3, 3] <- grid[4, 1] + grid[5, 2] + grid[6, 3]  # Depth 3
+    depth_props[3, 4] <- grid[5, 1] + grid[6, 2]  # Depth 4
+    depth_props[3, 5] <- grid[6, 1]  # Depth 5
+    
+    # Quadrant 4 (top-right, dc 4-6, ac 4-6)
+    depth_props[4, 1] <- grid[4, 4]  # Depth 1
+    depth_props[4, 2] <- grid[4, 5] + grid[5, 4]  # Depth 2
+    depth_props[4, 3] <- grid[4, 6] + grid[5, 5] + grid[6, 4]  # Depth 3
+    depth_props[4, 4] <- grid[5, 6] + grid[6, 5]  # Depth 4
+    depth_props[4, 5] <- grid[6, 6]  # Depth 5
+    
+    return(depth_props)
+  }
+  
+  # Select the appropriate calculation function based on plot type
+  calc_function <- switch(type,
+                         "cells" = function(grid) grid,
+                         "quadrants" = calculate_quadrant_props,
+                         "horizontal" = calculate_horizontal_props,
+                         "vertical" = calculate_vertical_props,
+                         "constraints" = calculate_constraint_props,
+                         "depth" = calculate_depth_props,
+                         function(grid) grid)  # Default to cells
+  
+  # If legend limits are not provided, calculate them from all conditions
+  if(is.null(max_legend) || is.null(min_legend)) {
+    # Calculate proportion values for each condition to determine global min/max
+    all_proportions <- list()
+    
+    for(cond in ordered_conditions) {
+      # Subset data for this condition
+      df_subset <- df[df$condition == cond, ]
+      
+      # Create basic proportion grid
+      base_grid <- create_grid(df_subset$dc, df_subset$ac)
+      
+      # Apply the type-specific calculation
+      type_specific_props <- calc_function(base_grid)
+      
+      # Store non-zero proportions
+      all_proportions[[as.character(cond)]] <- type_specific_props[type_specific_props > 0]
+    }
+    
+    # Combine all proportions and find global min/max
+    all_values <- unlist(all_proportions)
+    
+    if(is.null(max_legend) && length(all_values) > 0) {
+      max_legend <- max(all_values)
+    }
+    
+    if(is.null(min_legend) && length(all_values) > 0) {
+      min_legend <- 0
+    }
+  }
+  
   # Generate individual plots for each condition
   plot_list <- list()
   
@@ -222,7 +394,9 @@ create_tg_animation <- function(dc, ac, condition_col, type = "cells", proportio
                 type = type,
                 color_palette = color_palette,
                 x_label = x_label,
-                y_label = y_label)
+                y_label = y_label,
+                max_legend = max_legend,
+                min_legend = min_legend)
     
     # Add a title showing the condition
     p$plot <- p$plot + 
