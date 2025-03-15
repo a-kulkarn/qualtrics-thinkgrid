@@ -10,312 +10,257 @@ library(ggplot2)
 
 # Source the polygon coordinate functions
 source("zac_demo_files/get_polygons.R")
+source("zac_demo_files/plot_types.R")  # Source file with plot type functions
 
-plot_tg <- function(dc, ac, type = "cells", color_palette = "Greens", 
-                   x_label = "Directedness", y_label = "Stickiness") {
-    # check if ac and dc are either both vectors or both matrices
+plot_tg <- function(dc, ac, proportion_type = "overall", type = "cells", color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", condition_col = NULL, comparison_type = "separate", pos_palette = "Greens", neg_palette = "Reds") {
+    # Validate inputs
+    # ---------------
+    # Check if ac and dc are either both vectors or both matrices
     if (is.vector(dc) && is.vector(ac)) {
         if (length(dc) != length(ac)) {
             stop("dc and ac must have the same length")
+        }
+        # Check condition if proportion_type is "condition"
+        if (proportion_type == "condition" && is.null(condition_col)) {
+            stop("condition_col parameter must be provided when proportion_type is 'condition'")
+        }
+        if (proportion_type == "condition" && length(condition_col) != length(dc)) {
+            stop("condition must have the same length as dc and ac")
         }
     } else if (is.matrix(dc) && is.matrix(ac)) {
         if (nrow(dc) != nrow(ac) || ncol(dc) != ncol(ac)) {
             stop("dc and ac must have the same dimensions")
         }
+        # Matrices don't support condition comparison
+        if (proportion_type == "condition") {
+            stop("condition-based proportion not supported with matrix inputs")
+        }
     } else {
         stop("dc and ac must be either both vectors or both matrices")
     }
 
-    # Validate color palette
+    # Validate proportion_type
+    if (!(proportion_type %in% c("overall", "condition"))) {
+        warning("Invalid proportion_type. Using default 'overall'.")
+        proportion_type <- "overall"
+    }
+    
+    # Validate comparison_type when condition is present
+    if (proportion_type == "condition" && !(comparison_type %in% c("separate", "difference"))) {
+        warning("Invalid comparison_type. Using default 'separate'.")
+        comparison_type <- "separate"
+    }
+    
+    # Validate color palettes
     if (!color_palette %in% rownames(brewer.pal.info)) {
         warning("Invalid color palette. Using default Greens palette.")
         color_palette <- "Greens"
     }
+    if (!pos_palette %in% rownames(brewer.pal.info)) {
+        warning("Invalid positive palette. Using default Greens palette.")
+        pos_palette <- "Greens"
+    }
+    if (!neg_palette %in% rownames(brewer.pal.info)) {
+        warning("Invalid negative palette. Using default Reds palette.")
+        neg_palette <- "Reds"
+    }
 
+    # Validate plot type
     valid_types <- c("quadrants", "horizontal", "vertical", "constraints", "depth", "cells")
     if (!(type %in% valid_types)) {
         stop("type must be one of ", paste(valid_types, collapse = ", "))
     }
-
-    grid <- matrix(0, nrow = 6, ncol = 6)
     
-    # Count occurrences of each (dc, ac) pair
-    for (i in 1:length(dc)) {
-        # Ensure values are within 1-6 range
-        if (dc[i] >= 1 && dc[i] <= 6 && ac[i] >= 1 && ac[i] <= 6) {
-            grid[ac[i], dc[i]] <- grid[ac[i], dc[i]] + 1
+    # Process data
+    # ------------
+    
+    # Helper function to create grid and calculate proportions
+    create_grid <- function(dc, ac, condition_filter = NULL) {
+        # Initialize grid
+        grid <- matrix(0, nrow = 6, ncol = 6)
+        
+        # Apply condition filter if specified
+        if (!is.null(condition_filter) && !is.null(condition_col)) {
+            subset_indices <- which(condition_col == condition_filter)
+            dc_subset <- dc[subset_indices]
+            ac_subset <- ac[subset_indices]
+        } else {
+            dc_subset <- dc
+            ac_subset <- ac
+        }
+        
+        # Count occurrences
+        for (i in 1:length(dc_subset)) {
+            if (dc_subset[i] >= 1 && dc_subset[i] <= 6 && 
+                ac_subset[i] >= 1 && ac_subset[i] <= 6) {
+                grid[ac_subset[i], dc_subset[i]] <- grid[ac_subset[i], dc_subset[i]] + 1
+            }
+        }
+        
+        # Calculate proportions as percentages
+        total <- sum(grid)
+        if (total > 0) {
+            prop_grid <- grid / total * 100  # Convert to percentage
+        } else {
+            prop_grid <- grid
+        }
+        
+        return(prop_grid)
+    }
+    
+    # Calculate proportions based on proportion_type
+    if (proportion_type == "overall") {
+        # Single grid for overall proportions
+        prop_grid <- create_grid(dc, ac)
+        condition_grids <- NULL
+        
+    } else {  # condition-based analysis
+        # Get unique conditions
+        unique_conditions <- unique(condition_col)
+        
+        if (length(unique_conditions) < 2) {
+            warning("At least 2 unique conditions are needed for condition analysis. Reverting to overall proportion.")
+            prop_grid <- create_grid(dc, ac)
+            proportion_type <- "overall"
+            condition_grids <- NULL
+        } else {
+            # Calculate proportion grids for each condition
+            condition_grids <- lapply(unique_conditions, function(cond) {
+                create_grid(dc, ac, cond)
+            })
+            names(condition_grids) <- unique_conditions
+            prop_grid <- NULL  # Not used for condition analysis
         }
     }
     
-    # Calculate proportions - common for all plot types
-    total <- sum(grid)
-    if (total > 0) {
-        prop_grid <- grid / total
-    } else {
-        prop_grid <- grid
-    }
+    # Generate visualization
+    # ---------------------
     
-    # Get color palette with white at 0
-    pal_colors <- brewer.pal(9, color_palette)
-    
-    # Common plot theme settings
-    plot_theme <- theme_minimal() +
-        theme(
-            axis.text = element_text(size = 12),
-            axis.title = element_text(size = 14, face = "italic"),
-            legend.title = element_text(size = 12),
-            panel.grid = element_blank(),
-            plot.margin = unit(c(1, 1, 2, 2), "lines")
-        )
-    
-    # Common labels - using parameters
-    plot_labels <- labs(
-        x = x_label,
-        y = y_label,
-        fill = "Proportion"
+    # Define function mapping
+    plot_functions <- list(
+        "cells" = create_cells_plot,
+        "quadrants" = create_quadrants_plot,
+        "horizontal" = create_horizontal_plot,
+        "vertical" = create_vertical_plot,
+        "constraints" = create_constraints_plot,
+        "depth" = create_depth_plot
     )
     
-    # Plot based on type
-    if (type == "cells") {
-        # Convert matrix to data frame for plotting
-        plot_data <- expand.grid(dc = 1:6, ac = 1:6)
-        plot_data$proportion <- as.vector(t(prop_grid))
-        
-        # Create plot with origin at bottom left
-        p <- ggplot(plot_data, aes(x = dc, y = ac, fill = proportion)) +
-            geom_tile(color = "white", linewidth = 0.5) +
-            scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                               midpoint = max(prop_grid)/2, limits = c(0, max(prop_grid))) +
-            coord_fixed() +
-            scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-            scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-            labs(x = x_label, y = y_label, fill = "Proportion") +
-            plot_theme
-        
-        return(list(plot = p, prop_data = plot_data$proportion))
+    # Check if the plot function exists
+    if (is.null(plot_functions[[type]])) {
+        warning(paste("Plot type", type, "not implemented. Using 'cells'."))
+        type <- "cells"
     }
     
-    else if (type == "quadrants") {
-        # Calculate proportions by quadrant
-        quadrant_grid <- matrix(0, nrow = 2, ncol = 2)
-        
-        # Define quadrants (bottom-left, bottom-right, top-left, top-right)
-        quadrant_grid[1,1] <- sum(prop_grid[1:3, 1:3])  # Bottom-left
-        quadrant_grid[1,2] <- sum(prop_grid[1:3, 4:6])  # Bottom-right
-        quadrant_grid[2,1] <- sum(prop_grid[4:6, 1:3])  # Top-left
-        quadrant_grid[2,2] <- sum(prop_grid[4:6, 4:6])  # Top-right
-        
-        # Create data frame for quadrant plotting
-        quad_data <- data.frame(
-            dc_quad = rep(c(1, 2), each = 2),
-            ac_quad = rep(c(1, 2), times = 2),
-            proportion = c(quadrant_grid[1,1], quadrant_grid[2,1], 
-                          quadrant_grid[1,2], quadrant_grid[2,2])
-        )
-        
-        # Create plot for quadrants
-         p <- ggplot(quad_data, aes(x = dc_quad, y = ac_quad, fill = proportion)) +
-            geom_tile(color = "white", linewidth = 0.5) +
-            scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                               midpoint = max(quad_data$proportion)/2, limits = c(0, max(quad_data$proportion))) +
-            coord_fixed(ratio = 1, xlim = c(0.5, 2.5), ylim = c(0.5, 2.5)) +
-            scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-            scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-            labs(x = x_label, y = y_label, fill = "Proportion") +
-            plot_theme
-        
-        return(list(plot = p, prop_data = quadrant_grid))
-    }
+    # Call the appropriate plot function
+    plot_fn <- plot_functions[[type]]
     
-    else if (type == "horizontal") {
-        # Aggregate horizontally - sum across each row (ac value)
-        row_sums <- rowSums(prop_grid)
-        
-        # Create data frame for horizontal bands - one entry per row
-        horizontal_data <- data.frame(
-            ac = 1:6,
-            proportion = row_sums
-        )
-        
-        # Create plot with horizontal bands - spanning the full width
-        p <- ggplot(horizontal_data, aes(y = ac, fill = proportion)) +
-            geom_tile(aes(x = 3.5, width = 6), color = "white", linewidth = 0.5) +
-            scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                               midpoint = max(row_sums)/2, limits = c(0, max(row_sums))) +
-            coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-            scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-            scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-            labs(x = x_label, y = y_label, fill = "Proportion") +
-            plot_theme
-        
-        # Return both plot and proportion data
-        return(list(plot = p, prop_data = row_sums))
-    }
+    # All plot types now support condition-based visualization
+    return(plot_fn(prop_grid, proportion_type, color_palette, x_label, y_label,
+                 condition_grids, comparison_type, pos_palette, neg_palette))
+}
 
-    else if (type == "vertical") {
-        # Aggregate vertically - sum across each column (dc value)
-        col_sums <- colSums(prop_grid)
-        
-        # Create data frame for vertical bands - one entry per column
-        vertical_data <- data.frame(
-            dc = 1:6,
-            proportion = col_sums
-        )
-        
-        # Create plot with vertical bands - spanning the full height
-        p <- ggplot(vertical_data, aes(x = dc, fill = proportion)) +
-            geom_tile(aes(y = 3.5, height = 6), color = "white", linewidth = 0.5) +
-            scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                               midpoint = max(col_sums)/2, limits = c(0, max(col_sums))) +
-            coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-            scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-            scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-            labs(x = x_label, y = y_label, fill = "Proportion") +
-            plot_theme
-        
-        # Return both plot and proportion data
-        return(list(plot = p, prop_data = col_sums))
-    }
 
-    else if (type == "constraints") {
-        # Calculate constraint levels (ac + dc)
-        constraint_levels <- 2:12  # All constraint levels
-        constraint_props <- numeric(length(constraint_levels))
-        
-        # Calculate proportions for each constraint level
-        for (i in 1:length(constraint_levels)) {
-            constraint <- constraint_levels[i]
-            constraint_sum <- 0
-            for (ac_val in 1:6) {
-                for (dc_val in 1:6) {
-                    if (ac_val + dc_val == constraint) {
-                        constraint_sum <- constraint_sum + prop_grid[ac_val, dc_val]
-                    }
-                }
-            }
-            constraint_props[i] <- constraint_sum
-        }
-        
-        # Calculate band width
-        diagonal_length <- sqrt(72)  # From (0.5,0.5) to (6.5,6.5)
-        diagonal_band_width <- diagonal_length / 11  # Width perpendicular to diagonal
-        axis_projection <- diagonal_band_width * sqrt(2)  # Projection onto axes
-        
-        # Get constraint polygon coordinates from the helper function
-        diagonal_data <- get_constraint_polygons(axis_projection)
-        
-        # Add proportion data to the polygons
-        for (i in 1:length(constraint_levels)) {
-            diagonal_data$proportion[diagonal_data$constraint == constraint_levels[i]] <- constraint_props[i]
-        }
-        
-        # Create plot
-        p <- ggplot(diagonal_data, aes(x = x, y = y, fill = proportion, group = constraint)) +
-            geom_polygon(color = "white", linewidth = 0.5) +
-            scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                               midpoint = max(constraint_props)/2, limits = c(0, max(constraint_props))) +
-            # Add quadrant dividing lines in white
-            geom_vline(xintercept = 3.5, linewidth = 1, color = "white") +
-            geom_hline(yintercept = 3.5, linewidth = 1, color = "white") +
-            coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-            scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-            scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-            labs(x = x_label, y = y_label, fill = "Proportion") +
-            plot_theme +
-            theme(
-                plot.title = element_blank(),
-                panel.grid = element_blank()
-            )
-        
-        # Return both plot and proportion data
-        return(list(
-            plot = p,
-            prop_data = setNames(constraint_props, constraint_levels)
-        ))
+
+
+create_tg_animation <- function(dc, ac, condition_col, type = "cells", proportion_type = "overall", filename = "tg_animation.gif", duration = 1, width = 800, height = 800, sorted_conditions = NULL, color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness") {
+  
+  # Check required packages
+  if(!requireNamespace("gifski", quietly = TRUE)) {
+    stop("Please install the 'gifski' package: install.packages('gifski')")
+  }
+  if(!requireNamespace("gganimate", quietly = TRUE)) {
+    stop("Please install the 'gganimate' package: install.packages('gganimate')")
+  }
+  
+  # Convert condition_col to factor
+  df <- data.frame(dc = dc, ac = ac, condition = condition_col)
+  
+  # Get unique conditions
+  unique_conditions <- unique(df$condition)
+  
+  # Check if sorted_conditions is provided and valid
+  if(!is.null(sorted_conditions)) {
+    # Check if all values in sorted_conditions are present in condition_col
+    missing_values <- setdiff(sorted_conditions, unique_conditions)
+    if(length(missing_values) > 0) {
+      stop(paste("The following values in sorted_conditions are not present in condition_col:", 
+                 paste(missing_values, collapse = ", ")))
     }
     
-    else if (type == "depth") {
-        # Create a data frame for all cells with quadrant and depth info
-        quad_depth_data <- expand.grid(dc = 1:6, ac = 1:6)
-        
-        # Assign quadrant to each cell
-        quad_depth_data$quadrant <- ifelse(quad_depth_data$dc <= 3 & quad_depth_data$ac <= 3, 1,
-                                       ifelse(quad_depth_data$dc > 3 & quad_depth_data$ac <= 3, 2,
-                                           ifelse(quad_depth_data$dc <= 3 & quad_depth_data$ac > 3, 3, 4)))
-        
-        # Calculate quadrant depths
-        q1_cells <- quad_depth_data$quadrant == 1
-        quad_depth_data$depth[q1_cells] <- 6 - (quad_depth_data$dc[q1_cells] + quad_depth_data$ac[q1_cells] - 1)
-        
-        q2_cells <- quad_depth_data$quadrant == 2
-        quad_depth_data$depth[q2_cells] <- 6 - ((7 - quad_depth_data$dc[q2_cells]) + quad_depth_data$ac[q2_cells] - 1)
-        
-        q3_cells <- quad_depth_data$quadrant == 3
-        quad_depth_data$depth[q3_cells] <- 6 - (quad_depth_data$dc[q3_cells] + (7 - quad_depth_data$ac[q3_cells]) - 1)
-        
-        q4_cells <- quad_depth_data$quadrant == 4
-        quad_depth_data$depth[q4_cells] <- 6 - ((7 - quad_depth_data$dc[q4_cells]) + (7 - quad_depth_data$ac[q4_cells]) - 1)
-        
-        # Add proportion values to each cell
-        quad_depth_data$proportion <- 0
-        for (i in 1:nrow(quad_depth_data)) {
-            dc_val <- quad_depth_data$dc[i]
-            ac_val <- quad_depth_data$ac[i]
-            quad_depth_data$proportion[i] <- prop_grid[ac_val, dc_val]
-        }
-        
-        # Calculate proportions by quadrant and depth
-        quad_depth_summary <- aggregate(proportion ~ quadrant + depth, 
-                                      data = quad_depth_data, 
-                                      FUN = sum)
-        
-        # Calculate band width for depth polygons
-        diagonal_band_width <- sqrt(18) / 5 
-        axis_projection <- diagonal_band_width * sqrt(2)
-        
-        # Get depth polygon coordinates from the helper function
-        polygon_data <- get_depth_polygons(axis_projection)
-        
-        # Add proportion data to the polygons
-        for (q in 1:4) {  # For each quadrant
-            for (d in 1:5) {  # For each depth
-                matching_rows <- polygon_data$quadrant == q & polygon_data$depth == d
-                proportion_value <- quad_depth_summary$proportion[
-                    quad_depth_summary$quadrant == q & quad_depth_summary$depth == d
-                ]
-                
-                if (length(proportion_value) > 0) {
-                    polygon_data$proportion[matching_rows] <- proportion_value
-                } else {
-                    polygon_data$proportion[matching_rows] <- 0
-                }
-            }
-        }
-        
-        # Create factor variables for visualization
-        polygon_data$depth_factor <- factor(polygon_data$depth)
-        polygon_data$group_id <- paste(polygon_data$quadrant, polygon_data$depth, sep = "_")
-        
-        # Create the visualization with axis labels and white dividing lines
-        p <- ggplot(polygon_data, aes(x = x, y = y, fill = proportion, group = group_id)) +
-                geom_polygon(color = "white", linewidth = 0.5) +
-                scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                                   midpoint = max(polygon_data$proportion, na.rm = TRUE)/2, 
-                                   limits = c(0, max(polygon_data$proportion, na.rm = TRUE))) +
-                coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-                scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-                scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-                labs(x = x_label, y = y_label, fill = "Proportion") +
-                plot_theme +
-                theme(
-                    plot.title = element_blank(),
-                    panel.grid = element_blank()
-                )
-            
-        # Return the visualization
-        return(list(
-            plot = p,
-            data = quad_depth_data
-        ))
+    # Check if all values in condition_col are present in sorted_conditions
+    extra_values <- setdiff(unique_conditions, sorted_conditions)
+    if(length(extra_values) > 0) {
+      warning(paste("The following values in condition_col are not present in sorted_conditions and will be ignored:", 
+                   paste(extra_values, collapse = ", ")))
     }
+    
+    # Use the provided order
+    ordered_conditions <- sorted_conditions
+  } else {
+    # No custom sorting provided, sort based on data type
+    if(is.numeric(unique_conditions)) {
+      # For numeric conditions, sort in ascending order
+      ordered_conditions <- sort(unique_conditions)
+    } else {
+      # For character/factor conditions, use a random order if no sorting specified
+      ordered_conditions <- sample(unique_conditions)
+      message("Character conditions are being displayed in random order. Provide sorted_conditions parameter for custom ordering.")
+    }
+  }
+  
+  # Generate individual plots for each condition
+  plot_list <- list()
+  
+  for(cond in ordered_conditions) {
+    # Subset data for this condition
+    df_subset <- df[df$condition == cond, ]
+    
+    # Create plot using plot_tg function
+    p <- plot_tg(df_subset$dc, df_subset$ac, 
+                proportion_type = "overall", 
+                type = type,
+                color_palette = color_palette,
+                x_label = x_label,
+                y_label = y_label)
+    
+    # Add a title showing the condition
+    p$plot <- p$plot + 
+      ggtitle(paste("Condition:", cond)) +
+      theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5))
+    
+    # Add to list
+    plot_list[[as.character(cond)]] <- p$plot
+  }
+  
+  # Create a gif from the plots
+  if(length(plot_list) > 1) {
+    message(paste("Creating animation with", length(plot_list), "frames"))
+    
+    # Create temporary directory for frames
+    temp_dir <- tempfile()
+    dir.create(temp_dir)
+    
+    # Save each plot as an image
+    file_list <- c()
+    for(i in seq_along(plot_list)) {
+      cond <- names(plot_list)[i]
+      file_path <- file.path(temp_dir, paste0("frame_", sprintf("%03d", i), ".png"))
+      ggsave(file_path, plot_list[[i]], width = width/100, height = height/100)
+      file_list <- c(file_list, file_path)
+    }
+    
+    # Create gif using gifski
+    gifski::gifski(file_list, 
+                  gif_file = filename, 
+                  width = width, 
+                  height = height, 
+                  delay = duration)
+    
+    message(paste("Animation saved as", filename))
+    return(invisible(plot_list))
+  } else {
+    message("Only one condition found, no animation created")
+    return(plot_list[[1]])
+  }
 }
