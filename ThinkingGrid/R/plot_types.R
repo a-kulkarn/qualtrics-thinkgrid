@@ -1,7 +1,38 @@
 ## Load required packages
+
+validate_range <- function(value, ref_value, is_max = TRUE) {
+    if (!is.null(value)) {
+        if ((is_max && value < ref_value) || (!is_max && value > ref_value)) {
+            warning(paste(ifelse(is_max, "max_legend", "min_legend"),
+                          "value is out of bounds. Using the reference value instead."))
+            return(ref_value)
+        }
+        return(value)
+    }
+    return(ref_value)
+}
+
+create_plot_data <- function(grid, condition = NULL) {
+    plot_data <- base::expand.grid(dc = 1:6, ac = 1:6)
+    plot_data$proportion <- as.vector(t(grid))
+    if (!is.null(condition)) plot_data$condition <- condition
+    return(plot_data)
+}
+
+
 ## Function for cells plot type
-create_cells_plot <- function(prop_grid, proportion_type = "overall", color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", condition_grids = NULL, comparison_type = "separate", pos_palette = "Greens", neg_palette = "Reds", max_legend = NULL, min_legend = NULL) {
-  
+create_cells_plot <- function(prop_grid,
+                              proportion_type = "overall",
+                              color_palette = "Greens",
+                              x_label = "Directedness",
+                              y_label = "Stickiness",
+                              condition_grids = NULL,
+                              comparison_type = "separate",
+                              pos_palette = "Greens",
+                              neg_palette = "Reds",
+                              max_legend = NULL,
+                              min_legend = NULL) {
+    
   ## Common plot theme settings
   plot_theme <- ggplot2::theme_minimal() +
     ggplot2::theme(
@@ -16,223 +47,74 @@ create_cells_plot <- function(prop_grid, proportion_type = "overall", color_pale
   pal_colors <- RColorBrewer::brewer.pal(9, color_palette)
   pos_colors <- RColorBrewer::brewer.pal(9, pos_palette)
   neg_colors <- RColorBrewer::brewer.pal(9, neg_palette)
-  
-  ## Handle different proportion types
-  if (proportion_type == "overall") {
-    ## Simple cells visualization for overall proportions
-    plot_data <- base::expand.grid(dc = 1:6, ac = 1:6)
-    plot_data$proportion <- as.vector(t(prop_grid))
-    
-    ## Determine the limits for the legend
-    max_value <- max(prop_grid)
-    min_value <- 0
-    
-    ## Check if max_legend is provided and valid
-    if (!is.null(max_legend)) {
-      if (max_legend < max_value) {
-        warning("max_legend value is less than the maximum proportion. Using the maximum proportion instead.")
-      } else {
-        max_value <- max_legend
-      }
-    }
-    
-    ## Check if min_legend is provided and valid
-    if (!is.null(min_legend)) {
-      if (min_legend > min_value) {
-        warning("min_legend value is greater than the minimum proportion. Using the minimum proportion instead.")
-      } else {
-        min_value <- min_legend
-      }
-    }
-    
-    p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = dc, y = ac, fill = proportion)) +
+
+  create_tile_plot <- function(plot_data, fill_var, limits, condition = NULL) {
+    p <- ggplot2::ggplot(plot_data, ggplot2::aes_string(x = "dc", y = "ac", fill = fill_var)) +
       ggplot2::geom_tile(color = "white", linewidth = 0.5) +
       ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                        midpoint = (min_value + max_value)/2, limits = c(min_value, max_value)) +
+                                    midpoint = mean(limits), limits = limits) +
       ggplot2::coord_fixed() +
       ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
       ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-      ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)") +
+      ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)",
+                    title = ifelse(is.null(condition), NULL, paste("Condition:", condition))) +
       plot_theme
-    
+    return(p)
+  }
+
+  if (proportion_type == "overall") {
+    plot_data <- create_plot_data(prop_grid)
+    limits <- c(validate_range(max_legend, max(prop_grid)), validate_range(min_legend, 0, FALSE))
+    p <- create_tile_plot(plot_data, "proportion", limits)
     return(list(plot = p, prop_data = prop_grid))
-    
+  
   } else if (proportion_type == "condition") {
-    ## Handle condition-based visualizations
-    if (is.null(condition_grids)) {
-      stop("condition_grids must be provided when proportion_type is 'condition'")
-    }
+      if (is.null(condition_grids)) {
+          stop("condition_grids must be provided when proportion_type is 'condition'")
+      }
     
     unique_conditions <- names(condition_grids)
     
     if (comparison_type == "separate") {
       if (length(unique_conditions) == 2) {
-        ## Create a single figure with side-by-side plots
         cond1 <- unique_conditions[1]
         cond2 <- unique_conditions[2]
         
-        ## Find maximum proportion across both conditions for consistent color scale
-        max_prop <- max(max(condition_grids[[cond1]]), max(condition_grids[[cond2]]))
-        min_prop <- 0
+        max_prop <- validate_range(max_legend, max(c(max(condition_grids[[cond1]]), max(condition_grids[[cond2]]))))
         
-        ## Check max_legend
-        if (!is.null(max_legend)) {
-          if (max_legend < max_prop) {
-            warning("max_legend value is less than the maximum proportion. Using the maximum proportion instead.")
-          } else {
-            max_prop <- max_legend
-          }
-        }
-        
-        ## Check min_legend
-        if (!is.null(min_legend)) {
-          if (min_legend > min_prop) {
-            warning("min_legend value is greater than the minimum proportion. Using the minimum proportion instead.")
-          } else {
-            min_prop <- min_legend
-          }
-        }
-        
-        ## Create plot data for condition 1
-        plot_data1 <- base::expand.grid(dc = 1:6, ac = 1:6)
-        plot_data1$proportion <- as.vector(t(condition_grids[[cond1]]))
-        plot_data1$condition <- cond1
-        
-        ## Create plot data for condition 2
-        plot_data2 <- base::expand.grid(dc = 1:6, ac = 1:6)
-        plot_data2$proportion <- as.vector(t(condition_grids[[cond2]]))
-        plot_data2$condition <- cond2
-        
-        ## Combine for a single plot
+        plot_data1 <- create_plot_data(condition_grids[[cond1]], cond1)
+        plot_data2 <- create_plot_data(condition_grids[[cond2]], cond2)
         combined_data <- rbind(plot_data1, plot_data2)
         
-        ## Create faceted plot
-        p <- ggplot2::ggplot(combined_data, ggplot2::aes(x = dc, y = ac, fill = proportion)) +
-          ggplot2::geom_tile(color = "white", linewidth = 0.5) +
-          ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                            midpoint = (min_prop + max_prop)/2, limits = c(min_prop, max_prop)) +
-          ggplot2::facet_wrap(~ condition, ncol = 2) +
-          ggplot2::coord_fixed() +
-          ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-          ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-          ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)") +
-          plot_theme
-        
-        return(list(
-          plot = p,
-          prop_data = condition_grids
-        ))
+        limits <- c(0, max_prop)
+        p <- create_tile_plot(combined_data, "proportion", limits) + ggplot2::facet_wrap(~ condition, ncol = 2)
+        return(list(plot = p, prop_data = condition_grids))
         
       } else {
-        ## Return a list of separate plots for more than 2 conditions
-        condition_plots <- list()
-        max_prop <- max(unlist(lapply(condition_grids, max)))
-        min_prop <- 0
-        
-        ## Check max_legend
-        if (!is.null(max_legend)) {
-          if (max_legend < max_prop) {
-            warning("max_legend value is less than the maximum proportion. Using the maximum proportion instead.")
-          } else {
-            max_prop <- max_legend
-          }
-        }
-        
-        ## Check min_legend
-        if (!is.null(min_legend)) {
-          if (min_legend > min_prop) {
-            warning("min_legend value is greater than the minimum proportion. Using the minimum proportion instead.")
-          } else {
-            min_prop <- min_legend
-          }
-        }
-        
-        for (cond in unique_conditions) {
-          plot_data <- base::expand.grid(dc = 1:6, ac = 1:6)
-          plot_data$proportion <- as.vector(t(condition_grids[[cond]]))
-          
-          p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = dc, y = ac, fill = proportion)) +
-            ggplot2::geom_tile(color = "white", linewidth = 0.5) +
-            ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                              midpoint = (min_prop + max_prop)/2, limits = c(min_prop, max_prop)) +
-            ggplot2::coord_fixed() +
-            ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-            ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-            ggplot2::labs(x = x_label, y = y_label, 
-                 title = paste("Condition:", cond),
-                 fill = "Percentage (%)") +
-            plot_theme
-          
-          condition_plots[[cond]] <- p
-        }
-        
-        return(list(
-          plots = condition_plots,
-          prop_data = condition_grids
-        ))
+        condition_plots <- lapply(unique_conditions, function(cond) {
+          plot_data <- create_plot_data(condition_grids[[cond]])
+          limits <- c(0, validate_range(max_legend, max(unlist(lapply(condition_grids, max)))))
+          create_tile_plot(plot_data, "proportion", limits, cond)
+        })
+        names(condition_plots) <- unique_conditions
+        return(list(plots = condition_plots, prop_data = condition_grids))
       }
-      
+    
     } else if (comparison_type == "difference") {
-      ## For difference comparison, we use the first two conditions
-      if (length(unique_conditions) < 2) {
-        stop("At least 2 conditions are required for difference comparison")
-      }
+      if (length(unique_conditions) < 2) stop("At least 2 conditions are required for difference comparison")
       
       first_cond <- unique_conditions[1]
       second_cond <- unique_conditions[2]
-      
-      ## Calculate difference grid
       diff_grid <- condition_grids[[first_cond]] - condition_grids[[second_cond]]
       
-      plot_data <- base::expand.grid(dc = 1:6, ac = 1:6)
-      plot_data$difference <- as.vector(t(diff_grid))
+      plot_data <- create_plot_data(diff_grid)
+      max_diff <- validate_range(max_legend, max(abs(diff_grid)))
       
-      ## Get max absolute difference for symmetric color scale
-      max_diff <- max(abs(diff_grid))
-      
-      ## Check max_legend for difference view
-      if (!is.null(max_legend)) {
-        if (max_legend < max_diff) {
-          warning("max_legend value is less than the maximum difference. Using the maximum difference instead.")
-        } else {
-          max_diff <- max_legend
-        }
-      }
-      
-      ## Check min_legend for difference view (should be negative of max for diverging scale)
-      if (!is.null(min_legend)) {
-        if (min_legend > -max_diff) {
-          warning("min_legend value is greater than the negative maximum difference. Using the symmetric range instead.")
-        } else {
-          ## Only use min_legend if it's explicitly set and valid
-          max_diff <- max(max_diff, abs(min_legend))
-        }
-      }
-      
-      ## Create diverging plot
-      p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = dc, y = ac, fill = difference)) +
-        ggplot2::geom_tile(color = "white", linewidth = 0.5) +
-        ggplot2::scale_fill_gradient2(low = neg_colors[9], mid = "white", high = pos_colors[9],
-                           midpoint = 0,
-                           limits = c(-max_diff, max_diff)) +
-        ggplot2::coord_fixed() +
-        ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-        ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-        ggplot2::labs(x = x_label, y = y_label, 
-             title = paste("Difference (%):", first_cond, "-", second_cond),
-             fill = "Difference (%)") +
-        plot_theme
-      
-      return(list(
-        plot = p,
-        first_condition = first_cond,
-        second_condition = second_cond,
-        diff_grid = diff_grid
-      ))
+      p <- create_tile_plot(plot_data, "difference", c(-max_diff, max_diff))
+      return(list(plot = p, first_condition = first_cond, second_condition = second_cond, diff_grid = diff_grid))
     }
   }
   
-  ## If we reach here, there's an unsupported combination
   stop("Unsupported combination of proportion_type and comparison_type")
 }
 
