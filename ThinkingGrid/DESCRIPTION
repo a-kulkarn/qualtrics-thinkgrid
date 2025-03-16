@@ -14,6 +14,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Suggests: 
     ggplot2,
+    gifski,
     RColorBrewer,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

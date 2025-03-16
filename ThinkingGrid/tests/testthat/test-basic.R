@@ -4,6 +4,11 @@ setup_file <- system.file("test_data", "testQuestion.csv", package = "ThinkingGr
 data_file <- system.file("test_data", "testQuestionOutput.csv", package = "ThinkingGrid")
 expected_result <- system.file("test_data", "testExpectedResult.csv", package = "ThinkingGrid")
 
+dc <- sample(1:6, 100, replace = TRUE)
+ac <- sample(1:6, 100, replace = TRUE)
+id <- rep(1:5, times = 20)
+condition <- rep(c("a", "a", "a", "b", "b"), 20)
+
 skip_if_no_pandas <- function() {
   have_pandas <- reticulate::py_module_available("pandas")
   if (!have_pandas)
@@ -34,3 +39,17 @@ test_that("test pandas availability", {
     )
 })
 
+
+test_that("plot_tg is working", {
+    expect_type(
+        plot_tg(dc, ac, proportion_type = "overall", type = "cells"),
+        "list"
+    )
+})
+
+test_that("plot_tg is working", {
+    expect_type(
+        create_tg_animation(dc, ac, condition_col = id, proportion_type = "overall", type = "cells"),
+        "list"
+    )
+})
