@@ -1,7 +1,3 @@
-# Source the polygon coordinate functions
-source("zac_demo_files/get_polygons.R")
-source("zac_demo_files/plot_types.R")  # Source file with plot type functions
-
 check_install_package <- function(package_name) {
     if (!requireNamespace(package_name, quietly = TRUE)) {
         install_package <- readline(paste(package_name, "is required for this function. Would you like to install it? (y/n): "))
@@ -14,6 +10,15 @@ check_install_package <- function(package_name) {
     }
 }
 
+
+#' Illustration of plot_tg function
+#' 
+#' @param add_parameter_here {character} Description of the parameter
+#' 
+#' @examples
+#' plot_tg(relevant_data)
+#' 
+#' @export
 plot_tg <- function(dc, ac, proportion_type = "overall", type = "cells", color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", condition_col = NULL, comparison_type = "separate", pos_palette = "Greens", neg_palette = "Reds", max_legend = NULL, min_legend = NULL) {
     
     # Check required packages
@@ -167,21 +172,19 @@ plot_tg <- function(dc, ac, proportion_type = "overall", type = "cells", color_p
 }
 
 
-
+#' Illustration of create_tg_animation function
+#' 
+#' @param add_parameter_here {character} Description of the parameter
+#' 
+#' @examples
+#' create_tg_animation(relevant_data)
+#' 
+#' @export
 
 create_tg_animation <- function(dc, ac, condition_col, type = "cells", proportion_type = "overall", filename = "tg_animation.gif", duration = 1, width = 800, height = 800, sorted_conditions = NULL, color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", max_legend = NULL, min_legend = NULL) {
   
-  # Check required packages
-  if(!requireNamespace("gifski", quietly = TRUE)) {
-    utils::install.packages("gifski")
-  }
-  if(!requireNamespace("gganimate", quietly = TRUE)) {
-    utils::install.packages("gganimate")
-  }
-
   check_install_package("RColorBrewer")
   check_install_package("ggplot2")
-  check_install_package("gganimate")
   check_install_package("gifski")
 
   
@@ -421,7 +424,6 @@ create_tg_animation <- function(dc, ac, condition_col, type = "cells", proportio
   
   # Create a gif from the plots
   if(length(plot_list) > 1) {
-    message(paste("Creating animation with", length(plot_list), "frames"))
     
     # Create temporary directory for frames
     temp_dir <- tempfile()
@@ -442,8 +444,6 @@ create_tg_animation <- function(dc, ac, condition_col, type = "cells", proportio
                   width = width, 
                   height = height, 
                   delay = duration)
-    
-    message(paste("Animation saved as", filename))
     return(invisible(plot_list))
   } else {
     message("Only one condition found, no animation created")

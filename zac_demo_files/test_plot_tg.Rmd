@@ -9,28 +9,116 @@ data <- read.csv("zac_demo_files/study3A.csv")
 ```{r}
 dc <- data$dc
 ac <- data$ac
+condition <- data$condition
+val = data$val
 ```
 
 ```{r}
-plot_tg(dc, ac)
+plot_tg(dc, ac, proportion_type = "overall", type = "cells")
+
+plot_tg(dc, ac, proportion_type = "overall", type = "quadrants")
+
+plot_tg(dc, ac, proportion_type = "overall", type = "horizontal")
+
+plot_tg(dc, ac, proportion_type = "overall", type = "vertical")
+
+plot_tg(dc, ac, proportion_type = "overall", type = "constraints")
+
+plot_tg(dc, ac, proportion_type = "overall", type = "depth")
 ```
 
 ```{r}
-plot_tg(dc, ac, type = "quadrants")
+plot_tg(dc, ac, proportion_type = "condition", type = "cells", condition_col = condition)
+
+plot_tg(dc, ac, proportion_type = "condition", type = "quadrants", condition_col = condition)
+
+plot_tg(dc, ac, proportion_type = "condition", type = "horizontal", condition_col = condition)
+
+plot_tg(dc, ac, proportion_type = "condition", type = "vertical", condition_col = condition)
+
+plot_tg(dc, ac, proportion_type = "condition", type = "constraints", condition_col = condition)
+
+plot_tg(dc, ac, proportion_type = "condition", type = "depth", condition_col = condition)
 ```
 
 ```{r}
-plot_tg(dc, ac, type = "horizontal")
+plot_tg(dc, ac, proportion_type = "condition", type = "cells", condition_col = condition, comparison_type = "difference")
+
+plot_tg(dc, ac, proportion_type = "condition", type = "quadrants", condition_col = condition, comparison_type = "difference")
+
+plot_tg(dc, ac, proportion_type = "condition", type = "horizontal", condition_col = condition, comparison_type = "difference")
+
+plot_tg(dc, ac, proportion_type = "condition", type = "vertical", condition_col = condition, comparison_type = "difference")
+
+plot_tg(dc, ac, proportion_type = "condition", type = "constraints", condition_col = condition, comparison_type = "difference")
+
+plot_tg(dc, ac, proportion_type = "condition", type = "depth", condition_col = condition, comparison_type = "difference")
 ```
 
 ```{r}
-plot_tg(dc, ac, type = "vertical")
+create_tg_animation(dc, ac, val, type = "cells", filename = "~/Downloads/cells.gif")
+
+create_tg_animation(dc, ac, val, type = "quadrants", filename = "~/Downloads/quadrants.gif")
+
+create_tg_animation(dc, ac, val, type = "horizontal", filename = "~/Downloads/horizontal.gif")
+
+create_tg_animation(dc, ac, val, type = "vertical", filename = "~/Downloads/vertical.gif")
+
+create_tg_animation(dc, ac, val, type = "constraints", filename = "~/Downloads/constraints.gif")
+
+create_tg_animation(dc, ac, val, type = "depth", filename = "~/Downloads/depth.gif")
+```
+
+
+```{r}
+plot_tg(dc, ac, proportion_type = "overall", type = "cells")
+plot_tg(dc, ac, proportion_type = "condition", type = "cells", condition_col = condition)
+plot_tg(dc, ac, proportion_type = "condition", type = "cells", condition_col = condition, comparison_type = "difference")
 ```
 
 ```{r}
-plot_tg(dc, ac, type = "constraints")
+plot_tg(dc, ac, proportion_type = "overall", type = "cells", max_legend=30)
+plot_tg(dc, ac, proportion_type = "condition", type = "cells", condition_col = condition, max_legend=30)
+plot_tg(dc, ac, proportion_type = "condition", type = "cells", condition_col = condition, comparison_type = "difference", max_legend=10, min_legend=-10)
 ```
 
 ```{r}
-plot_tg(dc, ac, type = "depth")
+plot_tg(dc, ac, proportion_type = "overall", type = "quadrants")
+plot_tg(dc, ac, proportion_type = "condition", type = "quadrants", condition_col = condition)
+plot_tg(dc, ac, proportion_type = "condition", type = "quadrants", condition_col = condition, comparison_type = "difference")
+```
+
+```{r}
+plot_tg(dc, ac, proportion_type = "overall", type = "cells", max_legend=70, min_legend=-10)
+plot_tg(dc, ac, proportion_type = "condition", type = "cells", condition_col = condition, max_legend=50)
+plot_tg(dc, ac, proportion_type = "condition", type = "cells", condition_col = condition, comparison_type = "difference", max_legend=10, min_legend=-10)
+```
+
+```{r}
+plot_tg(dc, ac, proportion_type = "overall", type = "horizontal")
+plot_tg(dc, ac, proportion_type = "condition", type = "horizontal", condition_col = condition)
+plot_tg(dc, ac, proportion_type = "condition", type = "horizontal", condition_col = condition, comparison_type = "difference")
+```
+
+```{r}
+plot_tg(dc, ac, proportion_type = "overall", type = "horizontal", max_legend=70, min_legend=-10)
+plot_tg(dc, ac, proportion_type = "condition", type = "horizontal", condition_col = condition, max_legend=50)
+plot_tg(dc, ac, proportion_type = "condition", type = "horizontal", condition_col = condition, comparison_type = "difference", max_legend=10, min_legend=-10)
+```
+
+```{r}
+plot_tg(dc, ac, proportion_type = "overall", type = "vertical")
+plot_tg(dc, ac, proportion_type = "condition", type = "vertical", condition_col = condition)
+plot_tg(dc, ac, proportion_type = "condition", type = "vertical", condition_col = condition, comparison_type = "difference")
+```
+
+```{r}
+plot_tg(dc, ac, proportion_type = "overall", type = "vertical", max_legend=70, min_legend=-10)
+plot_tg(dc, ac, proportion_type = "condition", type = "vertical", condition_col = condition, max_legend=50)
+plot_tg(dc, ac, proportion_type = "condition", type = "vertical", condition_col = condition, comparison_type = "difference", max_legend=10, min_legend=-10)
+```
+
+```{r}
+plot_tg(dc, ac, proportion_type = "overall", type = "cells")
+plot_tg(dc, ac, proportion_type = "condition", type = "cells", condition_col = condition)
 ```

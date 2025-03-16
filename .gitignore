@@ -1,5 +1,6 @@
 *~
 *.csv
+*.gif
 *__pycache__/
 /invoice/*
 .DS_Store
