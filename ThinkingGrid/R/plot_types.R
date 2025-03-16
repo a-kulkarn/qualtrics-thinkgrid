@@ -499,7 +499,7 @@ create_vertical_plot <- function(prop_grid, proportion_type = "overall", color_p
 
 create_constraints_plot <- function(prop_grid, proportion_type = "overall", color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", condition_grids = NULL, comparison_type = "separate", pos_palette = "Greens", neg_palette = "Reds", max_legend = NULL, min_legend = NULL) {
   
-  ## Common plot theme settings
+  # Common plot theme settings
   plot_theme <- ggplot2::theme_minimal() +
     ggplot2::theme(
       axis.text = ggplot2::element_text(size = 12),
@@ -509,105 +509,49 @@ create_constraints_plot <- function(prop_grid, proportion_type = "overall", colo
       plot.margin = grid::unit(c(1, 1, 2, 2), "lines")
     )
   
-  ## Get color palettes
+  # Get color palettes
   pal_colors <- RColorBrewer::brewer.pal(9, color_palette)
-  pos_colors <- RColorBrewer::brewer.pal(9, pos_palette)
-  neg_colors <- RColorBrewer::brewer.pal(9, neg_palette)
-  
-  ## Calculate constraint proportions in a more explicit way
+
+  # Calculate constraint proportions
   calculate_constraint_props <- function(grid) {
-    ## Initialize vector for constraint proportions
-    constraint_props <- numeric(11)  ## For constraints 2-12
-    
-    ## Constraint 2 (ac=1, dc=1)
-    constraint_props[1] <- grid[1, 1]
-    
-    ## Constraint 3 (ac=1,dc=2 and ac=2,dc=1)
-    constraint_props[2] <- grid[1, 2] + grid[2, 1]
-    
-    ## Constraint 4 (ac=1,dc=3 and ac=2,dc=2 and ac=3,dc=1)
-    constraint_props[3] <- grid[1, 3] + grid[2, 2] + grid[3, 1]
-    
-    ## Constraint 5 (ac=1,dc=4 and ac=2,dc=3 and ac=3,dc=2 and ac=4,dc=1)
-    constraint_props[4] <- grid[1, 4] + grid[2, 3] + grid[3, 2] + grid[4, 1]
-    
-    ## Constraint 6 (ac=1,dc=5 and ac=2,dc=4 and ac=3,dc=3 and ac=4,dc=2 and ac=5,dc=1)
-    constraint_props[5] <- grid[1, 5] + grid[2, 4] + grid[3, 3] + grid[4, 2] + grid[5, 1]
-    
-    ## Constraint 7 (ac=1,dc=6 and ac=2,dc=5 and ac=3,dc=4 and ac=4,dc=3 and ac=5,dc=2 and ac=6,dc=1)
-    constraint_props[6] <- grid[1, 6] + grid[2, 5] + grid[3, 4] + grid[4, 3] + grid[5, 2] + grid[6, 1]
-    
-    ## Constraint 8 (ac=2,dc=6 and ac=3,dc=5 and ac=4,dc=4 and ac=5,dc=3 and ac=6,dc=2)
-    constraint_props[7] <- grid[2, 6] + grid[3, 5] + grid[4, 4] + grid[5, 3] + grid[6, 2]
-    
-    ## Constraint 9 (ac=3,dc=6 and ac=4,dc=5 and ac=5,dc=4 and ac=6,dc=3)
-    constraint_props[8] <- grid[3, 6] + grid[4, 5] + grid[5, 4] + grid[6, 3]
-    
-    ## Constraint 10 (ac=4,dc=6 and ac=5,dc=5 and ac=6,dc=4)
-    constraint_props[9] <- grid[4, 6] + grid[5, 5] + grid[6, 4]
-    
-    ## Constraint 11 (ac=5,dc=6 and ac=6,dc=5)
-    constraint_props[10] <- grid[5, 6] + grid[6, 5]
-    
-    ## Constraint 12 (ac=6,dc=6)
-    constraint_props[11] <- grid[6, 6]
-    
-    return(constraint_props)
+    constraints <- c(
+      grid[1, 1],
+      grid[1, 2] + grid[2, 1],
+      grid[1, 3] + grid[2, 2] + grid[3, 1],
+      grid[1, 4] + grid[2, 3] + grid[3, 2] + grid[4, 1],
+      grid[1, 5] + grid[2, 4] + grid[3, 3] + grid[4, 2] + grid[5, 1],
+      grid[1, 6] + grid[2, 5] + grid[3, 4] + grid[4, 3] + grid[5, 2] + grid[6, 1],
+      grid[2, 6] + grid[3, 5] + grid[4, 4] + grid[5, 3] + grid[6, 2],
+      grid[3, 6] + grid[4, 5] + grid[5, 4] + grid[6, 3],
+      grid[4, 6] + grid[5, 5] + grid[6, 4],
+      grid[5, 6] + grid[6, 5],
+      grid[6, 6]
+    )
+    return(constraints)
   }
   
   diagonal_band_width <- sqrt(72) / 11
   axis_projection <- diagonal_band_width * sqrt(2)
   constraint_polygons <- get_constraint_polygons(axis_projection)
-  
-  ## Remove the existing proportion column to avoid conflicts
+
   if ("proportion" %in% colnames(constraint_polygons)) {
     constraint_polygons$proportion <- NULL
   }
-  
-  ## Handle different proportion types
+
   if (proportion_type == "overall") {
-    ## Calculate constraint proportions
     constraint_props <- calculate_constraint_props(prop_grid)
+    limits <- range(validate_range(max_legend, max(constraint_props)), validate_range(min_legend, 0, FALSE))
     
-    ## Determine the limits for the legend
-    max_value <- max(constraint_props)
-    min_value <- 0
-    
-    ## Check if max_legend is provided and valid
-    if (!is.null(max_legend)) {
-      if (max_legend < max_value) {
-        warning("max_legend value is less than the maximum proportion. Using the maximum proportion instead.")
-      } else {
-        max_value <- max_legend
-      }
-    }
-    
-    ## Check if min_legend is provided and valid
-    if (!is.null(min_legend)) {
-      if (min_legend > min_value) {
-        warning("min_legend value is greater than the minimum proportion. Using the minimum proportion instead.")
-      } else {
-        min_value <- min_legend
-      }
-    }
-    
-    ## Create data frame for constraints
     constraint_data <- data.frame(
       constraint = 2:12,
       proportion = constraint_props
     )
     
-    ## Merge with polygon data
     plot_data <- merge(constraint_polygons, constraint_data, by = "constraint")
     
-    ## Create plot with constraints
     p <- ggplot2::ggplot() +
-      ggplot2::geom_polygon(data = plot_data, 
-                  ggplot2::aes(x = x, y = y, fill = proportion, group = constraint),
-                  color = "white", linewidth = 0.5) +
-      ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                         midpoint = (min_value + max_value)/2, 
-                         limits = c(min_value, max_value)) +
+      ggplot2::geom_polygon(data = plot_data, ggplot2::aes(x = x, y = y, fill = proportion, group = constraint), color = "white", linewidth = 0.5) +
+      ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9], midpoint = mean(limits), limits = limits) +
       ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
       ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
       ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
@@ -617,76 +561,32 @@ create_constraints_plot <- function(prop_grid, proportion_type = "overall", colo
     return(list(plot = p, prop_data = constraint_props))
     
   } else if (proportion_type == "condition") {
-    ## Handle condition-based visualizations
     if (is.null(condition_grids)) {
       stop("condition_grids must be provided when proportion_type is 'condition'")
     }
-    
+
     unique_conditions <- names(condition_grids)
-    
-    ## Calculate constraint proportions for each condition
     condition_constraint_props <- lapply(condition_grids, calculate_constraint_props)
-    
+
     if (comparison_type == "separate") {
       if (length(unique_conditions) == 2) {
-        ## Create a single figure with side-by-side plots for 2 conditions
         cond1 <- unique_conditions[1]
         cond2 <- unique_conditions[2]
-        
-        ## Calculate constraint proportions
         const_props1 <- condition_constraint_props[[cond1]]
         const_props2 <- condition_constraint_props[[cond2]]
         
-        ## Find maximum proportion across both conditions for consistent color scale
-        max_prop <- max(max(const_props1), max(const_props2))
-        min_prop <- 0
-        
-        ## Check max_legend
-        if (!is.null(max_legend)) {
-          if (max_legend < max_prop) {
-            warning("max_legend value is less than the maximum proportion. Using the maximum proportion instead.")
-          } else {
-            max_prop <- max_legend
-          }
-        }
-        
-        ## Check min_legend
-        if (!is.null(min_legend)) {
-          if (min_legend > min_prop) {
-            warning("min_legend value is greater than the minimum proportion. Using the minimum proportion instead.")
-          } else {
-            min_prop <- min_legend
-          }
-        }
-        
-        ## Create data frame for condition 1
-        const_data1 <- data.frame(
-          constraint = 2:12,
-          proportion = const_props1,
-          condition = cond1
-        )
-        
-        ## Create data frame for condition 2
-        const_data2 <- data.frame(
-          constraint = 2:12,
-          proportion = const_props2,
-          condition = cond2
-        )
-        
-        ## Combine constraint data
+        limits <- range(validate_range(max_legend, max(c(const_props1, const_props2))), validate_range(min_legend, 0, FALSE))
+
+        const_data1 <- data.frame(constraint = 2:12, proportion = const_props1, condition = cond1)
+        const_data2 <- data.frame(constraint = 2:12, proportion = const_props2, condition = cond2)
+
         combined_const_data <- rbind(const_data1, const_data2)
         
-        ## Create plot data by merging with polygon data
         plot_data <- merge(constraint_polygons, combined_const_data, by = "constraint")
         
-        ## Create faceted plot
         p <- ggplot2::ggplot() +
-          ggplot2::geom_polygon(data = plot_data, 
-                      ggplot2::aes(x = x, y = y, fill = proportion, group = interaction(constraint, condition)),
-                      color = "white", linewidth = 0.5) +
-          ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                             midpoint = (min_prop + max_prop)/2, 
-                             limits = c(min_prop, max_prop)) +
+          ggplot2::geom_polygon(data = plot_data, aes(x = x, y = y, fill = proportion, group = interaction(constraint, condition)), color = "white", linewidth = 0.5) +
+          ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9], midpoint = mean(limits), limits = limits) +
           ggplot2::facet_wrap(~ condition, ncol = 2) +
           ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
           ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
@@ -694,144 +594,65 @@ create_constraints_plot <- function(prop_grid, proportion_type = "overall", colo
           ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)") +
           plot_theme
         
-        return(list(
-          plot = p,
-          prop_data = condition_constraint_props
-        ))
+        return(list(plot = p, prop_data = condition_constraint_props))
         
       } else {
-        ## Return a list of separate plots for more than 2 conditions
         condition_plots <- list()
         
-        ## Find maximum proportion across all conditions
         max_prop <- max(unlist(lapply(condition_constraint_props, max)))
-        min_prop <- 0
-        
-        ## Check max_legend
-        if (!is.null(max_legend)) {
-          if (max_legend < max_prop) {
-            warning("max_legend value is less than the maximum proportion. Using the maximum proportion instead.")
-          } else {
-            max_prop <- max_legend
-          }
-        }
-        
-        ## Check min_legend
-        if (!is.null(min_legend)) {
-          if (min_legend > min_prop) {
-            warning("min_legend value is greater than the minimum proportion. Using the minimum proportion instead.")
-          } else {
-            min_prop <- min_legend
-          }
-        }
-        
+        limits <- range(validate_range(max_legend, max_prop), validate_range(min_legend, 0, FALSE))
+
         for (cond in unique_conditions) {
           const_props <- condition_constraint_props[[cond]]
-          
-          ## Create data frame for constraints
-          const_data <- data.frame(
-            constraint = 2:12,
-            proportion = const_props
-          )
-          
-          ## Merge with polygon data
+          const_data <- data.frame(constraint = 2:12, proportion = const_props)
           plot_data <- merge(constraint_polygons, const_data, by = "constraint")
           
           p <- ggplot2::ggplot() +
-            ggplot2::geom_polygon(data = plot_data, 
-                        ggplot2::aes(x = x, y = y, fill = proportion, group = constraint),
-                        color = "white", linewidth = 0.5) +
-            ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                               midpoint = (min_prop + max_prop)/2, 
-                               limits = c(min_prop, max_prop)) +
+            ggplot2::geom_polygon(data = plot_data, aes(x = x, y = y, fill = proportion, group = constraint), color = "white", linewidth = 0.5) +
+            ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9], midpoint = mean(limits), limits = limits) +
             ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
             ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
             ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-            ggplot2::labs(x = x_label, y = y_label, 
-                 title = paste("Condition:", cond),
-                 fill = "Percentage (%)") +
+            ggplot2::labs(x = x_label, y = y_label, title = paste("Condition:", cond), fill = "Percentage (%)") +
             plot_theme
-          
+            
           condition_plots[[cond]] <- p
         }
         
-        return(list(
-          plots = condition_plots,
-          prop_data = condition_constraint_props
-        ))
+        return(list(plots = condition_plots, prop_data = condition_constraint_props))
       }
       
     } else if (comparison_type == "difference") {
-      ## For difference comparison, we use the first two conditions
       if (length(unique_conditions) < 2) {
         stop("At least 2 conditions are required for difference comparison")
       }
-      
+
       first_cond <- unique_conditions[1]
       second_cond <- unique_conditions[2]
-      
-      ## Calculate difference
       diff_const <- condition_constraint_props[[first_cond]] - condition_constraint_props[[second_cond]]
       
-      ## Create data frame for differences
-      diff_data <- data.frame(
-        constraint = 2:12,
-        difference = diff_const
-      )
-      
-      ## Merge with polygon data
+      diff_data <- data.frame(constraint = 2:12, difference = diff_const)
       plot_data <- merge(constraint_polygons, diff_data, by = "constraint")
       
-      ## Get max absolute difference for symmetric color scale
       max_diff <- max(abs(diff_const))
-      
-      ## Check max_legend for difference view
-      if (!is.null(max_legend)) {
-        if (max_legend < max_diff) {
-          warning("max_legend value is less than the maximum difference. Using the maximum difference instead.")
-        } else {
-          max_diff <- max_legend
-        }
-      }
-      
-      ## Check min_legend for difference view (should be negative of max for diverging scale)
-      if (!is.null(min_legend)) {
-        if (min_legend > -max_diff) {
-          warning("min_legend value is greater than the negative maximum difference. Using the symmetric range instead.")
-        } else {
-          ## Only use min_legend if it's explicitly set and valid
-          max_diff <- max(max_diff, abs(min_legend))
-        }
-      }
-      
-      ## Create diverging plot
+      limits <- c(-max_diff, max_diff)
+
       p <- ggplot2::ggplot() +
-        ggplot2::geom_polygon(data = plot_data, 
-                    ggplot2::aes(x = x, y = y, fill = difference, group = constraint),
-                    color = "white", linewidth = 0.5) +
-        ggplot2::scale_fill_gradient2(low = neg_colors[9], mid = "white", high = pos_colors[9],
-                           midpoint = 0,
-                           limits = c(-max_diff, max_diff)) +
+        ggplot2::geom_polygon(data = plot_data, aes(x = x, y = y, fill = difference, group = constraint), color = "white", linewidth = 0.5) +
+        ggplot2::scale_fill_gradient2(low = neg_colors[9], mid = "white", high = pos_colors[9], midpoint = 0, limits = limits) +
         ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
         ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
         ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-        ggplot2::labs(x = x_label, y = y_label, 
-             title = paste("Difference (%):", first_cond, "-", second_cond),
-             fill = "Difference (%)") +
+        ggplot2::labs(x = x_label, y = y_label, title = paste("Difference (%):", first_cond, "-", second_cond), fill = "Difference (%)") +
         plot_theme
       
-      return(list(
-        plot = p,
-        first_condition = first_cond,
-        second_condition = second_cond,
-        diff_data = diff_const
-      ))
+      return(list(plot = p, first_condition = first_cond, second_condition = second_cond, diff_data = diff_const))
     }
   }
   
-  ## If we reach here, there's an unsupported combination
   stop("Unsupported combination of proportion_type and comparison_type")
 }
+
 
 
 create_depth_plot <- function(prop_grid, proportion_type = "overall", color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", condition_grids = NULL, comparison_type = "separate", pos_palette = "Greens", neg_palette = "Reds", max_legend = NULL, min_legend = NULL) {
