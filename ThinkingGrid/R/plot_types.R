@@ -19,8 +19,22 @@ create_plot_data <- function(grid, condition = NULL) {
     return(plot_data)
 }
 
+create_tile_plot_grid <- function(plot_data, fill_var, limits, condition = NULL) {
+  p <- ggplot2::ggplot(plot_data, ggplot2::aes_string(x = "dc", y = "ac", fill = fill_var)) +
+    ggplot2::geom_tile(color = "white", linewidth = 0.5) +
+    ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
+                                  midpoint = mean(limits), limits = limits) +
+    ggplot2::coord_fixed() +
+    ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+    ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+    ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)",
+                  title = ifelse(is.null(condition), NULL, paste("Condition:", condition))) +
+    plot_theme
+  return(p)
+}
+
 create_tile_plot <- function(plot_data, fill_var, limits, x_label, y_label, pal_colors, plot_theme) {
-  ggplot2::ggplot(plot_data, ggplot2::aes_string(x = "dc_quad", y = "ac_quad", fill = fill_var)) +
+  ggplot2::ggplot(plot_data, ggplot2::aes_string(x = "dc", y = "ac", fill = fill_var)) +
     ggplot2::geom_tile(color = "white", linewidth = 0.5) +
     ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
                                    midpoint = (limits[1] + limits[2]) / 2,
@@ -31,6 +45,22 @@ create_tile_plot <- function(plot_data, fill_var, limits, x_label, y_label, pal_
     ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)") +
     plot_theme
 }
+
+
+create_vertical_bands_plot <- function(vertical_data, pal_colors, min_value, max_value, x_label, y_label, plot_theme) {
+    p <- ggplot2::ggplot(vertical_data, ggplot2::aes(x = dc, fill = proportion)) +
+      ggplot2::geom_tile(ggplot2::aes(y = 3.5, height = 6), color = "white", linewidth = 0.5) +
+      ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
+                        midpoint = (min_value + max_value)/2, 
+                        limits = c(min_value, max_value)) +
+      ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
+      ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+      ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+      ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)") +
+      plot_theme
+    return(p)
+}
+
 
 ## Function for cells plot type
 create_cells_plot <- function(prop_grid,
@@ -60,19 +90,6 @@ create_cells_plot <- function(prop_grid,
   pos_colors <- RColorBrewer::brewer.pal(9, pos_palette)
   neg_colors <- RColorBrewer::brewer.pal(9, neg_palette)
 
-  create_tile_plot <- function(plot_data, fill_var, limits, condition = NULL) {
-    p <- ggplot2::ggplot(plot_data, ggplot2::aes_string(x = "dc", y = "ac", fill = fill_var)) +
-      ggplot2::geom_tile(color = "white", linewidth = 0.5) +
-      ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                                    midpoint = mean(limits), limits = limits) +
-      ggplot2::coord_fixed() +
-      ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-      ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-      ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)",
-                    title = ifelse(is.null(condition), NULL, paste("Condition:", condition))) +
-      plot_theme
-    return(p)
-  }
 
   if (proportion_type == "overall") {
     plot_data <- create_plot_data(prop_grid)
@@ -171,8 +188,8 @@ create_quadrants_plot <- function(prop_grid,
 
     # Prepare data for plotting
     quad_data <- data.frame(
-      dc_quad = rep(c(1, 2), each = 2),
-      ac_quad = rep(c(1, 2), times = 2),
+      dc = rep(c(1, 2), each = 2),
+      ac = rep(c(1, 2), times = 2),
       proportion = as.vector(quadrant_grid)
     )
 
@@ -252,7 +269,6 @@ create_quadrants_plot <- function(prop_grid,
 
 create_horizontal_plot <- function(prop_grid, proportion_type = "overall", color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", condition_grids = NULL, comparison_type = "separate", pos_palette = "Greens", neg_palette = "Reds", max_legend = NULL, min_legend = NULL) {
   
-  ## Common plot theme settings
   plot_theme <- ggplot2::theme_minimal() +
     ggplot2::theme(
       axis.text = ggplot2::element_text(size = 12),
@@ -262,265 +278,86 @@ create_horizontal_plot <- function(prop_grid, proportion_type = "overall", color
       plot.margin = grid::unit(c(1, 1, 2, 2), "lines")
     )
   
-  ## Get color palettes
   pal_colors <- RColorBrewer::brewer.pal(9, color_palette)
   pos_colors <- RColorBrewer::brewer.pal(9, pos_palette)
   neg_colors <- RColorBrewer::brewer.pal(9, neg_palette)
   
-  ## Calculate horizontal proportions
   calculate_horizontal_props <- function(grid) {
-    ## Sum across each row (ac value)
-    row_sums <- rowSums(grid)
-    return(row_sums)
+    rowSums(grid)
   }
   
-  ## Handle different proportion types
+  create_horizontal_plot_data <- function(row_sums) {
+    data.frame(ac = 1:6, proportion = row_sums)
+  }
+  
   if (proportion_type == "overall") {
-    ## Calculate horizontal proportions
     row_sums <- calculate_horizontal_props(prop_grid)
+    limits <- c(validate_range(max_legend, max(row_sums)), validate_range(min_legend, 0, FALSE))
+    horizontal_data <- create_horizontal_plot_data(row_sums)
     
-    ## Determine the limits for the legend
-    max_value <- max(row_sums)
-    min_value <- 0
-    
-    ## Check if max_legend is provided and valid
-    if (!is.null(max_legend)) {
-      if (max_legend < max_value) {
-        warning("max_legend value is less than the maximum proportion. Using the maximum proportion instead.")
-      } else {
-        max_value <- max_legend
-      }
-    }
-    
-    ## Check if min_legend is provided and valid
-    if (!is.null(min_legend)) {
-      if (min_legend > min_value) {
-        warning("min_legend value is greater than the minimum proportion. Using the minimum proportion instead.")
-      } else {
-        min_value <- min_legend
-      }
-    }
-    
-    ## Create data frame for horizontal bands
-    horizontal_data <- data.frame(
-      ac = 1:6,
-      proportion = row_sums
-    )
-    
-    ## Create plot with horizontal bands
-    p <- ggplot2::ggplot(horizontal_data, ggplot2::aes(y = ac, fill = proportion)) +
-      ggplot2::geom_tile(ggplot2::aes(x = 3.5, width = 6), color = "white", linewidth = 0.5) +
-      ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                        midpoint = (min_value + max_value)/2, 
-                        limits = c(min_value, max_value)) +
-      ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-      ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-      ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-      ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)") +
-      plot_theme
+    p <- create_tile_plot(horizontal_data, "proportion", limits, x_label, y_label, pal_colors, plot_theme) +
+      ggplot2::geom_tile(ggplot2::aes(x = 3.5, width = 6), color = "white", linewidth = 0.5)
     
     return(list(plot = p, prop_data = row_sums))
     
   } else if (proportion_type == "condition") {
-    ## Handle condition-based visualizations
     if (is.null(condition_grids)) {
       stop("condition_grids must be provided when proportion_type is 'condition'")
     }
     
     unique_conditions <- names(condition_grids)
-    
-    ## Calculate horizontal proportions for each condition
     condition_horizontal_props <- lapply(condition_grids, calculate_horizontal_props)
     
     if (comparison_type == "separate") {
       if (length(unique_conditions) == 2) {
-        ## Create a single figure with side-by-side plots for 2 conditions
         cond1 <- unique_conditions[1]
         cond2 <- unique_conditions[2]
         
-        ## Calculate horizontal proportions
         horz_props1 <- condition_horizontal_props[[cond1]]
         horz_props2 <- condition_horizontal_props[[cond2]]
         
-        ## Find maximum proportion across both conditions for consistent color scale
-        max_prop <- max(max(horz_props1), max(horz_props2))
-        min_prop <- 0
+        limits <- c(0, validate_range(max_legend, max(unlist(condition_horizontal_props))))
         
-        ## Check max_legend
-        if (!is.null(max_legend)) {
-          if (max_legend < max_prop) {
-            warning("max_legend value is less than the maximum proportion. Using the maximum proportion instead.")
-          } else {
-            max_prop <- max_legend
-          }
-        }
-        
-        ## Check min_legend
-        if (!is.null(min_legend)) {
-          if (min_legend > min_prop) {
-            warning("min_legend value is greater than the minimum proportion. Using the minimum proportion instead.")
-          } else {
-            min_prop <- min_legend
-          }
-        }
-        
-        ## Create plot data for condition 1
-        horz_data1 <- data.frame(
-          ac = 1:6,
-          proportion = horz_props1,
-          condition = cond1
-        )
-        
-        ## Create plot data for condition 2
-        horz_data2 <- data.frame(
-          ac = 1:6,
-          proportion = horz_props2,
-          condition = cond2
-        )
-        
-        ## Combine for a single plot
+        horz_data1 <- create_horizontal_plot_data(horz_props1)
+        horz_data2 <- create_horizontal_plot_data(horz_props2)
         combined_data <- rbind(horz_data1, horz_data2)
         
-        ## Create faceted plot
-        p <- ggplot2::ggplot(combined_data, ggplot2::aes(y = ac, fill = proportion)) +
-          ggplot2::geom_tile(ggplot2::aes(x = 3.5, width = 6), color = "white", linewidth = 0.5) +
-          ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                             midpoint = (min_prop + max_prop)/2, 
-                             limits = c(min_prop, max_prop)) +
-          ggplot2::facet_wrap(~ condition, ncol = 2) +
-          ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-          ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-          ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-          ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)") +
-          plot_theme
+        p <- create_tile_plot(combined_data, "proportion", limits, x_label, y_label, pal_colors, plot_theme) +
+          ggplot2::facet_wrap(~ condition, ncol = 2)
         
-        return(list(
-          plot = p,
-          prop_data = condition_horizontal_props
-        ))
-        
+        return(list(plot = p, prop_data = condition_horizontal_props))
       } else {
-        ## Return a list of separate plots for more than 2 conditions
-        condition_plots <- list()
-        
-        ## Find maximum proportion across all conditions
-        max_prop <- max(unlist(lapply(condition_horizontal_props, max)))
-        min_prop <- 0
-        
-        ## Check max_legend
-        if (!is.null(max_legend)) {
-          if (max_legend < max_prop) {
-            warning("max_legend value is less than the maximum proportion. Using the maximum proportion instead.")
-          } else {
-            max_prop <- max_legend
-          }
-        }
-        
-        ## Check min_legend
-        if (!is.null(min_legend)) {
-          if (min_legend > min_prop) {
-            warning("min_legend value is greater than the minimum proportion. Using the minimum proportion instead.")
-          } else {
-            min_prop <- min_legend
-          }
-        }
-        
-        for (cond in unique_conditions) {
+        condition_plots <- lapply(unique_conditions, function(cond) {
           horz_props <- condition_horizontal_props[[cond]]
-          
-          horz_data <- data.frame(
-            ac = 1:6,
-            proportion = horz_props
-          )
-          
-          p <- ggplot2::ggplot(horz_data, ggplot2::aes(y = ac, fill = proportion)) +
-            ggplot2::geom_tile(ggplot2::aes(x = 3.5, width = 6), color = "white", linewidth = 0.5) +
-            ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                               midpoint = (min_prop + max_prop)/2, 
-                               limits = c(min_prop, max_prop)) +
-            ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-            ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-            ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-            ggplot2::labs(x = x_label, y = y_label, 
-                 title = paste("Condition:", cond),
-                 fill = "Percentage (%)") +
-            plot_theme
-          
-          condition_plots[[cond]] <- p
-        }
+          limits <- c(0, validate_range(max_legend, max(unlist(lapply(condition_horizontal_props, max)))))
+          horz_data <- create_horizontal_plot_data(horz_props)
+          create_tile_plot(horz_data, "proportion", limits, x_label, y_label, pal_colors, plot_theme)
+        })
         
-        return(list(
-          plots = condition_plots,
-          prop_data = condition_horizontal_props
-        ))
+        names(condition_plots) <- unique_conditions
+        return(list(plots = condition_plots, prop_data = condition_horizontal_props))
       }
-      
     } else if (comparison_type == "difference") {
-      ## For difference comparison, we use the first two conditions
       if (length(unique_conditions) < 2) {
         stop("At least 2 conditions are required for difference comparison")
       }
       
       first_cond <- unique_conditions[1]
       second_cond <- unique_conditions[2]
-      
-      ## Calculate difference 
       diff_horz <- condition_horizontal_props[[first_cond]] - condition_horizontal_props[[second_cond]]
       
-      ## Create data frame for difference plot
-      diff_data <- data.frame(
-        ac = 1:6,
-        difference = diff_horz
-      )
+      diff_data <- data.frame(ac = 1:6, difference = diff_horz)
+      max_diff <- validate_range(max_legend, max(abs(diff_data$difference)))
       
-      ## Get max absolute difference for symmetric color scale
-      max_diff <- max(abs(diff_data$difference))
+      p <- create_tile_plot(diff_data, "difference", c(-max_diff, max_diff), x_label, y_label, pal_colors, plot_theme)
       
-      ## Check max_legend for difference view
-      if (!is.null(max_legend)) {
-        if (max_legend < max_diff) {
-          warning("max_legend value is less than the maximum difference. Using the maximum difference instead.")
-        } else {
-          max_diff <- max_legend
-        }
-      }
-      
-      ## Check min_legend for difference view (should be negative of max for diverging scale)
-      if (!is.null(min_legend)) {
-        if (min_legend > -max_diff) {
-          warning("min_legend value is greater than the negative maximum difference. Using the symmetric range instead.")
-        } else {
-          ## Only use min_legend if it's explicitly set and valid
-          max_diff <- max(max_diff, abs(min_legend))
-        }
-      }
-      
-      ## Create diverging plot
-      p <- ggplot2::ggplot(diff_data, ggplot2::aes(y = ac, fill = difference)) +
-        ggplot2::geom_tile(ggplot2::aes(x = 3.5, width = 6), color = "white", linewidth = 0.5) +
-        ggplot2::scale_fill_gradient2(low = neg_colors[9], mid = "white", high = pos_colors[9],
-                           midpoint = 0,
-                           limits = c(-max_diff, max_diff)) +
-        ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-        ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-        ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-        ggplot2::labs(x = x_label, y = y_label, 
-             title = paste("Difference (%):", first_cond, "-", second_cond),
-             fill = "Difference (%)") +
-        plot_theme
-      
-      return(list(
-        plot = p,
-        first_condition = first_cond,
-        second_condition = second_cond,
-        diff_data = diff_horz
-      ))
+      return(list(plot = p, first_condition = first_cond, second_condition = second_cond, diff_data = diff_horz))
     }
   }
   
-  ## If we reach here, there's an unsupported combination
   stop("Unsupported combination of proportion_type and comparison_type")
 }
+
 
 create_vertical_plot <- function(prop_grid, proportion_type = "overall", color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", condition_grids = NULL, comparison_type = "separate", pos_palette = "Greens", neg_palette = "Reds", max_legend = NULL, min_legend = NULL) {
   
@@ -578,19 +415,15 @@ create_vertical_plot <- function(prop_grid, proportion_type = "overall", color_p
       dc = 1:6,
       proportion = col_sums
     )
-    
-    ## Create plot with vertical bands
-    p <- ggplot2::ggplot(vertical_data, ggplot2::aes(x = dc, fill = proportion)) +
-      ggplot2::geom_tile(ggplot2::aes(y = 3.5, height = 6), color = "white", linewidth = 0.5) +
-      ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                        midpoint = (min_value + max_value)/2, 
-                        limits = c(min_value, max_value)) +
-      ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-      ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-      ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-      ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)") +
-      plot_theme
-    
+
+      p <- create_vertical_bands_plot(vertical_data,
+                                      pal_colors,
+                                      min_value,
+                                      max_value,
+                                      x_label,
+                                      y_label,
+                                      plot_theme)
+      
     return(list(plot = p, prop_data = col_sums))
     
   } else if (proportion_type == "condition") {
