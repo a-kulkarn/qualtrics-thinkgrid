@@ -75,12 +75,15 @@ create_horizontal_bands_plot <- function(vertical_data, pal_colors, min_value, m
 }
 
 ## YYY
-vertical_plot <- function(data, limits, x_label, y_label, pal_colors, title = NULL) {
-    print(data)
-    print(x_label)
-    print(limits)
+vertical_plot <- function(data,
+                          limits,
+                          x_label,
+                          y_label,
+                          pal_colors,
+                          comparison_type = NULL,
+                          title = NULL) {
     
-    ggplot2::ggplot(data, ggplot2::aes(x = dc, y = dc, fill = 6*sample(0:5))) +
+    p <- ggplot2::ggplot(data, ggplot2::aes(x = dc, fill = proportion)) +
         ggplot2::geom_tile(ggplot2::aes(y = 3.5, height = 6), color = "white", linewidth = 0.5) +
         ggplot2::scale_fill_gradient2(
                      low = "white",
@@ -92,11 +95,53 @@ vertical_plot <- function(data, limits, x_label, y_label, pal_colors, title = NU
         ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
         ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
         ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-        ggplot2::labs(x = x_label, y = y_label, title = title, fill = "Percentage (%)") +
         base_plot_theme()
 
+    if (!is.null(comparison_type) && comparison_type == "difference") {
+        p <- p + ggplot2::labs(x = x_label,
+                               y = y_label,
+                               title = paste("Difference (%):", first_cond, "-", second_cond),
+                               fill = "Difference (%)")
+    } else {
+        p <- p + ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)")    
+    }
+    if (!is.null(comparison_type) && comparison_type != "difference") {
+        p <- p + ggplot2::facet_wrap(~ condition, ncol = 2)
+    }
+    return(p)
+    
 }
 
+vertical_difference_plot <- function(diff_data,
+                                     limits,
+                                     x_label,
+                                     y_label,
+                                     pos_colors,
+                                     neg_colors,
+                                     comparison_type = NULL,
+                                     title = NULL) {
+
+    p <- ggplot2::ggplot(diff_data, ggplot2::aes(x = dc, fill = difference)) +
+        ggplot2::geom_tile(
+                     ggplot2::aes(y = 3.5, height = 6),
+                     color = "white",
+                     linewidth = 0.5
+                 ) +
+        ggplot2::scale_fill_gradient2(
+                     low = neg_colors[9],
+                     mid = "white",
+                     high = pos_colors[9],
+                     midpoint = 0,
+                     limits = limits
+                 ) +
+        ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
+        ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+        ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+        ggplot2::labs(x = x_label, y = y_label,
+                      title = paste("Difference (%):", first_cond, "-", second_cond),
+                      fill = "Difference (%)") +
+        base_plot_theme()
+}
 
 constraints_plot <- function(plot_data,
                              x_label,
@@ -297,8 +342,9 @@ create_quadrants_plot <- function(prop_grid,
       proportion = as.vector(quadrant_grid)
     )
 
-    limits <- c(validate_range(max_legend, max(quad_data$proportion)),
-                validate_range(min_legend, 0, FALSE))
+    limits <- c(validate_range(min_legend, 0, FALSE),
+                validate_range(max_legend, max(quad_data$proportion)))
+    
     return(create_tile_plot(quad_data, "proportion", limits, x_label, y_label, pal_colors, plot_theme))
     
   } else if (proportion_type == "condition") {
@@ -376,131 +422,17 @@ create_quadrants_plot <- function(prop_grid,
 ## Horizontal.
 
 create_horizontal_plot <- function(prop_grid,
-                                 proportion_type = "overall",
-                                 color_palette = "Greens",
-                                 x_label = "Directedness",
-                                 y_label = "Stickiness",
-                                 condition_grids = NULL,
-                                 comparison_type = "separate",
-                                 pos_palette = "Greens",
-                                 neg_palette = "Reds",
-                                 max_legend = NULL,
-                                 min_legend = NULL) {
-
-    ## Common plot theme settings
-    plot_theme <- base_plot_theme()
-
-    ## Get color palettes
-    pal_colors <- RColorBrewer::brewer.pal(9, color_palette)
-    pos_colors <- RColorBrewer::brewer.pal(9, pos_palette)
-    neg_colors <- RColorBrewer::brewer.pal(9, neg_palette)
-
-    ## Calculate vertical proportions
-    calculate_vertical_props <- function(grid) {
-        colSums(grid)
-    }
-
-    ## Create data frame for vertical band plot
-    create_vertical_data_frame <- function(col_sums) {
-        data.frame(dc = 1:6, proportion = col_sums)
-    }
-
-    if (proportion_type == "overall") {
-        col_sums <- calculate_vertical_props(prop_grid)
-        limits <- c(validate_range(max_legend, max(col_sums)), validate_range(min_legend, 0, FALSE))
-        vertical_data <- create_vertical_data_frame(col_sums)
-        p <- vertical_plot(vertical_data, "proportion", limits, x_label, y_label)
-        return(list(plot = p, prop_data = col_sums))
-
-    } else if (proportion_type == "condition") {
-        if (is.null(condition_grids)) {
-            stop("condition_grids must be provided when proportion_type is 'condition'")
-        }
-
-        unique_conditions <- names(condition_grids)
-        condition_vertical_props <- lapply(condition_grids, calculate_vertical_props)
-
-        if (comparison_type == "separate") {
-            if (length(unique_conditions) == 2) {
-                cond1 <- unique_conditions[1]
-                cond2 <- unique_conditions[2]
-
-                vert_props1 <- condition_vertical_props[[cond1]]
-                vert_props2 <- condition_vertical_props[[cond2]]
-
-                max_prop <- max(max(vert_props1), max(vert_props2))
-                min_prop <- 0
-
-                limits <- c(validate_range(max_legend, max_prop), validate_range(min_legend, min_prop, FALSE))
-
-                combined_data <- rbind(
-                    data.frame(dc = 1:6, proportion = vert_props1, condition = cond1),
-                    data.frame(dc = 1:6, proportion = vert_props2, condition = cond2)
-                )
-
-                p <- ggplot2::ggplot(combined_data, ggplot2::aes(x = dc, fill = proportion)) +
-                    ggplot2::geom_tile(ggplot2::aes(y = 3.5, height = 6), color = "white", linewidth = 0.5) +
-                    ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                                                   midpoint = (limits[2] + limits[1]) / 2,
-                                                   limits = limits) +
-                    ggplot2::facet_wrap(~ condition, ncol = 2) +
-                    ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-                    ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-                    ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-                    ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)") +
-                    plot_theme
-
-                return(list(plot = p, prop_data = condition_vertical_props))
-
-            } else {
-                condition_plots <- list()
-                max_prop <- max(unlist(lapply(condition_vertical_props, max)))
-                min_prop <- 0
-                limits <- c(validate_range(max_legend, max_prop), validate_range(min_legend, min_prop, FALSE))
-
-                for (cond in unique_conditions) {
-                    vert_props <- condition_vertical_props[[cond]]
-
-                    vert_data <- create_vertical_data_frame(vert_props)
-
-                    p <- vertical_plot(vert_data, "proportion", limits, title = paste("Condition:", cond))
-
-                    condition_plots[[cond]] <- p
-                }
-
-                return(list(plots = condition_plots, prop_data = condition_vertical_props))
-            }
-
-        } else if (comparison_type == "difference") {
-            if (length(unique_conditions) < 2) {
-                stop("At least 2 conditions are required for difference comparison")
-            }
-
-            first_cond <- unique_conditions[1]
-            second_cond <- unique_conditions[2]
-            diff_vert <- condition_vertical_props[[first_cond]] - condition_vertical_props[[second_cond]]
-
-            diff_data <- data.frame(dc = 1:6, difference = diff_vert)
-            max_diff <- validate_range(max_legend, max(abs(diff_data$difference)))
-
-            p <- ggplot2::ggplot(diff_data, ggplot2::aes(x = dc, fill = difference)) +
-                ggplot2::geom_tile(ggplot2::aes(y = 3.5, height = 6), color = "white", linewidth = 0.5) +
-                ggplot2::scale_fill_gradient2(low = neg_colors[9], mid = "white", high = pos_colors[9],
-                                               midpoint = 0,
-                                               limits = c(-max_diff, max_diff)) +
-                ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-                ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-                ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-                ggplot2::labs(x = x_label, y = y_label,
-                              title = paste("Difference (%):", first_cond, "-", second_cond),
-                              fill = "Difference (%)") +
-                plot_theme
-
-            return(list(plot = p, first_condition = first_cond, second_condition = second_cond, diff_data = diff_vert))
-        }
-    }
-
-    stop("Unsupported combination of proportion_type and comparison_type")
+                                   proportion_type = "overall",
+                                   color_palette = "Greens",
+                                   x_label = "Directedness",
+                                   y_label = "Stickiness",
+                                   condition_grids = NULL,
+                                   comparison_type = "separate",
+                                   pos_palette = "Greens",
+                                   neg_palette = "Reds",
+                                   max_legend = NULL,
+                                   min_legend = NULL) {
+    stop("Not implemented.")
 }
 
 
@@ -539,16 +471,16 @@ create_vertical_plot <- function(prop_grid,
 
     if (proportion_type == "overall") {
         col_sums <- calculate_vertical_props(prop_grid)
-        limits <- c(validate_range(max_legend, max(col_sums)),
-                    validate_range(min_legend, 0, FALSE))
+        limits <- c(validate_range(min_legend, 0, FALSE),
+                    validate_range(max_legend, max(col_sums)))
 
         vertical_data <- create_vertical_data_frame(col_sums)
 
         p <- vertical_plot(
             vertical_data,
             limits,
-            x_label = x_label,
-            y_label = y_label,
+            x_label,
+            y_label,
             pal_colors
         )
         return(list(plot = p, prop_data = col_sums))
@@ -572,40 +504,43 @@ create_vertical_plot <- function(prop_grid,
                 max_prop <- max(max(vert_props1), max(vert_props2))
                 min_prop <- 0
 
-                limits <- c(validate_range(max_legend, max_prop), validate_range(min_legend, min_prop, FALSE))
+                limits <- c(validate_range(min_legend, min_prop, FALSE),
+                            validate_range(max_legend, max_prop))
 
                 combined_data <- rbind(
                     data.frame(dc = 1:6, proportion = vert_props1, condition = cond1),
                     data.frame(dc = 1:6, proportion = vert_props2, condition = cond2)
                 )
 
-                p <- ggplot2::ggplot(combined_data, ggplot2::aes(x = dc, fill = proportion)) +
-                    ggplot2::geom_tile(ggplot2::aes(y = 3.5, height = 6), color = "white", linewidth = 0.5) +
-                    ggplot2::scale_fill_gradient2(low = "white", mid = pal_colors[3], high = pal_colors[9],
-                                                   midpoint = (limits[2] + limits[1]) / 2,
-                                                   limits = limits) +
-                    ggplot2::facet_wrap(~ condition, ncol = 2) +
-                    ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-                    ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-                    ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-                    ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)") +
-                    plot_theme
-
+                p <- vertical_plot(
+                    combined_data,
+                    limits,
+                    x_label,
+                    y_label,
+                    pal_colors,
+                    comparison_type
+                )
                 return(list(plot = p, prop_data = condition_vertical_props))
 
             } else {
                 condition_plots <- list()
                 max_prop <- max(unlist(lapply(condition_vertical_props, max)))
                 min_prop <- 0
-                limits <- c(validate_range(max_legend, max_prop), validate_range(min_legend, min_prop, FALSE))
+                limits <- c(validate_range(min_legend, min_prop, FALSE),
+                            validate_range(max_legend, max_prop))
 
                 for (cond in unique_conditions) {
                     vert_props <- condition_vertical_props[[cond]]
-
                     vert_data <- create_vertical_data_frame(vert_props)
 
-                    p <- vertical_plot(vert_data, "proportion", limits, title = paste("Condition:", cond))
-
+                    p <- vertical_plot(
+                        combined_data,
+                        limits,
+                        x_label,
+                        y_label,
+                        pal_colors,
+                        comparison_type
+                    )                    
                     condition_plots[[cond]] <- p
                 }
 
@@ -619,25 +554,32 @@ create_vertical_plot <- function(prop_grid,
 
             first_cond <- unique_conditions[1]
             second_cond <- unique_conditions[2]
-            diff_vert <- condition_vertical_props[[first_cond]] - condition_vertical_props[[second_cond]]
+            diff_vert <- (
+                condition_vertical_props[[first_cond]] - condition_vertical_props[[second_cond]]
+            )
 
             diff_data <- data.frame(dc = 1:6, difference = diff_vert)
             max_diff <- validate_range(max_legend, max(abs(diff_data$difference)))
+            limits = c(-max_diff, max_diff)
+            
+            p <- vertical_difference_plot(
+                diff_data,
+                limits,
+                x_label,
+                y_label,
+                pos_colors,
+                neg_colors,
+                comparison_type = NULL,
+                title = NULL
+            )
 
-            p <- ggplot2::ggplot(diff_data, ggplot2::aes(x = dc, fill = difference)) +
-                ggplot2::geom_tile(ggplot2::aes(y = 3.5, height = 6), color = "white", linewidth = 0.5) +
-                ggplot2::scale_fill_gradient2(low = neg_colors[9], mid = "white", high = pos_colors[9],
-                                               midpoint = 0,
-                                               limits = c(-max_diff, max_diff)) +
-                ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-                ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-                ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-                ggplot2::labs(x = x_label, y = y_label,
-                              title = paste("Difference (%):", first_cond, "-", second_cond),
-                              fill = "Difference (%)") +
-                plot_theme
-
-            return(list(plot = p, first_condition = first_cond, second_condition = second_cond, diff_data = diff_vert))
+            return(list(
+                plot = p,
+                first_condition = first_cond,
+                second_condition = second_cond,
+                diff_data = diff_vert
+            ))
+            
         }
     }
 
