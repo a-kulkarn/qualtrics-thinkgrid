@@ -109,16 +109,52 @@ create_horizontal_bands_plot <- function(vertical_data, pal_colors, min_value, m
 }
 
 ## YYY
+plot_engine <- function(data,
+                        limits,
+                        x_label,
+                        y_label,
+                        colorer,
+                        aesthetics,
+                        geometry,
+                        comparison_type = NULL,
+                        title = NULL) {
+    
+    p <- ggplot2::ggplot(data) +
+        aesthetics + 
+        geometry +
+        colorer(limits) +
+        ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
+        ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+        ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+        base_plot_theme()
+
+    if (!is.null(comparison_type) && comparison_type == "difference") {
+        p <- p + ggplot2::labs(x = x_label,
+                               y = y_label,
+                               title = paste("Difference (%):", first_cond, "-", second_cond),
+                               fill = "Difference (%)")
+    } else {
+        p <- p + ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)")    
+    }
+    if (!is.null(comparison_type) && comparison_type != "difference") {
+        p <- p + ggplot2::facet_wrap(~ condition, ncol = 2)
+    }
+    return(p)
+    
+}
+
+
 vertical_plot <- function(data,
                           limits,
                           x_label,
                           y_label,
                           colorer,
+                          aesthetics,
                           comparison_type = NULL,
                           title = NULL) {
     
     p <- ggplot2::ggplot(data) +
-        ggplot2::aes(x = dc, fill = proportion) +
+        aesthetics + 
         ggplot2::geom_tile(ggplot2::aes(y = 3.5, height = 6), color = "white", linewidth = 0.5) +
         colorer(limits) +
         ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
@@ -479,43 +515,31 @@ create_horizontal_plot <- function(prop_grid,
 ################################################################################
 ## Vertical.
 
-## Calculate vertical proportions
-calculate_vertical_props <- function(grid) {
-    colSums(grid)
-}
-
-## Create data frame for vertical band plot
-create_vertical_data_frame <- function(col_sums) {
-    data.frame(dc = 1:6, proportion = col_sums)
-}
-
-
-create_overall_vertical_plot <- function(data,
-                                         proportioner,
-                                         plotter,
-                                         min_legend,
-                                         max_legend) {
+create_overall_plot <- function(data,
+                                proportioner,
+                                plotter,
+                                framer,
+                                min_legend,
+                                max_legend) {
 
     proportions <- proportioner(data)
     limits <- c(validate_range(min_legend, 0, FALSE),
                 validate_range(max_legend, max(proportions)))
 
-    vertical_data <- create_vertical_data_frame(proportions)
+    vertical_data <- framer()
+    vertical_data$fill_value <- proportions
 
     p <- plotter(vertical_data, limits)
     
     return(list(plot = p, prop_data = proportions))
 }
 
-create_separate_vertical_plot <- function(prop_grid,
-                                          proportion_type = "overall",
-                                          colorer = NULL,
-                                          x_label = "Directedness",
-                                          y_label = "Stickiness",
-                                          condition_grids = NULL,
-                                          comparison_type = "separate",
-                                          max_legend = NULL,
-                                          min_legend = NULL) {
+create_separate_plot <- function(condition_grids,
+                                 proportioner,
+                                 plotter,
+                                 framer,
+                                 min_legend,
+                                 max_legend) {
 
     unique_conditions <- names(condition_grids)
     proportions <- lapply(condition_grids, proportioner)
@@ -533,83 +557,61 @@ create_separate_vertical_plot <- function(prop_grid,
         limits <- c(validate_range(min_legend, min_prop, FALSE),
                     validate_range(max_legend, max_prop))
 
-        combined_vertical_data <- rbind(
-            data.frame(dc = 1:6, proportion = props1, condition = cond1),
-            data.frame(dc = 1:6, proportion = props2, condition = cond2)
-        )
+        data1 <- framer()
+        data1$fill_value <- props1
+        data1$condition <- cond1
 
-        p <- vertical_plot(
-            combined_vertical_data,
-            limits,
-            x_label,
-            y_label,
-            colorer,
-            comparison_type
-        )
+        data2 <- framer()
+        data2$fill_value <- props2
+        data2$condition <- cond2
+        
+        combined_data <- rbind(data1, data2)
+
+        p <- plotter(combined_data, limits)
         return(list(plot = p, prop_data = proportions))
 
     } else {
         condition_plots <- list()
         max_prop <- max(unlist(lapply(proportions, max)))
         min_prop <- 0
+        
         limits <- c(validate_range(min_legend, min_prop, FALSE),
                     validate_range(max_legend, max_prop))
 
         for (cond in unique_conditions) {
-            vert_data <- create_vertical_data_frame(proportions[[cond]])
-
-            p <- vertical_plot(
-                vert_data,
-                limits,
-                x_label,
-                y_label,
-                colorer,                        
-                comparison_type
-            )                    
-            condition_plots[[cond]] <- p
+            data <- framer()
+            data$fill_value <- proportions[[cond]]
+            condition_plots[[cond]] <- plotter(data, limits)
         }
 
         return(list(plots = condition_plots, prop_data = proportions))
     }
 }
 
-create_difference_vertical_plot <- function(prop_grid,
-                                            proportion_type = "overall",
-                                            colorer = NULL,
-                                            x_label = "Directedness",
-                                            y_label = "Stickiness",
-                                            condition_grids = NULL,
-                                            comparison_type = "separate",
-                                            max_legend = NULL,
-                                            min_legend = NULL) {
+create_difference_plot <- function(condition_grids,
+                                   proportioner,
+                                   plotter,
+                                   framer,
+                                   min_legend,
+                                   max_legend) {
 
     unique_conditions <- names(condition_grids)
-    condition_vertical_props <- lapply(condition_grids, calculate_vertical_props)
+    proportions <- lapply(condition_grids, proportioner)
 
-    
-    if (length(unique_conditions) < 2) {
-        stop("At least 2 conditions are required for difference comparison")
+    if (length(unique_conditions) != 2) {
+        stop("Exactly 2 conditions are required for difference comparison.")
     }
 
     first_cond <- unique_conditions[1]
     second_cond <- unique_conditions[2]
-    diff_vert <- (
-        condition_vertical_props[[first_cond]] - condition_vertical_props[[second_cond]]
-    )
 
-    diff_data <- data.frame(dc = 1:6, difference = diff_vert)
-    max_diff <- validate_range(max_legend, max(abs(diff_data$difference)))
+    diff_data <- framer()
+    diff_data$fill_value <- proportions[[first_cond]] - proportions[[second_cond]]
+    
+    max_diff <- validate_range(max_legend, max(abs(diff_data$fill_value)))
     limits = c(-max_diff, max_diff)
     
-    p <- vertical_plot(
-        diff_data,
-        limits,
-        x_label,
-        y_label,
-        colorer,
-        comparison_type = NULL,
-        title = NULL
-    )
+    p <- plotter(diff_data, limits)
 
     return(list(
         plot = p,
@@ -618,6 +620,27 @@ create_difference_vertical_plot <- function(prop_grid,
         diff_data = diff_vert
     ))
 
+}
+
+get_plot_method <- function(proportion_type, comparison_type) {
+    if (proportion_type == "overall") {
+        return(create_overall_plot)
+
+    } else if (proportion_type == "condition") {
+        if (is.null(condition_grids)) {
+            stop("condition_grids must be provided when proportion_type is 'condition'")
+        }
+
+        if (comparison_type == "separate") {
+            return(create_separate_plot)
+
+        } else if (comparison_type == "difference") {
+            ## NOTE: The aesthetics fill might be different.
+            return(create_difference_plot)
+        }
+    } else {
+        stop("Unsupported combination of proportion_type and comparison_type")
+    }
 }
 
 create_vertical_plot <- function(prop_grid,
@@ -637,43 +660,51 @@ create_vertical_plot <- function(prop_grid,
         stop("Not Implemented.")
     }
 
-    proportioner <- calculate_vertical_props
+    ## Calculate vertical proportions
+    proportioner <- function(grid) {
+        colSums(grid)
+    }
 
+    ## Create data frame for vertical band plot
+    framer <- function(col_sums) {
+        data.frame(dc = 1:6)
+    }
+    
+    ## aesthetics <- ggplot2::aes(x = dc, fill = proportion)
+    aesthetics <- ggplot2::aes(x = dc, fill = fill_value)
+
+    geometry <- ggplot2::geom_tile(
+                             ggplot2::aes(y = 3.5, height = 6),
+                             color = "white",
+                             linewidth = 0.5
+                         )
+    
     plotter <- function(data, limits) {
-        vertical_plot(
+        plot_engine(
             data,
             limits,
             x_label,
             y_label,
             colorer,
+            aesthetics,
+            geometry,
             comparison_type = NULL,
             title = NULL
         )
     }
+
+    meth <- get_plot_method(proportion_type, comparison_type)
     
-    if (proportion_type == "overall") {
-        return(create_overall_vertical_plot(
-            data = prop_grid,
-            proportioner = proportioner,
-            plotter = plotter,
-            min_legend,
-            max_legend
-        ))
+    ## Create the plot.
+    return(meth(
+        data = prop_grid,
+        proportioner = proportioner,
+        plotter = plotter,
+        framer = framer,            
+        min_legend,
+        max_legend
+    ))
 
-    } else if (proportion_type == "condition") {
-        if (is.null(condition_grids)) {
-            stop("condition_grids must be provided when proportion_type is 'condition'")
-        }
-
-        if (comparison_type == "separate") {
-            return(create_separate_vertical_plot)
-
-        } else if (comparison_type == "difference") {
-            return(create_difference_vertical_plot)
-        }
-    }
-
-    stop("Unsupported combination of proportion_type and comparison_type")
 }
 
 
