@@ -495,25 +495,7 @@ create_quadrants_plot <- function(prop_grid,
 
 
 ################################################################################
-## Horizontal.
-
-create_horizontal_plot <- function(prop_grid,
-                                   proportion_type = "overall",
-                                   color_palette = "Greens",
-                                   x_label = "Directedness",
-                                   y_label = "Stickiness",
-                                   condition_grids = NULL,
-                                   comparison_type = "separate",
-                                   pos_palette = "Greens",
-                                   neg_palette = "Reds",
-                                   max_legend = NULL,
-                                   min_legend = NULL) {
-    stop("Not implemented.")
-}
-
-
-################################################################################
-## Vertical.
+## General.
 
 create_overall_plot <- function(data,
                                 proportioner,
@@ -643,22 +625,60 @@ get_plot_method <- function(proportion_type, comparison_type) {
     }
 }
 
-create_vertical_plot <- function(prop_grid,
-                                 proportion_type = "overall",
-                                 colorer = NULL,
-                                 x_label = "Directedness",
-                                 y_label = "Stickiness",
-                                 condition_grids = NULL,
-                                 comparison_type = "separate",
-                                 max_legend = NULL,
-                                 min_legend = NULL) {
-    ## YYY
+compile_plot_creator <- function(proportioner,
+                                 framer,
+                                 aesthetics,
+                                 geometry) {
 
-    if (is.null(colorer)) {
-        colorer <- default_colorer(with_negatives = (comparison_type == "difference"))
-    } else {
-        stop("Not Implemented.")
+    function(prop_grid,
+             proportion_type = "overall",
+             colorer = NULL,
+             x_label = "Directedness",
+             y_label = "Stickiness",
+             condition_grids = NULL,
+             comparison_type = "separate",
+             max_legend = NULL,
+             min_legend = NULL) {
+
+        if (is.null(colorer)) {
+            colorer <- default_colorer(with_negatives = (comparison_type == "difference"))
+        } else {
+            stop("Not Implemented.")
+        }
+
+        plotter <- function(data, limits) {
+            plot_engine(
+                data,
+                limits,
+                x_label,
+                y_label,
+                colorer,
+                aesthetics,
+                geometry,
+                comparison_type = NULL,
+                title = NULL
+            )
+        }
+
+        meth <- get_plot_method(proportion_type, comparison_type)
+    
+        ## Create the plot.
+        return(meth(
+            data = prop_grid,
+            proportioner = proportioner,
+            plotter = plotter,
+            framer = framer,            
+            min_legend,
+            max_legend
+        ))
     }
+
+}
+
+################################################################################
+## Vertical.
+
+compile_vertical_plot_creator <- function() {
 
     ## Calculate vertical proportions
     proportioner <- function(grid) {
@@ -670,7 +690,6 @@ create_vertical_plot <- function(prop_grid,
         data.frame(dc = 1:6)
     }
     
-    ## aesthetics <- ggplot2::aes(x = dc, fill = proportion)
     aesthetics <- ggplot2::aes(x = dc, fill = fill_value)
 
     geometry <- ggplot2::geom_tile(
@@ -678,34 +697,39 @@ create_vertical_plot <- function(prop_grid,
                              color = "white",
                              linewidth = 0.5
                          )
-    
-    plotter <- function(data, limits) {
-        plot_engine(
-            data,
-            limits,
-            x_label,
-            y_label,
-            colorer,
-            aesthetics,
-            geometry,
-            comparison_type = NULL,
-            title = NULL
-        )
+
+    compile_plot_creator(proportioner, framer, aesthetics, geometry)
+}
+
+create_vertical_plot <- compile_vertical_plot_creator()
+
+################################################################################
+## Horizontal.
+
+compile_horizontal_plot_creator <- function() {
+
+    ## Calculate vertical proportions
+    proportioner <- function(grid) {
+        colSums(grid)
     }
 
-    meth <- get_plot_method(proportion_type, comparison_type)
+    ## Create data frame for vertical band plot
+    framer <- function(col_sums) {
+        data.frame(ac = 1:6)
+    }
     
-    ## Create the plot.
-    return(meth(
-        data = prop_grid,
-        proportioner = proportioner,
-        plotter = plotter,
-        framer = framer,            
-        min_legend,
-        max_legend
-    ))
+    aesthetics <- ggplot2::aes(y = ac, fill = fill_value)
 
+    geometry <- ggplot2::geom_tile(
+                             ggplot2::aes(x = 3.5, width = 6),
+                             color = "white",
+                             linewidth = 0.5
+                         )
+
+    compile_plot_creator(proportioner, framer, aesthetics, geometry)
 }
+
+create_horizontal_plot <- compile_horizontal_plot_creator()
 
 
 ################################################################################
