@@ -16,7 +16,7 @@ validate_range <- function(value, ref_value, is_max = TRUE) {
 }
 
 ################################################################################
-## Plot creation.
+## Plot creation base.
 
 base_plot_theme <- function() {
       plot_theme <- ggplot2::theme_minimal() +
@@ -28,6 +28,40 @@ base_plot_theme <- function() {
       plot.margin = grid::unit(c(1, 1, 2, 2), "lines")
     )
 }
+
+default_colorer <- function(with_negatives = FALSE) {
+    ## Get color palettes
+    pal_colors <- RColorBrewer::brewer.pal(9, "Greens")
+    pos_colors <- RColorBrewer::brewer.pal(9, "Greens")
+    neg_colors <- RColorBrewer::brewer.pal(9, "Reds")
+
+
+    if (with_negatives) {
+        function (limits) {
+            ggplot2::scale_fill_gradient2(
+                         low = neg_colors[9],
+                         mid = "white",
+                         high = pos_colors[9],
+                         midpoint = 0,
+                         limits = limits
+                     )
+        }
+
+    } else {
+        function (limits) {
+            ggplot2::scale_fill_gradient2(
+                         low = "white",
+                         mid = pal_colors[3],
+                         high = pal_colors[9],
+                         midpoint = mean(limits), 
+                         limits = limits
+                     )
+        }
+    }
+}
+
+################################################################################
+## Plot creation.
 
 create_tile_plot_grid <- function(plot_data, fill_var, limits, condition = NULL) {
   p <- ggplot2::ggplot(plot_data, ggplot2::aes_string(x = "dc", y = "ac", fill = fill_var)) +
@@ -79,19 +113,14 @@ vertical_plot <- function(data,
                           limits,
                           x_label,
                           y_label,
-                          pal_colors,
+                          colorer,
                           comparison_type = NULL,
                           title = NULL) {
     
-    p <- ggplot2::ggplot(data, ggplot2::aes(x = dc, fill = proportion)) +
+    p <- ggplot2::ggplot(data) +
+        ggplot2::aes(x = dc, fill = proportion) +
         ggplot2::geom_tile(ggplot2::aes(y = 3.5, height = 6), color = "white", linewidth = 0.5) +
-        ggplot2::scale_fill_gradient2(
-                     low = "white",
-                     mid = pal_colors[3],
-                     high = pal_colors[9],
-                     midpoint = mean(limits),
-                     limits = limits
-                 ) +
+        colorer(limits) +
         ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
         ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
         ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
@@ -112,36 +141,6 @@ vertical_plot <- function(data,
     
 }
 
-vertical_difference_plot <- function(diff_data,
-                                     limits,
-                                     x_label,
-                                     y_label,
-                                     pos_colors,
-                                     neg_colors,
-                                     comparison_type = NULL,
-                                     title = NULL) {
-
-    p <- ggplot2::ggplot(diff_data, ggplot2::aes(x = dc, fill = difference)) +
-        ggplot2::geom_tile(
-                     ggplot2::aes(y = 3.5, height = 6),
-                     color = "white",
-                     linewidth = 0.5
-                 ) +
-        ggplot2::scale_fill_gradient2(
-                     low = neg_colors[9],
-                     mid = "white",
-                     high = pos_colors[9],
-                     midpoint = 0,
-                     limits = limits
-                 ) +
-        ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-        ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-        ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-        ggplot2::labs(x = x_label, y = y_label,
-                      title = paste("Difference (%):", first_cond, "-", second_cond),
-                      fill = "Difference (%)") +
-        base_plot_theme()
-}
 
 constraints_plot <- function(plot_data,
                              x_label,
@@ -344,8 +343,18 @@ create_quadrants_plot <- function(prop_grid,
 
     limits <- c(validate_range(min_legend, 0, FALSE),
                 validate_range(max_legend, max(quad_data$proportion)))
+
+    p <- create_tile_plot(
+        quad_data,
+        "proportion",
+        limits,
+        x_label,
+        y_label,
+        pal_colors,
+        plot_theme
+    )
     
-    return(create_tile_plot(quad_data, "proportion", limits, x_label, y_label, pal_colors, plot_theme))
+    return(p)
     
   } else if (proportion_type == "condition") {
     if (is.null(condition_grids)) {
@@ -376,7 +385,19 @@ create_quadrants_plot <- function(prop_grid,
         
         combined_data <- rbind(quad_data1, quad_data2)
         limits <- c(0, validate_range(max_legend, max(unlist(condition_quad_grids))))
-        p <- create_tile_plot(combined_data, "proportion", limits, x_label, y_label, pal_colors, plot_theme) + ggplot2::facet_wrap(~ condition, ncol = 2)
+        
+        p <- create_tile_plot(
+            combined_data,
+            "proportion",
+            limits,
+            x_label,
+            y_label,
+            pal_colors,
+            plot_theme
+        )
+
+        p <- p + ggplot2::facet_wrap(~ condition, ncol = 2)
+        
         return(list(plot = p, prop_data = condition_quad_grids))
         
       } else {
@@ -388,7 +409,15 @@ create_quadrants_plot <- function(prop_grid,
           )
           limits <- c(0, validate_range(max_legend, max(unlist(lapply(condition_quad_grids, max)))))
           
-          create_tile_plot(quad_data, "proportion", limits, x_label, y_label, pal_colors, plot_theme)
+          create_tile_plot(
+              quad_data,
+              "proportion",
+              limits,
+              x_label,
+              y_label,
+              pal_colors,
+              plot_theme
+          )
         })
         names(condition_plots) <- unique_conditions
         return(list(plots = condition_plots, prop_data = condition_quad_grids))
@@ -410,7 +439,18 @@ create_quadrants_plot <- function(prop_grid,
       )
       
       max_diff <- validate_range(max_legend, max(abs(diff_data$difference)))
-      return(create_tile_plot(diff_data, "difference", c(-max_diff, max_diff), x_label, y_label, pal_colors, plot_theme))
+
+      p <- create_tile_plot(
+          diff_data,
+          "difference",
+          c(-max_diff, max_diff),
+          x_label,
+          y_label,
+          pal_colors,
+          plot_theme
+      )
+      
+      return(p)
     }
   }
   
@@ -439,147 +479,197 @@ create_horizontal_plot <- function(prop_grid,
 ################################################################################
 ## Vertical.
 
+## Calculate vertical proportions
+calculate_vertical_props <- function(grid) {
+    colSums(grid)
+}
+
+## Create data frame for vertical band plot
+create_vertical_data_frame <- function(col_sums) {
+    data.frame(dc = 1:6, proportion = col_sums)
+}
+
+
+create_overall_vertical_plot <- function(data,
+                                         proportioner,
+                                         plotter,
+                                         min_legend,
+                                         max_legend) {
+
+    proportions <- proportioner(data)
+    limits <- c(validate_range(min_legend, 0, FALSE),
+                validate_range(max_legend, max(proportions)))
+
+    vertical_data <- create_vertical_data_frame(proportions)
+
+    p <- plotter(vertical_data, limits)
+    
+    return(list(plot = p, prop_data = proportions))
+}
+
+create_separate_vertical_plot <- function(prop_grid,
+                                          proportion_type = "overall",
+                                          colorer = NULL,
+                                          x_label = "Directedness",
+                                          y_label = "Stickiness",
+                                          condition_grids = NULL,
+                                          comparison_type = "separate",
+                                          max_legend = NULL,
+                                          min_legend = NULL) {
+
+    unique_conditions <- names(condition_grids)
+    proportions <- lapply(condition_grids, proportioner)
+
+    if (length(unique_conditions) == 2) {
+        cond1 <- unique_conditions[1]
+        cond2 <- unique_conditions[2]
+
+        props1 <- proportions[[cond1]]
+        props2 <- proportions[[cond2]]
+
+        max_prop <- max(max(props1), max(props2))
+        min_prop <- 0
+
+        limits <- c(validate_range(min_legend, min_prop, FALSE),
+                    validate_range(max_legend, max_prop))
+
+        combined_vertical_data <- rbind(
+            data.frame(dc = 1:6, proportion = props1, condition = cond1),
+            data.frame(dc = 1:6, proportion = props2, condition = cond2)
+        )
+
+        p <- vertical_plot(
+            combined_vertical_data,
+            limits,
+            x_label,
+            y_label,
+            colorer,
+            comparison_type
+        )
+        return(list(plot = p, prop_data = proportions))
+
+    } else {
+        condition_plots <- list()
+        max_prop <- max(unlist(lapply(proportions, max)))
+        min_prop <- 0
+        limits <- c(validate_range(min_legend, min_prop, FALSE),
+                    validate_range(max_legend, max_prop))
+
+        for (cond in unique_conditions) {
+            vert_data <- create_vertical_data_frame(proportions[[cond]])
+
+            p <- vertical_plot(
+                vert_data,
+                limits,
+                x_label,
+                y_label,
+                colorer,                        
+                comparison_type
+            )                    
+            condition_plots[[cond]] <- p
+        }
+
+        return(list(plots = condition_plots, prop_data = proportions))
+    }
+}
+
+create_difference_vertical_plot <- function(prop_grid,
+                                            proportion_type = "overall",
+                                            colorer = NULL,
+                                            x_label = "Directedness",
+                                            y_label = "Stickiness",
+                                            condition_grids = NULL,
+                                            comparison_type = "separate",
+                                            max_legend = NULL,
+                                            min_legend = NULL) {
+
+    unique_conditions <- names(condition_grids)
+    condition_vertical_props <- lapply(condition_grids, calculate_vertical_props)
+
+    
+    if (length(unique_conditions) < 2) {
+        stop("At least 2 conditions are required for difference comparison")
+    }
+
+    first_cond <- unique_conditions[1]
+    second_cond <- unique_conditions[2]
+    diff_vert <- (
+        condition_vertical_props[[first_cond]] - condition_vertical_props[[second_cond]]
+    )
+
+    diff_data <- data.frame(dc = 1:6, difference = diff_vert)
+    max_diff <- validate_range(max_legend, max(abs(diff_data$difference)))
+    limits = c(-max_diff, max_diff)
+    
+    p <- vertical_plot(
+        diff_data,
+        limits,
+        x_label,
+        y_label,
+        colorer,
+        comparison_type = NULL,
+        title = NULL
+    )
+
+    return(list(
+        plot = p,
+        first_condition = first_cond,
+        second_condition = second_cond,
+        diff_data = diff_vert
+    ))
+
+}
+
 create_vertical_plot <- function(prop_grid,
                                  proportion_type = "overall",
-                                 color_palette = "Greens",
+                                 colorer = NULL,
                                  x_label = "Directedness",
                                  y_label = "Stickiness",
                                  condition_grids = NULL,
                                  comparison_type = "separate",
-                                 pos_palette = "Greens",
-                                 neg_palette = "Reds",
                                  max_legend = NULL,
                                  min_legend = NULL) {
     ## YYY
-    ## Common plot theme settings
-    plot_theme <- base_plot_theme()
 
-    ## Get color palettes
-    pal_colors <- RColorBrewer::brewer.pal(9, color_palette)
-    pos_colors <- RColorBrewer::brewer.pal(9, pos_palette)
-    neg_colors <- RColorBrewer::brewer.pal(9, neg_palette)
-
-    ## Calculate vertical proportions
-    calculate_vertical_props <- function(grid) {
-        colSums(grid)
+    if (is.null(colorer)) {
+        colorer <- default_colorer(with_negatives = (comparison_type == "difference"))
+    } else {
+        stop("Not Implemented.")
     }
 
-    ## Create data frame for vertical band plot
-    create_vertical_data_frame <- function(col_sums) {
-        data.frame(dc = 1:6, proportion = col_sums)
-    }
+    proportioner <- calculate_vertical_props
 
-    if (proportion_type == "overall") {
-        col_sums <- calculate_vertical_props(prop_grid)
-        limits <- c(validate_range(min_legend, 0, FALSE),
-                    validate_range(max_legend, max(col_sums)))
-
-        vertical_data <- create_vertical_data_frame(col_sums)
-
-        p <- vertical_plot(
-            vertical_data,
+    plotter <- function(data, limits) {
+        vertical_plot(
+            data,
             limits,
             x_label,
             y_label,
-            pal_colors
+            colorer,
+            comparison_type = NULL,
+            title = NULL
         )
-        return(list(plot = p, prop_data = col_sums))
+    }
+    
+    if (proportion_type == "overall") {
+        return(create_overall_vertical_plot(
+            data = prop_grid,
+            proportioner = proportioner,
+            plotter = plotter,
+            min_legend,
+            max_legend
+        ))
 
     } else if (proportion_type == "condition") {
         if (is.null(condition_grids)) {
             stop("condition_grids must be provided when proportion_type is 'condition'")
         }
 
-        unique_conditions <- names(condition_grids)
-        condition_vertical_props <- lapply(condition_grids, calculate_vertical_props)
-
         if (comparison_type == "separate") {
-            if (length(unique_conditions) == 2) {
-                cond1 <- unique_conditions[1]
-                cond2 <- unique_conditions[2]
-
-                vert_props1 <- condition_vertical_props[[cond1]]
-                vert_props2 <- condition_vertical_props[[cond2]]
-
-                max_prop <- max(max(vert_props1), max(vert_props2))
-                min_prop <- 0
-
-                limits <- c(validate_range(min_legend, min_prop, FALSE),
-                            validate_range(max_legend, max_prop))
-
-                combined_data <- rbind(
-                    data.frame(dc = 1:6, proportion = vert_props1, condition = cond1),
-                    data.frame(dc = 1:6, proportion = vert_props2, condition = cond2)
-                )
-
-                p <- vertical_plot(
-                    combined_data,
-                    limits,
-                    x_label,
-                    y_label,
-                    pal_colors,
-                    comparison_type
-                )
-                return(list(plot = p, prop_data = condition_vertical_props))
-
-            } else {
-                condition_plots <- list()
-                max_prop <- max(unlist(lapply(condition_vertical_props, max)))
-                min_prop <- 0
-                limits <- c(validate_range(min_legend, min_prop, FALSE),
-                            validate_range(max_legend, max_prop))
-
-                for (cond in unique_conditions) {
-                    vert_props <- condition_vertical_props[[cond]]
-                    vert_data <- create_vertical_data_frame(vert_props)
-
-                    p <- vertical_plot(
-                        combined_data,
-                        limits,
-                        x_label,
-                        y_label,
-                        pal_colors,
-                        comparison_type
-                    )                    
-                    condition_plots[[cond]] <- p
-                }
-
-                return(list(plots = condition_plots, prop_data = condition_vertical_props))
-            }
+            return(create_separate_vertical_plot)
 
         } else if (comparison_type == "difference") {
-            if (length(unique_conditions) < 2) {
-                stop("At least 2 conditions are required for difference comparison")
-            }
-
-            first_cond <- unique_conditions[1]
-            second_cond <- unique_conditions[2]
-            diff_vert <- (
-                condition_vertical_props[[first_cond]] - condition_vertical_props[[second_cond]]
-            )
-
-            diff_data <- data.frame(dc = 1:6, difference = diff_vert)
-            max_diff <- validate_range(max_legend, max(abs(diff_data$difference)))
-            limits = c(-max_diff, max_diff)
-            
-            p <- vertical_difference_plot(
-                diff_data,
-                limits,
-                x_label,
-                y_label,
-                pos_colors,
-                neg_colors,
-                comparison_type = NULL,
-                title = NULL
-            )
-
-            return(list(
-                plot = p,
-                first_condition = first_cond,
-                second_condition = second_cond,
-                diff_data = diff_vert
-            ))
-            
+            return(create_difference_vertical_plot)
         }
     }
 
@@ -736,7 +826,7 @@ create_constraints_plot <- function(prop_grid,
 
 
 ################################################################################
-## Diagonal constraint.
+## Depth.
 
 
 ## Calculate depth proportions
@@ -879,50 +969,50 @@ create_depth_plot <- function(prop_grid,
         if (length(unique_conditions) < 2) {
             stop("At least 2 conditions are required for difference comparison")
         }
-      
-      first_cond <- unique_conditions[1]
-      second_cond <- unique_conditions[2]
-      diff_depth <- condition_depth_props[[first_cond]] - condition_depth_props[[second_cond]]
-      
-      diff_polygons <- depth_polygons
-      
-      for (q in 1:4) {
-        for (d in 1:5) {
-          mask <- diff_polygons$quadrant == q & diff_polygons$depth == d
-          if (any(mask)) {
-            diff_polygons$difference[mask] <- diff_depth[q, d]
-          }
+        
+        first_cond <- unique_conditions[1]
+        second_cond <- unique_conditions[2]
+        diff_depth <- condition_depth_props[[first_cond]] - condition_depth_props[[second_cond]]
+        
+        diff_polygons <- depth_polygons
+        
+        for (q in 1:4) {
+            for (d in 1:5) {
+                mask <- diff_polygons$quadrant == q & diff_polygons$depth == d
+                if (any(mask)) {
+                    diff_polygons$difference[mask] <- diff_depth[q, d]
+                }
+            }
         }
-      }
-      
-      max_diff <- max(abs(diff_depth))
-      limits <- c(-max_diff, max_diff)
+        
+        max_diff <- max(abs(diff_depth))
+        limits <- c(-max_diff, max_diff)
 
-      p <- ggplot2::ggplot() +
-        ggplot2::geom_polygon(data = diff_polygons, 
-                    ggplot2::aes(x = x, y = y, fill = difference, 
-                        group = interaction(quadrant, depth)),
-                    color = "white", linewidth = 0.5) +
-        ggplot2::scale_fill_gradient2(low = neg_palette[9], mid = "white", high = pos_palette[9],
-                           midpoint = 0,
-                           limits = limits) +
-        ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-        ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-        ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-        ggplot2::labs(x = x_label, y = y_label, 
-             title = paste("Difference (%):", first_cond, "-", second_cond),
-             fill = "Difference (%)") +
-        plot_theme
-      
-      return(list(
-        plot = p,
-        first_condition = first_cond,
-        second_condition = second_cond,
-        diff_data = diff_depth
-      ))
+        p <- ggplot2::ggplot() +
+            ggplot2::geom_polygon(data = diff_polygons, 
+                                  ggplot2::aes(x = x, y = y, fill = difference, 
+                                               group = interaction(quadrant, depth)),
+                                  color = "white", linewidth = 0.5) +
+            ggplot2::scale_fill_gradient2(low = neg_palette[9], mid = "white", high = pos_palette[9],
+                                          midpoint = 0,
+                                          limits = limits) +
+            ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
+            ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
+            ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
+            ggplot2::labs(x = x_label, y = y_label, 
+                          title = paste("Difference (%):", first_cond, "-", second_cond),
+                          fill = "Difference (%)") +
+            plot_theme
+        
+        return(list(
+            plot = p,
+            first_condition = first_cond,
+            second_condition = second_cond,
+            diff_data = diff_depth
+        ))
     }
   }
-  
-  stop("Unsupported combination of proportion_type and comparison_type")
+    
+    stop("Unsupported combination of proportion_type and comparison_type")
 }
 
