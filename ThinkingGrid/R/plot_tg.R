@@ -19,7 +19,21 @@ check_install_package <- function(package_name) {
 #' plot_tg(relevant_data)
 #' 
 #' @export
-plot_tg <- function(dc, ac, proportion_type = "overall", type = "cells", color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", condition_col = NULL, comparison_type = "separate", pos_palette = "Greens", neg_palette = "Reds", max_legend = NULL, min_legend = NULL) {
+plot_tg <- function(survey_results,
+                    proportion_type = "overall",
+                    type = "cells",
+                    colorer = NULL,
+                    x_label = "Directedness",
+                    y_label = "Stickiness",
+                    condition_col = NULL,
+                    comparison_type = "separate",
+                    max_legend = NULL,
+                    min_legend = NULL) {
+
+    dc <- survey_results$Deliberate.Constraints
+    ac <- survey_results$Automatic.Constraints
+
+    print(ac)
     
     # Check required packages
     check_install_package("RColorBrewer")
@@ -63,18 +77,18 @@ plot_tg <- function(dc, ac, proportion_type = "overall", type = "cells", color_p
     }
     
     # Validate color palettes
-    if (!color_palette %in% rownames(RColorBrewer::brewer.pal.info)) {
-        warning("Invalid color palette. Using default Greens palette.")
-        color_palette <- "Greens"
-    }
-    if (!pos_palette %in% rownames(RColorBrewer::brewer.pal.info)) {
-        warning("Invalid positive palette. Using default Greens palette.")
-        pos_palette <- "Greens"
-    }
-    if (!neg_palette %in% rownames(RColorBrewer::brewer.pal.info)) {
-        warning("Invalid negative palette. Using default Reds palette.")
-        neg_palette <- "Reds"
-    }
+    ## if (!color_palette %in% rownames(RColorBrewer::brewer.pal.info)) {
+    ##     warning("Invalid color palette. Using default Greens palette.")
+    ##     color_palette <- "Greens"
+    ## }
+    ## if (!pos_palette %in% rownames(RColorBrewer::brewer.pal.info)) {
+    ##     warning("Invalid positive palette. Using default Greens palette.")
+    ##     pos_palette <- "Greens"
+    ## }
+    ## if (!neg_palette %in% rownames(RColorBrewer::brewer.pal.info)) {
+    ##     warning("Invalid negative palette. Using default Reds palette.")
+    ##     neg_palette <- "Reds"
+    ## }
 
     # Validate plot type
     valid_types <- c("quadrants", "horizontal", "vertical", "constraints", "depth", "cells")
@@ -165,10 +179,10 @@ plot_tg <- function(dc, ac, proportion_type = "overall", type = "cells", color_p
     
     # Call the appropriate plot function
     plot_fn <- plot_functions[[type]]
-    
+
     # All plot types now support condition-based visualization
-    return(plot_fn(prop_grid, proportion_type, color_palette, x_label, y_label,
-                 condition_grids, comparison_type, pos_palette, neg_palette, max_legend, min_legend))
+    return(plot_fn(prop_grid, proportion_type, colorer, x_label, y_label,
+                 condition_grids, comparison_type, max_legend, min_legend))
 }
 
 
