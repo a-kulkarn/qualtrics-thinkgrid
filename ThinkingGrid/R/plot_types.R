@@ -121,7 +121,7 @@ plot_engine <- function(data,
     
     p <- ggplot2::ggplot(data) +
         aesthetics + 
-        geometry +
+        geometry(data) +
         colorer(limits) +
         ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
         ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
@@ -217,6 +217,7 @@ constraints_plot <- function(plot_data,
     return(p)
 }
 
+# YYY:
 taxicab_depth_plot <- function(plot_data, limits, pal_colors, x_label, y_label, plot_theme) {
   ggplot2::ggplot() +
       ggplot2::geom_polygon(
@@ -225,7 +226,8 @@ taxicab_depth_plot <- function(plot_data, limits, pal_colors, x_label, y_label, 
                                 y = y,
                                 fill = proportion,
                                 group = interaction(quadrant, depth)),
-                   color = "white", linewidth = 0.5) +
+                   color = "white", linewidth = 0.5
+               ) +
       ggplot2::scale_fill_gradient2(
                    low = "white",
                    mid = pal_colors[3],
@@ -686,17 +688,19 @@ compile_vertical_plot_creator <- function() {
     }
 
     ## Create data frame for vertical band plot
-    framer <- function(col_sums) {
+    framer <- function() {
         data.frame(dc = 1:6)
     }
     
     aesthetics <- ggplot2::aes(x = dc, fill = fill_value)
 
-    geometry <- ggplot2::geom_tile(
-                             ggplot2::aes(y = 3.5, height = 6),
-                             color = "white",
-                             linewidth = 0.5
-                         )
+    geometry <- function(data) {
+        ggplot2::geom_tile(
+                     ggplot2::aes(y = 3.5, height = 6),
+                     color = "white",
+                     linewidth = 0.5
+                 )
+    }
 
     compile_plot_creator(proportioner, framer, aesthetics, geometry)
 }
@@ -720,11 +724,13 @@ compile_horizontal_plot_creator <- function() {
     
     aesthetics <- ggplot2::aes(y = ac, fill = fill_value)
 
-    geometry <- ggplot2::geom_tile(
-                             ggplot2::aes(x = 3.5, width = 6),
-                             color = "white",
-                             linewidth = 0.5
-                         )
+    geometry <- function(data) {
+        ggplot2::geom_tile(
+                     ggplot2::aes(x = 3.5, width = 6),
+                     color = "white",
+                     linewidth = 0.5
+                 )
+    }
 
     compile_plot_creator(proportioner, framer, aesthetics, geometry)
 }
@@ -883,7 +889,6 @@ create_constraints_plot <- function(prop_grid,
 ################################################################################
 ## Depth.
 
-
 ## Calculate depth proportions
 calculate_depth_props <- function(grid) {
     ## Initialize matrix to store depth proportions for each quadrant (4 quadrants, 5 depths)
@@ -923,151 +928,44 @@ calculate_depth_props <- function(grid) {
     return(depth_props)
 }
 
+## YYY:
+compile_depth_plot_creator <- function() {
+    proportioner <- function(prop_grid) {
+        depth_props <- calculate_depth_props(prop_grid)
 
-create_depth_plot <- function(prop_grid,
-                              proportion_type = "overall",
-                              color_palette = "Greens",
-                              x_label = "Directedness",
-                              y_label = "Stickiness",
-                              condition_grids = NULL,
-                              comparison_type = "separate",
-                              pos_palette = "Greens",
-                              neg_palette = "Reds",
-                              max_legend = NULL,
-                              min_legend = NULL) {
+        depth_polygons <- get_depth_polygons()
+        plot_data <- depth_polygons
 
-    plot_theme <- base_plot_theme()
-    pal_colors <- RColorBrewer::brewer.pal(9, color_palette)
-
-    depth_props <- calculate_depth_props(prop_grid)
-    limits <- range(validate_range(max_legend, max(depth_props)),
-                    validate_range(min_legend, 0, FALSE))
-  
-  depth_polygons <- get_depth_polygons()
-  plot_data <- depth_polygons
-
-  if (proportion_type == "overall") {
-    for (q in 1:4) {
-      for (d in 1:5) {
-        mask <- plot_data$quadrant == q & plot_data$depth == d
-        if (any(mask)) {
-          plot_data$proportion[mask] <- depth_props[q, d]
-        }
-      }
-    }
-
-    p <- taxicab_depth_plot(plot_data, limits, pal_colors, x_label, y_label, plot_theme)
-    
-    return(list(plot = p, prop_data = depth_props))
-
-  } else if (proportion_type == "condition") {
-      if (is.null(condition_grids)) {
-          stop("condition_grids must be provided when proportion_type is 'condition'")
-      }
-    
-    unique_conditions <- names(condition_grids)
-    condition_depth_props <- lapply(condition_grids, calculate_depth_props)
-
-    if (comparison_type == "separate") {
-      if (length(unique_conditions) == 2) {
-        cond1 <- unique_conditions[1]
-        cond2 <- unique_conditions[2]
-        
-        depth_props1 <- condition_depth_props[[cond1]]
-        depth_props2 <- condition_depth_props[[cond2]]
-        
-        limits <- range(validate_range(max_legend, max(c(depth_props1, depth_props2))),
-                        validate_range(min_legend, 0, FALSE))
-        
-        combined_depth_data <- rbind(
-          cbind(depth_polygons, condition = cond1, proportion = depth_props1),
-          cbind(depth_polygons, condition = cond2, proportion = depth_props2)
-        )
-        
-        p <- taxicab_depth_plot(combined_depth_data,
-                                limits,
-                                pal_colors,
-                                x_label,
-                                y_label,
-                                plot_theme)
-        
-        return(list(plot = p, prop_data = condition_depth_props))
-
-      } else {
-        condition_plots <- list()
-        max_prop <- max(unlist(condition_depth_props))
-        limits <- range(validate_range(max_legend, max_prop),
-                        validate_range(min_legend, 0, FALSE));
-
-        for (cond in unique_conditions) {
-          depth_props <- condition_depth_props[[cond]]
-          cond_polygons <- depth_polygons
-
-          for (q in 1:4) {
-            for (d in 1:5) {
-              mask <- cond_polygons$quadrant == q & cond_polygons$depth == d
-              if (any(mask)) {
-                cond_polygons$proportion[mask] <- depth_props[q, d]
-              }
-            }
-          }
-
-          p <- taxicab_depth_plot(cond_polygons, limits, pal_colors, x_label, y_label, plot_theme)
-
-          condition_plots[[cond]] <- p
-        }
-
-        return(list(plots = condition_plots, prop_data = condition_depth_props))
-      }
-
-    } else if (comparison_type == "difference") {
-        if (length(unique_conditions) < 2) {
-            stop("At least 2 conditions are required for difference comparison")
-        }
-        
-        first_cond <- unique_conditions[1]
-        second_cond <- unique_conditions[2]
-        diff_depth <- condition_depth_props[[first_cond]] - condition_depth_props[[second_cond]]
-        
-        diff_polygons <- depth_polygons
-        
         for (q in 1:4) {
             for (d in 1:5) {
-                mask <- diff_polygons$quadrant == q & diff_polygons$depth == d
+                mask <- plot_data$quadrant == q & plot_data$depth == d
                 if (any(mask)) {
-                    diff_polygons$difference[mask] <- diff_depth[q, d]
+                    plot_data$proportion[mask] <- depth_props[q, d]
                 }
             }
         }
-        
-        max_diff <- max(abs(diff_depth))
-        limits <- c(-max_diff, max_diff)
-
-        p <- ggplot2::ggplot() +
-            ggplot2::geom_polygon(data = diff_polygons, 
-                                  ggplot2::aes(x = x, y = y, fill = difference, 
-                                               group = interaction(quadrant, depth)),
-                                  color = "white", linewidth = 0.5) +
-            ggplot2::scale_fill_gradient2(low = neg_palette[9], mid = "white", high = pos_palette[9],
-                                          midpoint = 0,
-                                          limits = limits) +
-            ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-            ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-            ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-            ggplot2::labs(x = x_label, y = y_label, 
-                          title = paste("Difference (%):", first_cond, "-", second_cond),
-                          fill = "Difference (%)") +
-            plot_theme
-        
-        return(list(
-            plot = p,
-            first_condition = first_cond,
-            second_condition = second_cond,
-            diff_data = diff_depth
-        ))
+        return(plot_data$proportion)
     }
-  }
     
-    stop("Unsupported combination of proportion_type and comparison_type")
+    framer <- function() {
+        get_depth_polygons()
+    }
+    
+    aesthetics <- ggplot2::aes(x = x,
+                               y = y,
+                               fill = fill_value,
+                               group = interaction(quadrant, depth))
+    
+    geometry <- function(data) {
+        ggplot2::geom_polygon(
+                     data = data,
+                     color = "white",
+                     linewidth = 0.5
+                 )
+    }
+
+    return(compile_plot_creator(proportioner, framer, aesthetics, geometry))
 }
+
+create_depth_plot <- compile_depth_plot_creator()
 
