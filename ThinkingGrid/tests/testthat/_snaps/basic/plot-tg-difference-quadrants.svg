@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' class='svglite' data-engine-version='2.0' width='720.00pt' height='576.00pt' viewBox='0 0 720.00 576.00'>
+<defs>
+  <style type='text/css'><![CDATA[
+    .svglite line, .svglite polyline, .svglite polygon, .svglite path, .svglite rect, .svglite circle {
+      fill: none;
+      stroke: #000000;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-miterlimit: 10.00;
+    }
+  ]]></style>
+</defs>
+<rect width='100%' height='100%' style='stroke: none; fill: #FFFFFF;'/>
+<defs>
+  <clipPath id='cpMC4wMHw3MjAuMDB8MC4wMHw1NzYuMDA='>
+    <rect x='0.00' y='0.00' width='720.00' height='576.00' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpMC4wMHw3MjAuMDB8MC4wMHw1NzYuMDA=)'>
+</g>
+<defs>
+  <clipPath id='cpMzEuMzV8Njg4LjY1fDAuMDB8NTc2LjAw'>
+    <rect x='31.35' y='0.00' width='657.31' height='576.00' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpMzEuMzV8Njg4LjY1fDAuMDB8NTc2LjAw)'>
+</g>
+<g clip-path='url(#cpMC4wMHw3MjAuMDB8MC4wMHw1NzYuMDA=)'>
+</g>
+<defs>
+  <clipPath id='cpNzUuNDN8NTc1LjY0fDMxLjcwfDUzMS45Mg=='>
+    <rect x='75.43' y='31.70' width='500.22' height='500.22' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpNzUuNDN8NTc1LjY0fDMxLjcwfDUzMS45Mg==)'>
+<rect x='75.43' y='281.81' width='250.11' height='250.11' style='stroke-width: 1.07; stroke: #FFFFFF; stroke-linecap: butt; stroke-linejoin: miter; fill: #DBBAB5;' />
+<rect x='75.43' y='31.70' width='250.11' height='250.11' style='stroke-width: 1.07; stroke: #FFFFFF; stroke-linecap: butt; stroke-linejoin: miter; fill: #873732;' />
+<rect x='325.53' y='281.81' width='250.11' height='250.11' style='stroke-width: 1.07; stroke: #FFFFFF; stroke-linecap: butt; stroke-linejoin: miter; fill: #00441B;' />
+<rect x='325.53' y='31.70' width='250.11' height='250.11' style='stroke-width: 1.07; stroke: #FFFFFF; stroke-linecap: butt; stroke-linejoin: miter; fill: #E7EDE8;' />
+</g>
+<g clip-path='url(#cpMC4wMHw3MjAuMDB8MC4wMHw1NzYuMDA=)'>
+<text x='325.53' y='544.29' text-anchor='middle' style='font-size: 14.00px; font-style: italic; font-family: sans;' textLength='81.72px' lengthAdjust='spacingAndGlyphs'>Directedness</text>
+<text transform='translate(69.78,281.81) rotate(-90)' text-anchor='middle' style='font-size: 14.00px; font-style: italic; font-family: sans;' textLength='63.04px' lengthAdjust='spacingAndGlyphs'>Stickiness</text>
+<text x='592.08' y='240.00' style='font-size: 12.00px; font-family: sans;' textLength='76.69px' lengthAdjust='spacingAndGlyphs'>Difference (%)</text>
+<image width='17.28' height='86.40' x='592.08' y='246.73' preserveAspectRatio='none' xlink:href='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAEsCAYAAAACUNnVAAAA0klEQVQ4ja2SXQ7CQAiEYTyG1/H+Nyr44Lr8dGga44sBhh2+aRR5PR1QFTwUsirUVnVV2DOgtEpUjVZrC+wXZA/4g/CpcL4RQnaBQHeijtaFsnzflMXfFYvwmbFE7dkNtNGlUQ2QJ76Wl8QnfjN4i5ra4VCiT3mR/wwBnj6OiMDNBO72rcxXJWkWK55np5WixjMJ59umTtDIjb0sLMf4dt67ajkaaUe/RD8I1knHaz+tGCW4hvQrqupiiYDZN6vmt9X2tglWjlvMDhP44evHDkvCG9F6vNnFOnKcAAAAAElFTkSuQmCC'/>
+<polyline points='605.90,313.41 609.36,313.41 ' style='stroke-width: 0.38; stroke: #FFFFFF; stroke-linecap: butt;' />
+<polyline points='605.90,289.93 609.36,289.93 ' style='stroke-width: 0.38; stroke: #FFFFFF; stroke-linecap: butt;' />
+<polyline points='605.90,266.44 609.36,266.44 ' style='stroke-width: 0.38; stroke: #FFFFFF; stroke-linecap: butt;' />
+<polyline points='595.54,313.41 592.08,313.41 ' style='stroke-width: 0.38; stroke: #FFFFFF; stroke-linecap: butt;' />
+<polyline points='595.54,289.93 592.08,289.93 ' style='stroke-width: 0.38; stroke: #FFFFFF; stroke-linecap: butt;' />
+<polyline points='595.54,266.44 592.08,266.44 ' style='stroke-width: 0.38; stroke: #FFFFFF; stroke-linecap: butt;' />
+<text x='614.84' y='316.44' style='font-size: 8.80px; font-family: sans;' textLength='7.82px' lengthAdjust='spacingAndGlyphs'>-5</text>
+<text x='614.84' y='292.95' style='font-size: 8.80px; font-family: sans;' textLength='4.89px' lengthAdjust='spacingAndGlyphs'>0</text>
+<text x='614.84' y='269.47' style='font-size: 8.80px; font-family: sans;' textLength='4.89px' lengthAdjust='spacingAndGlyphs'>5</text>
+<text x='75.43' y='23.48' style='font-size: 13.20px; font-family: sans;' textLength='118.11px' lengthAdjust='spacingAndGlyphs'>Difference (%): a - b</text>
+</g>
+</svg>

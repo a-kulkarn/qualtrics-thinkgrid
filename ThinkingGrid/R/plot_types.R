@@ -167,7 +167,7 @@ create_cells_plot <- function(prop_grid, proportion_type = "overall", color_pale
         }
         
         return(list(
-          plots = condition_plots,
+          plot = condition_plots,
           prop_data = condition_grids
         ))
       }
@@ -448,7 +448,7 @@ create_quadrants_plot <- function(prop_grid, proportion_type = "overall", color_
         }
         
         return(list(
-          plots = condition_plots,
+          plot = condition_plots,
           prop_data = condition_quad_grids
         ))
       }
@@ -723,7 +723,7 @@ create_horizontal_plot <- function(prop_grid, proportion_type = "overall", color
         }
         
         return(list(
-          plots = condition_plots,
+          plot = condition_plots,
           prop_data = condition_horizontal_props
         ))
       }
@@ -995,7 +995,7 @@ create_vertical_plot <- function(prop_grid, proportion_type = "overall", color_p
         }
         
         return(list(
-          plots = condition_plots,
+          plot = condition_plots,
           prop_data = condition_vertical_props
         ))
       }
@@ -1327,7 +1327,7 @@ create_constraints_plot <- function(prop_grid, proportion_type = "overall", colo
         }
         
         return(list(
-          plots = condition_plots,
+          plot = condition_plots,
           prop_data = condition_constraint_props
         ))
       }
@@ -1674,7 +1674,7 @@ create_depth_plot <- function(prop_grid, proportion_type = "overall", color_pale
         }
         
         return(list(
-          plots = condition_plots,
+          plot = condition_plots,
           prop_data = condition_depth_props
         ))
       }
