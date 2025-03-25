@@ -29,7 +29,7 @@ validate_range <- function(value, ref_value, is_max = TRUE) {
 ## Plot creation base.
 
 base_plot_theme <- function() {
-      plot_theme <- ggplot2::theme_minimal() +
+    plot_theme <- ggplot2::theme_minimal() +
     ggplot2::theme(
       axis.text = ggplot2::element_text(size = 12),
       axis.title = ggplot2::element_text(size = 14, face = "italic"),
@@ -179,7 +179,7 @@ create_separate_plot <- function(condition_grids,
             condition_plots[[cond]] <- plotter(data, limits)
         }
 
-        return(list(plots = condition_plots, prop_data = proportions))
+        return(list(plot = condition_plots, prop_data = proportions))
     }
 }
 
@@ -502,7 +502,7 @@ create_cells_plot <- function(ac,
           create_tile_plot(plot_data, "proportion", limits, cond)
         })
         names(condition_plots) <- unique_conditions
-        return(list(plots = condition_plots, prop_data = condition_grids))
+        return(list(plot = condition_plots, prop_data = condition_grids))
       }
     
     } else if (comparison_type == "difference") {
@@ -650,7 +650,7 @@ create_quadrants_plot <- function(prop_grid,
           )
         })
         names(condition_plots) <- unique_conditions
-        return(list(plots = condition_plots, prop_data = condition_quad_grids))
+        return(list(plot = condition_plots, prop_data = condition_quad_grids))
       }
       
     } else if (comparison_type == "difference") {
@@ -858,7 +858,7 @@ create_constraints_plot <- function(prop_grid,
           condition_plots[[cond]] <- p
         }
         
-        return(list(plots = condition_plots, prop_data = condition_constraint_props))
+        return(list(plot = condition_plots, prop_data = condition_constraint_props))
       }
       
     } else if (comparison_type == "difference") {

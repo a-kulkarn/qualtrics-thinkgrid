@@ -4,6 +4,7 @@ setup_file <- system.file("test_data", "testQuestion.csv", package = "ThinkingGr
 data_file <- system.file("test_data", "testQuestionOutput.csv", package = "ThinkingGrid")
 expected_result <- system.file("test_data", "testExpectedResult.csv", package = "ThinkingGrid")
 
+set.seed(42)
 dc <- sample(1:6, 100, replace = TRUE)
 ac <- sample(1:6, 100, replace = TRUE)
 id <- rep(1:5, times = 20)
@@ -39,17 +40,152 @@ test_that("test pandas availability", {
     )
 })
 
+normalize_plot <- function(plot) {
+  plot +
+    # Set a consistent theme for fonts, margins, backgrounds, and grids
+    theme(
+      text = element_text(family = "sans", size = 12),
+      plot.margin = margin(5, 5, 5, 5),
+      panel.background = element_rect(fill = "white", color = NA),
+      panel.grid.major = element_line(color = "grey90"),
+      panel.grid.minor = element_line(color = "grey95")
+    ) +
+    # Fix coordinate expansion so that axis limits don't change unexpectedly
+    coord_cartesian(expand = FALSE) +
+    # Set manual color and fill scales to enforce consistency across systems
+    scale_color_manual(values = c("black", "blue", "red", "green", "orange", "purple")) +
+    scale_fill_manual(values = c("black", "blue", "red", "green", "orange", "purple"))
+}
+test_that("plot_tg produces correct plot", {
+    res <- plot_tg(dc, ac, proportion_type = "overall", type = "cells")
+    vdiffr::expect_doppelganger("plot_tg_overall_cells", res$plot, transform = normalize_plot)
+})
 
-test_that("plot_tg is working", {
+test_that("plot_tg produces correct plot for quadrants", {
+    res <- plot_tg(dc, ac, proportion_type = "overall", type = "quadrants")
+    vdiffr::expect_doppelganger("plot_tg_overall_quadrants", res$plot, transform = normalize_plot)
+})
+
+test_that("plot_tg produces correct plot for horizontal", {
+    res <- plot_tg(dc, ac, proportion_type = "overall", type = "horizontal")
+    vdiffr::expect_doppelganger("plot_tg_overall_horizontal", res$plot, transform = normalize_plot)
+})
+
+test_that("plot_tg produces correct plot for vertical", {
+    res <- plot_tg(dc, ac, proportion_type = "overall", type = "vertical")
+    vdiffr::expect_doppelganger("plot_tg_overall_vertical", res$plot, transform = normalize_plot)
+})
+
+test_that("plot_tg produces correct plot for constraints", {
+    res <- plot_tg(dc, ac, proportion_type = "overall", type = "constraints")
+    vdiffr::expect_doppelganger("plot_tg_overall_constraints", res$plot, transform = normalize_plot)
+})
+
+test_that("plot_tg produces correct plot for depth", {
+    res <- plot_tg(dc, ac, proportion_type = "overall", type = "depth")
+    vdiffr::expect_doppelganger("plot_tg_overall_depth", res$plot, transform = normalize_plot)
+})
+
+# Tests for condition plots without comparison_type (use "separate")
+test_that("plot_tg produces correct plot for condition (separate) with type = cells", {
+  res <- plot_tg(dc, ac, proportion_type = "condition", type = "cells", condition_col = condition)
+  vdiffr::expect_doppelganger("plot_tg_separate_cells", res$plot, transform = normalize_plot)
+})
+
+test_that("plot_tg produces correct plot for condition (separate) with type = quadrants", {
+  res <- plot_tg(dc, ac, proportion_type = "condition", type = "quadrants", condition_col = condition)
+  vdiffr::expect_doppelganger("plot_tg_separate_quadrants", res$plot, transform = normalize_plot)
+})
+
+test_that("plot_tg produces correct plot for condition (separate) with type = horizontal", {
+  res <- plot_tg(dc, ac, proportion_type = "condition", type = "horizontal", condition_col = condition)
+  vdiffr::expect_doppelganger("plot_tg_separate_horizontal", res$plot, transform = normalize_plot)
+})
+
+test_that("plot_tg produces correct plot for condition (separate) with type = vertical", {
+  res <- plot_tg(dc, ac, proportion_type = "condition", type = "vertical", condition_col = condition)
+  vdiffr::expect_doppelganger("plot_tg_separate_vertical", res$plot, transform = normalize_plot)
+})
+
+test_that("plot_tg produces correct plot for condition (separate) with type = constraints", {
+  res <- plot_tg(dc, ac, proportion_type = "condition", type = "constraints", condition_col = condition)
+  vdiffr::expect_doppelganger("plot_tg_separate_constraints", res$plot, transform = normalize_plot)
+})
+
+test_that("plot_tg produces correct plot for condition (separate) with type = depth", {
+  res <- plot_tg(dc, ac, proportion_type = "condition", type = "depth", condition_col = condition)
+  vdiffr::expect_doppelganger("plot_tg_separate_depth", res$plot, transform = normalize_plot)
+})
+
+# Tests for condition plots with comparison_type = "difference"
+test_that("plot_tg produces correct plot for condition (difference) with type = cells", {
+  res <- plot_tg(dc, ac, proportion_type = "condition", type = "cells", condition_col = condition, comparison_type = "difference")
+  vdiffr::expect_doppelganger("plot_tg_difference_cells", res$plot, transform = normalize_plot)
+})
+
+test_that("plot_tg produces correct plot for condition (difference) with type = quadrants", {
+  res <- plot_tg(dc, ac, proportion_type = "condition", type = "quadrants", condition_col = condition, comparison_type = "difference")
+  vdiffr::expect_doppelganger("plot_tg_difference_quadrants", res$plot, transform = normalize_plot)
+})
+
+test_that("plot_tg produces correct plot for condition (difference) with type = horizontal", {
+  res <- plot_tg(dc, ac, proportion_type = "condition", type = "horizontal", condition_col = condition, comparison_type = "difference")
+  vdiffr::expect_doppelganger("plot_tg_difference_horizontal", res$plot, transform = normalize_plot)
+})
+
+test_that("plot_tg produces correct plot for condition (difference) with type = vertical", {
+  res <- plot_tg(dc, ac, proportion_type = "condition", type = "vertical", condition_col = condition, comparison_type = "difference")
+  vdiffr::expect_doppelganger("plot_tg_difference_vertical", res$plot, transform = normalize_plot)
+})
+
+test_that("plot_tg produces correct plot for condition (difference) with type = constraints", {
+  res <- plot_tg(dc, ac, proportion_type = "condition", type = "constraints", condition_col = condition, comparison_type = "difference")
+  vdiffr::expect_doppelganger("plot_tg_difference_constraints", res$plot, transform = normalize_plot)
+})
+
+test_that("plot_tg produces correct plot for condition (difference) with type = depth", {
+  res <- plot_tg(dc, ac, proportion_type = "condition", type = "depth", condition_col = condition, comparison_type = "difference")
+  vdiffr::expect_doppelganger("plot_tg_difference_depth", res$plot, transform = normalize_plot)
+})
+
+test_that("create_tg_animation is working with type = cells", {
     expect_type(
-        plot_tg(dc, ac, proportion_type = "overall", type = "cells"),
+        create_tg_animation(dc, ac, condition_col = id, proportion_type = "overall", type = "cells", filename = "gifs/cells.gif"),
         "list"
     )
 })
 
-test_that("plot_tg is working", {
+test_that("create_tg_animation is working with type = quadrants", {
     expect_type(
-        create_tg_animation(dc, ac, condition_col = id, proportion_type = "overall", type = "cells"),
+        create_tg_animation(dc, ac, condition_col = id, proportion_type = "overall", type = "quadrants", filename = "gifs/quadrants.gif"),
+        "list"
+    )
+})
+
+test_that("create_tg_animation is working with type = horizontal", {
+    expect_type(
+        create_tg_animation(dc, ac, condition_col = id, proportion_type = "overall", type = "horizontal", filename = "gifs/horizontal.gif"),
+        "list"
+    )
+})
+
+test_that("create_tg_animation is working with type = vertical", {
+    expect_type(
+        create_tg_animation(dc, ac, condition_col = id, proportion_type = "overall", type = "vertical", filename = "gifs/vertical.gif"),
+        "list"
+    )
+})
+
+test_that("create_tg_animation is working with type = constraints", {
+    expect_type(
+        create_tg_animation(dc, ac, condition_col = id, proportion_type = "overall", type = "constraints", filename = "gifs/constraints.gif"),
+        "list"
+    )
+})
+
+test_that("create_tg_animation is working with type = depth", {
+    expect_type(
+        create_tg_animation(dc, ac, condition_col = id, proportion_type = "overall", type = "depth", filename = "gifs/depth.gif"),
         "list"
     )
 })
