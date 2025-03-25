@@ -904,19 +904,20 @@ create_constraints_plot <- function(prop_grid,
 ################################################################################
 ## Depth.
 
+calculate_depth_props <- function(grid) {
+    depth_props <- matrix(0, nrow = 4, ncol = 5)
+    for (i in 1:6) {
+        for (j in 1:6) {
+            q <- get_quadrant_6x6(i, j)
+            d <- round(abs(i - 3.5) + abs(j - 3.5))
+            depth_props[q, d] <- grid[i, j]
+        }
+    }
+    return(depth_props)
+}
+
 ## YYY:
 compile_depth_plot_creator <- function() {
-    calculate_depth_props <- function(grid) {
-        depth_props <- matrix(0, nrow = 4, ncol = 5)
-        for (i in 1:6) {
-            for (j in 1:6) {
-                q <- get_quadrant_6x6(i, j)
-                d <- round(abs(i - 3.5) + abs(j - 3.5))
-                depth_props[q, d] <- grid[i, j]
-            }
-        }
-        return(depth_props)
-    }
     
     proportioner <- function(prop_grid) {
         depth_props <- calculate_depth_props(prop_grid)

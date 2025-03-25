@@ -11,6 +11,40 @@ check_install_package <- function(package_name) {
 }
 
 
+# Helper function to create grid and calculate proportions
+create_grid <- function(dc, ac, condition_filter = NULL) {
+    # Initialize grid
+    grid <- matrix(0, nrow = 6, ncol = 6)
+
+    # Apply condition filter if specified
+    if (!is.null(condition_filter) && !is.null(condition_col)) {
+        subset_indices <- which(condition_col == condition_filter)
+        dc_subset <- dc[subset_indices]
+        ac_subset <- ac[subset_indices]
+    } else {
+        dc_subset <- dc
+        ac_subset <- ac
+    }
+
+    # Count occurrences
+    for (i in 1:length(dc_subset)) {
+        if (dc_subset[i] >= 1 && dc_subset[i] <= 6 && 
+            ac_subset[i] >= 1 && ac_subset[i] <= 6) {
+            grid[ac_subset[i], dc_subset[i]] <- grid[ac_subset[i], dc_subset[i]] + 1
+        }
+    }
+
+    # Calculate proportions as percentages
+    total <- sum(grid)
+    if (total > 0) {
+        prop_grid <- grid / total * 100  # Convert to percentage
+    } else {
+        prop_grid <- grid
+    }
+
+    return(prop_grid)
+}
+
 #' Illustration of plot_tg function
 #' 
 #' @param add_parameter_here {character} Description of the parameter
@@ -100,41 +134,7 @@ plot_tg <- function(survey_results,
     
     # Process data
     # ------------
-    
-    # Helper function to create grid and calculate proportions
-    create_grid <- function(dc, ac, condition_filter = NULL) {
-        # Initialize grid
-        grid <- matrix(0, nrow = 6, ncol = 6)
         
-        # Apply condition filter if specified
-        if (!is.null(condition_filter) && !is.null(condition_col)) {
-            subset_indices <- which(condition_col == condition_filter)
-            dc_subset <- dc[subset_indices]
-            ac_subset <- ac[subset_indices]
-        } else {
-            dc_subset <- dc
-            ac_subset <- ac
-        }
-        
-        # Count occurrences
-        for (i in 1:length(dc_subset)) {
-            if (dc_subset[i] >= 1 && dc_subset[i] <= 6 && 
-                ac_subset[i] >= 1 && ac_subset[i] <= 6) {
-                grid[ac_subset[i], dc_subset[i]] <- grid[ac_subset[i], dc_subset[i]] + 1
-            }
-        }
-        
-        # Calculate proportions as percentages
-        total <- sum(grid)
-        if (total > 0) {
-            prop_grid <- grid / total * 100  # Convert to percentage
-        } else {
-            prop_grid <- grid
-        }
-        
-        return(prop_grid)
-    }
-    
     # Calculate proportions based on proportion_type
     if (proportion_type == "overall") {
         # Single grid for overall proportions
