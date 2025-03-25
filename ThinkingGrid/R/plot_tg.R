@@ -33,7 +33,9 @@ plot_tg <- function(survey_results,
     dc <- survey_results$Deliberate.Constraints
     ac <- survey_results$Automatic.Constraints
 
-    print(ac)
+    if (proportion_type == "condition" && is.null(condition_col)) {
+        stop("condition_grids must be provided when proportion_type is 'condition'")
+    }
     
     # Check required packages
     check_install_package("RColorBrewer")
@@ -157,7 +159,7 @@ plot_tg <- function(survey_results,
             prop_grid <- NULL  # Not used for condition analysis
         }
     }
-    
+
     # Generate visualization
     # ---------------------
     
@@ -195,12 +197,14 @@ plot_tg <- function(survey_results,
 #' 
 #' @export
 
-create_tg_animation <- function(dc, ac, condition_col, type = "cells", proportion_type = "overall", filename = "tg_animation.gif", duration = 1, width = 800, height = 800, sorted_conditions = NULL, color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", max_legend = NULL, min_legend = NULL) {
+create_tg_animation <- function(survey_results, condition_col, type = "cells", proportion_type = "overall", filename = "tg_animation.gif", duration = 1, width = 800, height = 800, sorted_conditions = NULL, color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", max_legend = NULL, min_legend = NULL) {
   
   check_install_package("RColorBrewer")
   check_install_package("ggplot2")
   check_install_package("gifski")
 
+  dc <- survey_results$Deliberate.Constraints
+  ac <- survey_results$Automatic.Constraints
   
   # Convert condition_col to factor
   df <- data.frame(dc = dc, ac = ac, condition = condition_col)

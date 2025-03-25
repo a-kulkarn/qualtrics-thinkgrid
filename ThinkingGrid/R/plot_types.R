@@ -129,13 +129,14 @@ create_overall_plot <- function(data,
     return(list(plot = p, prop_data = proportions))
 }
 
-create_separate_plot <- function(condition_grids,
+create_separate_plot <- function(data,
                                  proportioner,
                                  plotter,
                                  framer,
                                  min_legend,
                                  max_legend) {
 
+    condition_grids <- data
     unique_conditions <- names(condition_grids)
     proportions <- lapply(condition_grids, proportioner)
 
@@ -162,7 +163,7 @@ create_separate_plot <- function(condition_grids,
         
         combined_data <- rbind(data1, data2)
 
-        p <- plotter(combined_data, limits)
+        p <- plotter(combined_data, limits) + ggplot2::facet_wrap(~ condition, ncol = 2)
         return(list(plot = p, prop_data = proportions))
 
     } else {
@@ -183,13 +184,14 @@ create_separate_plot <- function(condition_grids,
     }
 }
 
-create_difference_plot <- function(condition_grids,
+create_difference_plot <- function(data,
                                    proportioner,
                                    plotter,
                                    framer,
                                    min_legend,
                                    max_legend) {
 
+    condition_grids <- data
     unique_conditions <- names(condition_grids)
     proportions <- lapply(condition_grids, proportioner)
 
@@ -212,7 +214,7 @@ create_difference_plot <- function(condition_grids,
         plot = p,
         first_condition = first_cond,
         second_condition = second_cond,
-        diff_data = diff_vert
+        diff_data = diff_data
     ))
 }
 
@@ -221,10 +223,6 @@ get_plot_method <- function(proportion_type, comparison_type) {
         return(create_overall_plot)
 
     } else if (proportion_type == "condition") {
-        if (is.null(condition_grids)) {
-            stop("condition_grids must be provided when proportion_type is 'condition'")
-        }
-
         if (comparison_type == "separate") {
             return(create_separate_plot)
 
@@ -267,16 +265,22 @@ compile_plot_creator <- function(proportioner,
                 colorer,
                 aesthetics,
                 geometry,
-                comparison_type = NULL,
+                comparison_type = comparison_type,
                 title = NULL
             )
         }
 
         meth <- get_plot_method(proportion_type, comparison_type)
-    
+
+        if (proportion_type == "overall") {
+            data <- prop_grid
+        } else {
+            data <- condition_grids
+        }
+        
         ## Create the plot.
         return(meth(
-            data = prop_grid,
+            data = data,
             proportioner = proportioner,
             plotter = plotter,
             framer = framer,            
@@ -725,11 +729,11 @@ compile_horizontal_plot_creator <- function() {
 
     ## Calculate vertical proportions
     proportioner <- function(grid) {
-        colSums(grid)
+        rowSums(grid)
     }
 
     ## Create data frame for vertical band plot
-    framer <- function(col_sums) {
+    framer <- function(row_sums) {
         data.frame(ac = 1:6)
     }
     
@@ -764,10 +768,10 @@ create_constraints_plot <- function(prop_grid,
                                     max_legend = NULL,
                                     min_legend = NULL) {
   
-    ## Common plot theme settings
-    plot_theme <- base_plot_theme()
+  ## Common plot theme settings
+  plot_theme <- base_plot_theme()
   
-  # Get color palettes
+  ## Get color palettes
   pal_colors <- RColorBrewer::brewer.pal(9, color_palette)
 
   # Calculate constraint proportions
