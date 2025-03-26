@@ -201,7 +201,21 @@ plot_tg <- function(survey_results,
 #' 
 #' @export
 
-create_tg_animation <- function(survey_results, condition_col, type = "cells", proportion_type = "overall", filename = "tg_animation.gif", duration = 1, width = 800, height = 800, sorted_conditions = NULL, color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", max_legend = NULL, min_legend = NULL) {
+create_tg_animation <- function(survey_results,
+                                condition_col,
+                                type = "cells",
+                                proportion_type = "overall",
+                                colorer = NULL,
+                                x_label = "Directedness",
+                                y_label = "Stickiness",
+                                max_legend = NULL,
+                                min_legend = NULL,                                
+                                filename = "tg_animation.gif",
+                                duration = 1,
+                                width = 800,
+                                height = 800,
+                                sorted_conditions = NULL
+                                ) {
   
   check_install_package("RColorBrewer")
   check_install_package("ggplot2")
@@ -424,12 +438,17 @@ create_tg_animation <- function(survey_results, condition_col, type = "cells", p
   for(cond in ordered_conditions) {
     # Subset data for this condition
     df_subset <- df[df$condition == cond, ]
-    
+
+    df_subset_relabelled <- data.frame(
+        Deliberate.Constraints <- df_subset$dc,
+        Automatic.Constraints <- df_subset$ac
+    )
+      
     # Create plot using plot_tg function
-    p <- plot_tg(df_subset$dc, df_subset$ac, 
+    p <- plot_tg(df_subset_relabelled, 
                 proportion_type = "overall", 
                 type = type,
-                color_palette = color_palette,
+                colorer = colorer,
                 x_label = x_label,
                 y_label = y_label,
                 max_legend = max_legend,
