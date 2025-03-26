@@ -5,8 +5,8 @@
 
 get_quadrant_6x6 <- function(i, j) {
     (i < 4) && (j < 4) && return(1)
-    (i > 3) && (j < 4) && return(2)
-    (i < 4) && (j > 3) && return(3)
+    (i < 4) && (j > 3) && return(2)
+    (i > 3) && (j < 4) && return(3)    
     return(4)
 }
 
@@ -101,10 +101,7 @@ plot_engine <- function(data,
     } else {
         p <- p + ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)")    
     }
-    
-    if (!is.null(comparison_type) && comparison_type != "difference") {
-        p <- p + ggplot2::facet_wrap(~ condition, ncol = 2)
-    }
+
     return(p)
     
 }
@@ -164,6 +161,7 @@ create_separate_plot <- function(data,
         combined_data <- rbind(data1, data2)
 
         p <- plotter(combined_data, limits)
+        p <- p + ggplot2::facet_wrap(~ condition, ncol = 2)
         return(list(plot = p, prop_data = proportions))
 
     } else {

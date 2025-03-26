@@ -74,6 +74,7 @@ plot_tg <- function(survey_results,
     # Check required packages
     check_install_package("RColorBrewer")
     check_install_package("ggplot2")
+    
     # Validate inputs
     # ---------------
     # Check if ac and dc are either both vectors or both matrices
@@ -100,13 +101,16 @@ plot_tg <- function(survey_results,
         stop("dc and ac must be either both vectors or both matrices")
     }
 
-    # Validate proportion_type
+    ## Options handling.
+    ## ------------------------------------
+    
+    ## Validate proportion_type
     if (!(proportion_type %in% c("overall", "condition"))) {
         warning("Invalid proportion_type. Using default 'overall'.")
         proportion_type <- "overall"
     }
-    
-    # Validate comparison_type when condition is present
+
+    ## Validate comparison_type when condition is present
     if (proportion_type == "condition" && !(comparison_type %in% c("separate", "difference"))) {
         warning("Invalid comparison_type. Using default 'separate'.")
         comparison_type <- "separate"
