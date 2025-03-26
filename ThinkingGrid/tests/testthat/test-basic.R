@@ -76,24 +76,23 @@ normalize_plot <- function(plot) {
 
 test_that("plot_tg produces correct plot for horizontal", {
     res <- plot_tg(mock_tg_frame, proportion_type = "overall", type = "horizontal")
-    # vdiffr::expect_doppelganger("plot_tg_overall_horizontal", res$plot, transform = normalize_plot)
-    expect_equal(1, 1)
+    vdiffr::expect_doppelganger("plot_tg_overall_horizontal", res$plot, transform = normalize_plot)
 })
 
-## test_that("plot_tg produces correct plot for vertical", {
-##     res <- plot_tg(mock_tg_frame, proportion_type = "overall", type = "vertical")
-##     vdiffr::expect_doppelganger("plot_tg_overall_vertical", res$plot, transform = normalize_plot)
-## })
+test_that("plot_tg produces correct plot for vertical", {
+    res <- plot_tg(mock_tg_frame, proportion_type = "overall", type = "vertical")
+    vdiffr::expect_doppelganger("plot_tg_overall_vertical", res$plot, transform = normalize_plot)
+})
 
 ## test_that("plot_tg produces correct plot for constraints", {
 ##     res <- plot_tg(mock_tg_frame, proportion_type = "overall", type = "constraints")
 ##     vdiffr::expect_doppelganger("plot_tg_overall_constraints", res$plot, transform = normalize_plot)
 ## })
 
-## test_that("plot_tg produces correct plot for depth", {
-##     res <- plot_tg(mock_tg_frame, proportion_type = "overall", type = "depth")
-##     vdiffr::expect_doppelganger("plot_tg_overall_depth", res$plot, transform = normalize_plot)
-## })
+test_that("plot_tg produces correct plot for depth", {
+    res <- plot_tg(mock_tg_frame, proportion_type = "overall", type = "depth")
+    vdiffr::expect_doppelganger("plot_tg_overall_depth", res$plot, transform = normalize_plot)
+})
 
 ## ------------------------------------------------------------------------
 
@@ -178,19 +177,19 @@ test_that("plot_tg produces correct plot for condition (difference) with type = 
 ##     )
 ## })
 
-## test_that("create_tg_animation is working with type = horizontal", {
-##     expect_type(
-##         create_tg_animation(mock_tg_frame, condition_col = id, proportion_type = "overall", type = "horizontal", filename = "gifs/horizontal.gif"),
-##         "list"
-##     )
-## })
+test_that("create_tg_animation is working with type = horizontal", {
+    expect_type(
+        create_tg_animation(mock_tg_frame, condition_col = id, proportion_type = "overall", type = "horizontal", filename = "gifs/horizontal.gif"),
+        "list"
+    )
+})
 
-## test_that("create_tg_animation is working with type = vertical", {
-##     expect_type(
-##         create_tg_animation(mock_tg_frame, condition_col = id, proportion_type = "overall", type = "vertical", filename = "gifs/vertical.gif"),
-##         "list"
-##     )
-## })
+test_that("create_tg_animation is working with type = vertical", {
+    expect_type(
+        create_tg_animation(mock_tg_frame, condition_col = id, proportion_type = "overall", type = "vertical", filename = "gifs/vertical.gif"),
+        "list"
+    )
+})
 
 ## test_that("create_tg_animation is working with type = constraints", {
 ##     expect_type(
@@ -199,9 +198,9 @@ test_that("plot_tg produces correct plot for condition (difference) with type = 
 ##     )
 ## })
 
-## test_that("create_tg_animation is working with type = depth", {
-##     expect_type(
-##         create_tg_animation(mock_tg_frame, condition_col = id, proportion_type = "overall", type = "depth", filename = "gifs/depth.gif"),
-##         "list"
-##     )
-## })
+test_that("create_tg_animation is working with type = depth", {
+    expect_type(
+        create_tg_animation(mock_tg_frame, condition_col = id, proportion_type = "overall", type = "depth", filename = "gifs/depth.gif"),
+        "list"
+    )
+})
