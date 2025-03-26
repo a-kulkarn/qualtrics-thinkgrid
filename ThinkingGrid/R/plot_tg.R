@@ -12,7 +12,7 @@ check_install_package <- function(package_name) {
 
 
 # Helper function to create grid and calculate proportions
-create_grid <- function(dc, ac, condition_filter = NULL) {
+create_grid <- function(dc, ac, condition_filter = NULL, condition_col = NULL) {
     # Initialize grid
     grid <- matrix(0, nrow = 6, ncol = 6)
 
@@ -153,7 +153,7 @@ plot_tg <- function(survey_results,
         } else {
             # Calculate proportion grids for each condition
             condition_grids <- lapply(unique_conditions, function(cond) {
-                create_grid(dc, ac, cond)
+                create_grid(dc, ac, cond, condition_col)
             })
             names(condition_grids) <- unique_conditions
             prop_grid <- NULL  # Not used for condition analysis

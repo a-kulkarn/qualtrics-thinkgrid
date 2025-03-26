@@ -96,7 +96,7 @@ plot_engine <- function(data,
     if (!is.null(comparison_type) && comparison_type == "difference") {
         p <- p + ggplot2::labs(x = x_label,
                                y = y_label,
-                               title = paste("Difference (%):", first_cond, "-", second_cond),
+                               title = title,
                                fill = "Difference (%)")
     } else {
         p <- p + ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)")    
@@ -163,7 +163,7 @@ create_separate_plot <- function(data,
         
         combined_data <- rbind(data1, data2)
 
-        p <- plotter(combined_data, limits) + ggplot2::facet_wrap(~ condition, ncol = 2)
+        p <- plotter(combined_data, limits)
         return(list(plot = p, prop_data = proportions))
 
     } else {
@@ -206,9 +206,10 @@ create_difference_plot <- function(data,
     diff_data$fill_value <- proportions[[first_cond]] - proportions[[second_cond]]
     
     max_diff <- validate_range(max_legend, max(abs(diff_data$fill_value)))
-    limits = c(-max_diff, max_diff)
+    limits <- c(-max_diff, max_diff)
+    title <- paste("Difference (%):", first_cond, "-", second_cond)
     
-    p <- plotter(diff_data, limits)
+    p <- plotter(diff_data, limits, title = title)
 
     return(list(
         plot = p,
@@ -256,7 +257,7 @@ compile_plot_creator <- function(proportioner,
             stop("Not Implemented.")
         }
 
-        plotter <- function(data, limits) {
+        plotter <- function(data, limits, title = NULL) {
             plot_engine(
                 data,
                 limits,
@@ -266,7 +267,7 @@ compile_plot_creator <- function(proportioner,
                 aesthetics,
                 geometry,
                 comparison_type = comparison_type,
-                title = NULL
+                title = title
             )
         }
 
@@ -277,7 +278,7 @@ compile_plot_creator <- function(proportioner,
         } else {
             data <- condition_grids
         }
-        
+
         ## Create the plot.
         return(meth(
             data = data,
@@ -910,7 +911,7 @@ calculate_depth_props <- function(grid) {
         for (j in 1:6) {
             q <- get_quadrant_6x6(i, j)
             d <- round(abs(i - 3.5) + abs(j - 3.5))
-            depth_props[q, d] <- grid[i, j]
+            depth_props[q, d] <- depth_props[q, d] + grid[i, j]
         }
     }
     return(depth_props)
