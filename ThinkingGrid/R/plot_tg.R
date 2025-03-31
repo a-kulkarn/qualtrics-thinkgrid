@@ -11,6 +11,40 @@ check_install_package <- function(package_name) {
 }
 
 
+# Helper function to create grid and calculate proportions
+create_grid <- function(dc, ac, condition_filter = NULL, condition_col = NULL) {
+    # Initialize grid
+    grid <- matrix(0, nrow = 6, ncol = 6)
+
+    # Apply condition filter if specified
+    if (!is.null(condition_filter) && !is.null(condition_col)) {
+        subset_indices <- which(condition_col == condition_filter)
+        dc_subset <- dc[subset_indices]
+        ac_subset <- ac[subset_indices]
+    } else {
+        dc_subset <- dc
+        ac_subset <- ac
+    }
+
+    # Count occurrences
+    for (i in 1:length(dc_subset)) {
+        if (dc_subset[i] >= 1 && dc_subset[i] <= 6 && 
+            ac_subset[i] >= 1 && ac_subset[i] <= 6) {
+            grid[ac_subset[i], dc_subset[i]] <- grid[ac_subset[i], dc_subset[i]] + 1
+        }
+    }
+
+    # Calculate proportions as percentages
+    total <- sum(grid)
+    if (total > 0) {
+        prop_grid <- grid / total * 100  # Convert to percentage
+    } else {
+        prop_grid <- grid
+    }
+
+    return(prop_grid)
+}
+
 #' Illustration of plot_tg function
 #' 
 #' @param add_parameter_here {character} Description of the parameter
@@ -19,11 +53,28 @@ check_install_package <- function(package_name) {
 #' plot_tg(relevant_data)
 #' 
 #' @export
-plot_tg <- function(dc, ac, proportion_type = "overall", type = "cells", color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", condition_col = NULL, comparison_type = "separate", pos_palette = "Greens", neg_palette = "Reds", max_legend = NULL, min_legend = NULL) {
+plot_tg <- function(survey_results,
+                    proportion_type = "overall",
+                    type = "cells",
+                    colorer = NULL,
+                    x_label = "Directedness",
+                    y_label = "Stickiness",
+                    condition_col = NULL,
+                    comparison_type = "separate",
+                    max_legend = NULL,
+                    min_legend = NULL) {
+
+    dc <- survey_results$Deliberate.Constraints
+    ac <- survey_results$Automatic.Constraints
+
+    if (proportion_type == "condition" && is.null(condition_col)) {
+        stop("condition_grids must be provided when proportion_type is 'condition'")
+    }
     
     # Check required packages
     check_install_package("RColorBrewer")
     check_install_package("ggplot2")
+    
     # Validate inputs
     # ---------------
     # Check if ac and dc are either both vectors or both matrices
@@ -50,31 +101,34 @@ plot_tg <- function(dc, ac, proportion_type = "overall", type = "cells", color_p
         stop("dc and ac must be either both vectors or both matrices")
     }
 
-    # Validate proportion_type
+    ## Options handling.
+    ## ------------------------------------
+    
+    ## Validate proportion_type
     if (!(proportion_type %in% c("overall", "condition"))) {
         warning("Invalid proportion_type. Using default 'overall'.")
         proportion_type <- "overall"
     }
-    
-    # Validate comparison_type when condition is present
+
+    ## Validate comparison_type when condition is present
     if (proportion_type == "condition" && !(comparison_type %in% c("separate", "difference"))) {
         warning("Invalid comparison_type. Using default 'separate'.")
         comparison_type <- "separate"
     }
     
     # Validate color palettes
-    if (!color_palette %in% rownames(RColorBrewer::brewer.pal.info)) {
-        warning("Invalid color palette. Using default Greens palette.")
-        color_palette <- "Greens"
-    }
-    if (!pos_palette %in% rownames(RColorBrewer::brewer.pal.info)) {
-        warning("Invalid positive palette. Using default Greens palette.")
-        pos_palette <- "Greens"
-    }
-    if (!neg_palette %in% rownames(RColorBrewer::brewer.pal.info)) {
-        warning("Invalid negative palette. Using default Reds palette.")
-        neg_palette <- "Reds"
-    }
+    ## if (!color_palette %in% rownames(RColorBrewer::brewer.pal.info)) {
+    ##     warning("Invalid color palette. Using default Greens palette.")
+    ##     color_palette <- "Greens"
+    ## }
+    ## if (!pos_palette %in% rownames(RColorBrewer::brewer.pal.info)) {
+    ##     warning("Invalid positive palette. Using default Greens palette.")
+    ##     pos_palette <- "Greens"
+    ## }
+    ## if (!neg_palette %in% rownames(RColorBrewer::brewer.pal.info)) {
+    ##     warning("Invalid negative palette. Using default Reds palette.")
+    ##     neg_palette <- "Reds"
+    ## }
 
     # Validate plot type
     valid_types <- c("quadrants", "horizontal", "vertical", "constraints", "depth", "cells")
@@ -84,41 +138,7 @@ plot_tg <- function(dc, ac, proportion_type = "overall", type = "cells", color_p
     
     # Process data
     # ------------
-    
-    # Helper function to create grid and calculate proportions
-    create_grid <- function(dc, ac, condition_filter = NULL) {
-        # Initialize grid
-        grid <- matrix(0, nrow = 6, ncol = 6)
         
-        # Apply condition filter if specified
-        if (!is.null(condition_filter) && !is.null(condition_col)) {
-            subset_indices <- which(condition_col == condition_filter)
-            dc_subset <- dc[subset_indices]
-            ac_subset <- ac[subset_indices]
-        } else {
-            dc_subset <- dc
-            ac_subset <- ac
-        }
-        
-        # Count occurrences
-        for (i in 1:length(dc_subset)) {
-            if (dc_subset[i] >= 1 && dc_subset[i] <= 6 && 
-                ac_subset[i] >= 1 && ac_subset[i] <= 6) {
-                grid[ac_subset[i], dc_subset[i]] <- grid[ac_subset[i], dc_subset[i]] + 1
-            }
-        }
-        
-        # Calculate proportions as percentages
-        total <- sum(grid)
-        if (total > 0) {
-            prop_grid <- grid / total * 100  # Convert to percentage
-        } else {
-            prop_grid <- grid
-        }
-        
-        return(prop_grid)
-    }
-    
     # Calculate proportions based on proportion_type
     if (proportion_type == "overall") {
         # Single grid for overall proportions
@@ -137,13 +157,13 @@ plot_tg <- function(dc, ac, proportion_type = "overall", type = "cells", color_p
         } else {
             # Calculate proportion grids for each condition
             condition_grids <- lapply(unique_conditions, function(cond) {
-                create_grid(dc, ac, cond)
+                create_grid(dc, ac, cond, condition_col)
             })
             names(condition_grids) <- unique_conditions
             prop_grid <- NULL  # Not used for condition analysis
         }
     }
-    
+
     # Generate visualization
     # ---------------------
     
@@ -165,10 +185,10 @@ plot_tg <- function(dc, ac, proportion_type = "overall", type = "cells", color_p
     
     # Call the appropriate plot function
     plot_fn <- plot_functions[[type]]
-    
+
     # All plot types now support condition-based visualization
-    return(plot_fn(prop_grid, proportion_type, color_palette, x_label, y_label,
-                 condition_grids, comparison_type, pos_palette, neg_palette, max_legend, min_legend))
+    return(plot_fn(prop_grid, proportion_type, colorer, x_label, y_label,
+                 condition_grids, comparison_type, max_legend, min_legend))
 }
 
 
@@ -181,12 +201,28 @@ plot_tg <- function(dc, ac, proportion_type = "overall", type = "cells", color_p
 #' 
 #' @export
 
-create_tg_animation <- function(dc, ac, condition_col, type = "cells", proportion_type = "overall", filename = "tg_animation.gif", duration = 1, width = 800, height = 800, sorted_conditions = NULL, color_palette = "Greens", x_label = "Directedness", y_label = "Stickiness", max_legend = NULL, min_legend = NULL) {
+create_tg_animation <- function(survey_results,
+                                condition_col,
+                                type = "cells",
+                                proportion_type = "overall",
+                                colorer = NULL,
+                                x_label = "Directedness",
+                                y_label = "Stickiness",
+                                max_legend = NULL,
+                                min_legend = NULL,                                
+                                filename = "tg_animation.gif",
+                                duration = 1,
+                                width = 800,
+                                height = 800,
+                                sorted_conditions = NULL
+                                ) {
   
   check_install_package("RColorBrewer")
   check_install_package("ggplot2")
   check_install_package("gifski")
 
+  dc <- survey_results$Deliberate.Constraints
+  ac <- survey_results$Automatic.Constraints
   
   # Convert condition_col to factor
   df <- data.frame(dc = dc, ac = ac, condition = condition_col)
@@ -402,12 +438,17 @@ create_tg_animation <- function(dc, ac, condition_col, type = "cells", proportio
   for(cond in ordered_conditions) {
     # Subset data for this condition
     df_subset <- df[df$condition == cond, ]
-    
+
+    df_subset_relabelled <- data.frame(
+        Deliberate.Constraints <- df_subset$dc,
+        Automatic.Constraints <- df_subset$ac
+    )
+      
     # Create plot using plot_tg function
-    p <- plot_tg(df_subset$dc, df_subset$ac, 
+    p <- plot_tg(df_subset_relabelled, 
                 proportion_type = "overall", 
                 type = type,
-                color_palette = color_palette,
+                colorer = colorer,
                 x_label = x_label,
                 y_label = y_label,
                 max_legend = max_legend,
