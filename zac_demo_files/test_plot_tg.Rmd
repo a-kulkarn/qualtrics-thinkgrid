@@ -119,6 +119,10 @@ plot_tg(dc, ac, proportion_type = "condition", type = "vertical", condition_col 
 ```
 
 ```{r}
-plot_tg(dc, ac, proportion_type = "overall", type = "cells")
-plot_tg(dc, ac, proportion_type = "condition", type = "cells", condition_col = condition)
+a <- plot_tg(dc, ac, proportion_type = "overall", type = "cells")
+b<- plot_tg(dc, ac, proportion_type = "condition", type = "cells", condition_col = condition)
+```
+
+```{r}
+a <- create_tg_animation(dc, ac, val, type = "cells", filename = "~/Downloads/cells.gif")
 ```
