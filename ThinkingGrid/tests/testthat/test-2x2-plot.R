@@ -4,18 +4,18 @@ ls()
 graphics.off()
 
 ## Load libraries
-library(dplyr)
-library(ragg)
-library(magick)
-library(lme4)
-library(sjPlot)
-library(ggplot2)
-library(png)
-library(grid)
-library(gridExtra)
-library(tidyr)
-library(ggeffects)
-library(cowplot)
+## library(dplyr)
+## library(ragg)
+## library(magick)
+## library(lme4)
+## library(sjPlot)
+## library(ggplot2)
+## library(png)
+## library(grid)
+## library(gridExtra)
+## library(tidyr)
+## library(ggeffects)
+## library(cowplot)
 
 ## New prediction function
 get_predictions <- function(model, newdata) {
@@ -73,33 +73,35 @@ create_subplot <- function(predictions, valence_seq, measure_name) {
   y_max <- ceiling(y_max * 2) / 2
 
   ## Return the plot.
-  (ggplot(plot_data, aes(x = valence, group = block)) +
-    geom_ribbon(aes(ymin = pmax(0, ci_lower), ymax = ci_upper, fill = block), 
-                alpha = 0.3) +
-    geom_line(aes(y = fit, color = block), size = 0.8) +
-    scale_x_continuous(limits = c(-2, 2)) +
-    scale_y_continuous(limits = c(0, y_max), expand = c(0, 0)) +
-    scale_color_manual(values = c("Emotional Task" = "darkorange", "Rest" = "steelblue")) +
-    scale_fill_manual(values = c("Emotional Task" = "darkorange", "Rest" = "steelblue")) +
-    theme_minimal() +
-    theme(
-      plot.background = element_blank(),
-      panel.background = element_blank(),      
-      ## legend.position = "none",
-      plot.margin = margin(5, 5, 5, 5),
-      aspect.ratio = 1,
-      axis.title = element_text(size = 14),
-      axis.text = element_text(size = 12),
-      axis.title.y = element_text(margin = margin(r = 10)),
-      panel.grid.major = element_line(color = "gray90", linewidth = 0.2),
-      panel.grid.minor = element_blank(),
-      axis.line = element_line(color = "black", linewidth = 0.5)
-    ) +
-    labs(
-      title = element_blank(),
-      y = y_labels[measure_name],
-      x = element_blank()
-    ))
+  values = c("Emotional Task" = "darkorange", "Rest" = "steelblue")
+      
+  ggplot2::ggplot(plot_data, ggplot2::aes(x = valence, group = block)) +
+      ggplot2::geom_ribbon(ggplot2::aes(ymin = pmax(0, ci_lower), ymax = ci_upper, fill = block), 
+                           alpha = 0.3) +
+      ggplot2::geom_line(ggplot2::aes(y = fit, color = block), linewidth = 0.8) +
+      ggplot2::scale_x_continuous(limits = c(-2, 2)) +
+      ggplot2::scale_y_continuous(limits = c(0, y_max), expand = c(0, 0)) +
+      ggplot2::scale_color_manual(values = values) +
+      ggplot2::scale_fill_manual(values = values) +
+      ggplot2::theme_minimal() +
+      ggplot2::theme(
+          plot.background = ggplot2::element_blank(),
+          panel.background = ggplot2::element_blank(),      
+          ## legend.position = "none",
+          plot.margin = ggplot2::margin(5, 5, 5, 5),
+          aspect.ratio = 1,
+          axis.title = ggplot2::element_text(size = 14),
+          axis.text = ggplot2::element_text(size = 12),
+          axis.title.y = ggplot2::element_text(margin = ggplot2::margin(r = 10)),
+          panel.grid.major = ggplot2::element_line(color = "gray90", linewidth = 0.2),
+          panel.grid.minor = ggplot2::element_blank(),
+          axis.line = ggplot2::element_line(color = "black", linewidth = 0.5)
+      ) +
+      ggplot2::labs(
+          title = ggplot2::element_blank(),
+          y = y_labels[measure_name],
+          x = ggplot2::element_blank()
+      )
 }
 
 
@@ -111,8 +113,8 @@ create_subplot <- function(predictions, valence_seq, measure_name) {
 data <- read.csv("~/thinking-grid/demo-files/taxicab_Affect_Induction.csv")
 
 data <- data %>%
-  rename(valence = val) %>%
-  rename(id = pid)
+    dplyr::rename(valence = val) %>%
+    dplyr::rename(id = pid)
 
 data$total_correct <- data$directed_correct + data$sticky_correct + data$free_correct
 
@@ -126,27 +128,27 @@ data$block <- factor(ifelse(data$probe < 3, "Emotional Task", "Rest"),
                      levels = c("Emotional Task", "Rest"))
 
 ## Fit the models
-model3_free <- lmer(
+model3_free <- lme4::lmer(
     free ~ valence + I(valence^2) + block + block:valence + block:I(valence^2) +  (1 | id),
     data,
-    control = lmerControl(optimizer = "bobyqa")
+    control = lme4::lmerControl(optimizer = "bobyqa")
 )
-model3_sticky <- lmer(
+model3_sticky <- lme4::lmer(
     sticky ~ valence + I(valence^2) + block + block:valence + block:I(valence^2) +  (1 | id),
     data,
-    control = lmerControl(optimizer = "bobyqa")
+    control = lme4::lmerControl(optimizer = "bobyqa")
 )
-model3_directed <- lmer(
+model3_directed <- lme4::lmer(
     directed ~ valence + I(valence^2) + block + block:valence + block:I(valence^2) + (1 | id),
     data, 
-    control = lmerControl(optimizer = "bobyqa")
+    control = lme4::lmerControl(optimizer = "bobyqa")
 )
-model3_salience_directed <- lmer(
+model3_salience_directed <- lme4::lmer(
     salience_directed ~ (
         valence + I(valence^2) + block + block:valence + block:I(valence^2) + (1 | id)
     ),
     data, 
-    control = lmerControl(optimizer = "bobyqa"))
+    control = lme4::lmerControl(optimizer = "bobyqa"))
 
 
 ## Calculate predictions
@@ -181,5 +183,5 @@ A <- result[[1]]
 B <- result[[2]]
 
 grid::grid.newpage()  # Clear the graphics device
-grid.draw(B)
-grid.draw(A)
+grid::grid.draw(B)
+grid::grid.draw(A)

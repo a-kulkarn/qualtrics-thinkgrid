@@ -2,6 +2,14 @@
 ## Quadrant background.
 
 thinkgrid_quadrant_background <- function() {
+    ## Imports
+    unit <- ggplot2::unit
+    arrow <- ggplot2::arrow
+    aes <- ggplot2::aes
+    gpar <- grid::gpar
+    unit.c <- grid::unit.c
+
+
     ## Create 6x6 grid background
 
     ## Create the axis labels and arrows manually.
@@ -76,6 +84,10 @@ thinkgrid_quadrant_background <- function() {
 ## Quadrant plot.
 
 thinkgrid_quadrant_plot <- function(...) {
+    ## Imports.
+    unit <- ggplot2::unit
+    unit.c <- grid::unit.c
+
     plots <- list(...)
 
     ## if (length(plots) == 1 & is.list(plots)) {
@@ -84,7 +96,7 @@ thinkgrid_quadrant_plot <- function(...) {
     ##     plots = plots[1]
     ## }
 
-    g <- ggplot2::ggplotGrob(plots[[1]] + theme(legend.position="right"))$grobs
+    g <- ggplot2::ggplotGrob(plots[[1]] + ggplot2::theme(legend.position="right"))$grobs
     legend <- g[[which(sapply(g, function(x) x$name) == "guide-box")]]
     lwidth <- sum(legend$width)
     
@@ -94,9 +106,9 @@ thinkgrid_quadrant_plot <- function(...) {
             plots,
             function(x)
                 x +
-                theme(
+                ggplot2::theme(
                     legend.position="none",
-                    plot.margin = margin(20,20,20,20)
+                    plot.margin = ggplot2::margin(20,20,20,20)
                 )
         )
     )
