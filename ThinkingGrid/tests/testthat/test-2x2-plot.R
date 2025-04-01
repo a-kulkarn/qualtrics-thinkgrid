@@ -17,35 +17,6 @@ library(tidyr)
 library(ggeffects)
 library(cowplot)
 
-## Read data and rename variables
-## data <- read.csv("taxicab_Affect_Induction.csv")
-data <- read.csv("~/thinking-grid/demo-files/taxicab_Affect_Induction.csv")
-
-data <- data %>%
-  rename(valence = val) %>%
-  rename(id = pid)
-
-data$total_correct <- data$directed_correct + data$sticky_correct + data$free_correct
-
-data <- data[data$total_correct == 3, ]
-
-
-
-## Create block variable
-data$probe <- as.numeric(as.character(data$probe))
-data$block <- factor(ifelse(data$probe < 3, "Emotional Task", "Rest"),
-                     levels = c("Emotional Task", "Rest"))
-
-## Fit the models
-model3_free <- lmer(free ~ valence + I(valence^2) + block + block:valence + block:I(valence^2) +  (1 | id), data, 
-                    control = lmerControl(optimizer = "bobyqa"))
-model3_sticky <- lmer(sticky ~ valence + I(valence^2) + block + block:valence + block:I(valence^2) + (1 | id), data, 
-                      control = lmerControl(optimizer = "bobyqa"))
-model3_directed <- lmer(directed ~ valence + I(valence^2) + block + block:valence + block:I(valence^2) + (1 | id), data, 
-                        control = lmerControl(optimizer = "bobyqa"))
-model3_salience_directed <- lmer(salience_directed ~ valence + I(valence^2) + block + block:valence + block:I(valence^2) + (1 | id), data, 
-                                 control = lmerControl(optimizer = "bobyqa"))
-
 ## New prediction function
 get_predictions <- function(model, newdata) {
   ## Create prediction data frames for both conditions
@@ -120,9 +91,9 @@ create_subplot <- function(predictions, valence_seq, measure_name) {
       axis.title = element_text(size = 14),
       axis.text = element_text(size = 12),
       axis.title.y = element_text(margin = margin(r = 10)),
-      panel.grid.major = element_line(color = "gray90", size = 0.2),
+      panel.grid.major = element_line(color = "gray90", linewidth = 0.2),
       panel.grid.minor = element_blank(),
-      axis.line = element_line(color = "black", size = 0.5)
+      axis.line = element_line(color = "black", linewidth = 0.5)
     ) +
     labs(
       title = element_blank(),
@@ -134,7 +105,37 @@ create_subplot <- function(predictions, valence_seq, measure_name) {
 
 ##################################################
 ## Main script.
- 
+
+## Read data and rename variables
+## data <- read.csv("taxicab_Affect_Induction.csv")
+data <- read.csv("~/thinking-grid/demo-files/taxicab_Affect_Induction.csv")
+
+data <- data %>%
+  rename(valence = val) %>%
+  rename(id = pid)
+
+data$total_correct <- data$directed_correct + data$sticky_correct + data$free_correct
+
+data <- data[data$total_correct == 3, ]
+
+
+
+## Create block variable
+data$probe <- as.numeric(as.character(data$probe))
+data$block <- factor(ifelse(data$probe < 3, "Emotional Task", "Rest"),
+                     levels = c("Emotional Task", "Rest"))
+
+## Fit the models
+model3_free <- lmer(free ~ valence + I(valence^2) + block + block:valence + block:I(valence^2) +  (1 | id), data, 
+                    control = lmerControl(optimizer = "bobyqa"))
+model3_sticky <- lmer(sticky ~ valence + I(valence^2) + block + block:valence + block:I(valence^2) + (1 | id), data, 
+                      control = lmerControl(optimizer = "bobyqa"))
+model3_directed <- lmer(directed ~ valence + I(valence^2) + block + block:valence + block:I(valence^2) + (1 | id), data, 
+                        control = lmerControl(optimizer = "bobyqa"))
+model3_salience_directed <- lmer(salience_directed ~ valence + I(valence^2) + block + block:valence + block:I(valence^2) + (1 | id), data, 
+                                 control = lmerControl(optimizer = "bobyqa"))
+
+
 ## Calculate predictions
 valence_seq <- seq(min(data$valence), max(data$valence), length.out = 100)
 newdata <- data.frame(valence = valence_seq)
