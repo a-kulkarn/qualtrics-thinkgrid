@@ -4,7 +4,7 @@ check_install_package <- function(package_name) {
         if (tolower(install_package) == "y") {
             install.packages(package_name)
         } else {
-            warning(paste(package_name, "is required for this function. Please install it before proceeding. Use command install.packages('", package_name, "') to install the package.", sep = ""))
+            stop(paste(package_name, "is required for this function. Please install it before proceeding. Use command install.packages('", package_name, "') to install the package.", sep = ""))
             return(NULL)
         }
     }
@@ -106,14 +106,12 @@ plot_tg <- function(survey_results,
     
     ## Validate proportion_type
     if (!(proportion_type %in% c("overall", "condition"))) {
-        warning("Invalid proportion_type. Using default 'overall'.")
-        proportion_type <- "overall"
+        stop("Invalid proportion_type.")
     }
 
     ## Validate comparison_type when condition is present
     if (proportion_type == "condition" && !(comparison_type %in% c("separate", "difference"))) {
-        warning("Invalid comparison_type. Using default 'separate'.")
-        comparison_type <- "separate"
+        stop("Invalid comparison_type. Using default 'separate'.")
     }
     
     # Validate color palettes
@@ -150,7 +148,7 @@ plot_tg <- function(survey_results,
         unique_conditions <- unique(condition_col)
         
         if (length(unique_conditions) < 2) {
-            warning("At least 2 unique conditions are needed for condition analysis. Reverting to overall proportion.")
+            stop("At least 2 unique conditions are needed for condition analysis.")
             prop_grid <- create_grid(dc, ac)
             proportion_type <- "overall"
             condition_grids <- NULL
@@ -179,8 +177,7 @@ plot_tg <- function(survey_results,
     
     # Check if the plot function exists
     if (is.null(plot_functions[[type]])) {
-        warning(paste("Plot type", type, "not implemented. Using 'cells'."))
-        type <- "cells"
+        stop(paste("Plot type", type, "not implemented"))
     }
     
     # Call the appropriate plot function
@@ -242,7 +239,7 @@ create_tg_animation <- function(survey_results,
     # Check if all values in condition_col are present in sorted_conditions
     extra_values <- setdiff(unique_conditions, sorted_conditions)
     if(length(extra_values) > 0) {
-      warning(paste("The following values in condition_col are not present in sorted_conditions and will be ignored:", 
+      stop(paste("The following values in condition_col are not present in sorted_conditions :", 
                    paste(extra_values, collapse = ", ")))
     }
     

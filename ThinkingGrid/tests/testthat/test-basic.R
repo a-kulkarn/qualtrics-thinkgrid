@@ -64,118 +64,118 @@ normalize_plot <- function(plot) {
 
 ## ------------------------------------------------------------------------
 
-## test_that("plot_tg produces correct plot", {
-##     res <- plot_tg(mock_tg_frame, proportion_type = "overall", type = "cells")
-##     vdiffr::expect_doppelganger("plot_tg_overall_cells", res$plot, transform = normalize_plot)
-## })
+test_that("plot_tg produces correct plot", {
+    res <- plot_tg(mock_tg_frame, proportion_type = "overall", type = "cells")
+    vdiffr::expect_doppelganger("plot_tg_overall_cells", res$plot)
+})
 
-## test_that("plot_tg produces correct plot for quadrants", {
-##     res <- plot_tg(mock_tg_frame, proportion_type = "overall", type = "quadrants")
-##     vdiffr::expect_doppelganger("plot_tg_overall_quadrants", res$plot, transform = normalize_plot)
-## })
+test_that("plot_tg produces correct plot for quadrants", {
+    res <- plot_tg(mock_tg_frame, proportion_type = "overall", type = "quadrants")
+    vdiffr::expect_doppelganger("plot_tg_overall_quadrants", res$plot)
+})
 
 test_that("plot_tg produces correct plot for horizontal", {
     res <- plot_tg(mock_tg_frame, proportion_type = "overall", type = "horizontal")
-    vdiffr::expect_doppelganger("plot_tg_overall_horizontal", res$plot, transform = normalize_plot)
+    vdiffr::expect_doppelganger("plot_tg_overall_horizontal", res$plot)
 })
 
 test_that("plot_tg produces correct plot for vertical", {
     res <- plot_tg(mock_tg_frame, proportion_type = "overall", type = "vertical")
-    vdiffr::expect_doppelganger("plot_tg_overall_vertical", res$plot, transform = normalize_plot)
+    vdiffr::expect_doppelganger("plot_tg_overall_vertical", res$plot)
 })
 
-## test_that("plot_tg produces correct plot for constraints", {
-##     res <- plot_tg(mock_tg_frame, proportion_type = "overall", type = "constraints")
-##     vdiffr::expect_doppelganger("plot_tg_overall_constraints", res$plot, transform = normalize_plot)
-## })
+test_that("plot_tg produces correct plot for constraints", {
+    res <- plot_tg(mock_tg_frame, proportion_type = "overall", type = "constraints")
+    vdiffr::expect_doppelganger("plot_tg_overall_constraints", res$plot)
+})
 
 test_that("plot_tg produces correct plot for depth", {
     res <- plot_tg(mock_tg_frame, proportion_type = "overall", type = "depth")
-    vdiffr::expect_doppelganger("plot_tg_overall_depth", res$plot, transform = normalize_plot)
+    vdiffr::expect_doppelganger("plot_tg_overall_depth", res$plot)
 })
 
 ## ------------------------------------------------------------------------
 
-# Tests for condition plots without comparison_type (use "separate")
-## test_that("plot_tg produces correct plot for condition (separate) with type = cells", {
-##   res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "cells", condition_col = condition)
-##   vdiffr::expect_doppelganger("plot_tg_separate_cells", res$plot, transform = normalize_plot)
-## })
+#Tests for condition plots without comparison_type (use "separate")
+test_that("plot_tg produces correct plot for condition (separate) with type = cells", {
+  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "cells", condition_col = condition)
+  vdiffr::expect_doppelganger("plot_tg_separate_cells", res$plot)
+})
 
-## test_that("plot_tg produces correct plot for condition (separate) with type = quadrants", {
-##   res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "quadrants", condition_col = condition)
-##   vdiffr::expect_doppelganger("plot_tg_separate_quadrants", res$plot, transform = normalize_plot)
-## })
+test_that("plot_tg produces correct plot for condition (separate) with type = quadrants", {
+  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "quadrants", condition_col = condition)
+  vdiffr::expect_doppelganger("plot_tg_separate_quadrants", res$plot)
+})
 
 test_that("plot_tg produces correct plot for condition (separate) with type = horizontal", {
   res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "horizontal", condition_col = condition)
-  vdiffr::expect_doppelganger("plot_tg_separate_horizontal", res$plot, transform = normalize_plot)
+  vdiffr::expect_doppelganger("plot_tg_separate_horizontal", res$plot)
 })
 
 test_that("plot_tg produces correct plot for condition (separate) with type = vertical", {
   res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "vertical", condition_col = condition)
-  vdiffr::expect_doppelganger("plot_tg_separate_vertical", res$plot, transform = normalize_plot)
+  vdiffr::expect_doppelganger("plot_tg_separate_vertical", res$plot)
 })
 
-## test_that("plot_tg produces correct plot for condition (separate) with type = constraints", {
-##   res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "constraints", condition_col = condition)
-##   vdiffr::expect_doppelganger("plot_tg_separate_constraints", res$plot, transform = normalize_plot)
-## })
+test_that("plot_tg produces correct plot for condition (separate) with type = constraints", {
+  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "constraints", condition_col = condition)
+  vdiffr::expect_doppelganger("plot_tg_separate_constraints", res$plot)
+})
 
 test_that("plot_tg produces correct plot for condition (separate) with type = depth", {
   res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "depth", condition_col = condition)
-  vdiffr::expect_doppelganger("plot_tg_separate_depth", res$plot, transform = normalize_plot)
+  vdiffr::expect_doppelganger("plot_tg_separate_depth", res$plot)
 })
 
 ## ------------------------------------------------------------------------
 ## Tests for condition plots with comparison_type = "difference"
 
-## test_that("plot_tg produces correct plot for condition (difference) with type = cells", {
-##   res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "cells", condition_col = condition, comparison_type = "difference")
-##   vdiffr::expect_doppelganger("plot_tg_difference_cells", res$plot, transform = normalize_plot)
-## })
+test_that("plot_tg produces correct plot for condition (difference) with type = cells", {
+  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "cells", condition_col = condition, comparison_type = "difference")
+  vdiffr::expect_doppelganger("plot_tg_difference_cells", res$plot)
+})
 
-## test_that("plot_tg produces correct plot for condition (difference) with type = quadrants", {
-##   res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "quadrants", condition_col = condition, comparison_type = "difference")
-##   vdiffr::expect_doppelganger("plot_tg_difference_quadrants", res$plot, transform = normalize_plot)
-## })
+test_that("plot_tg produces correct plot for condition (difference) with type = quadrants", {
+  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "quadrants", condition_col = condition, comparison_type = "difference")
+  vdiffr::expect_doppelganger("plot_tg_difference_quadrants", res$plot)
+})
 
 test_that("plot_tg produces correct plot for condition (difference) with type = horizontal", {
   res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "horizontal", condition_col = condition, comparison_type = "difference")
-  vdiffr::expect_doppelganger("plot_tg_difference_horizontal", res$plot, transform = normalize_plot)
+  vdiffr::expect_doppelganger("plot_tg_difference_horizontal", res$plot)
 })
 
 test_that("plot_tg produces correct plot for condition (difference) with type = vertical", {
   res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "vertical", condition_col = condition, comparison_type = "difference")
-  vdiffr::expect_doppelganger("plot_tg_difference_vertical", res$plot, transform = normalize_plot)
+  vdiffr::expect_doppelganger("plot_tg_difference_vertical", res$plot)
 })
 
-## test_that("plot_tg produces correct plot for condition (difference) with type = constraints", {
-##   res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "constraints", condition_col = condition, comparison_type = "difference")
-##   vdiffr::expect_doppelganger("plot_tg_difference_constraints", res$plot, transform = normalize_plot)
-## })
+test_that("plot_tg produces correct plot for condition (difference) with type = constraints", {
+  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "constraints", condition_col = condition, comparison_type = "difference")
+  vdiffr::expect_doppelganger("plot_tg_difference_constraints", res$plot)
+})
 
 test_that("plot_tg produces correct plot for condition (difference) with type = depth", {
   res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "depth", condition_col = condition, comparison_type = "difference")
-  vdiffr::expect_doppelganger("plot_tg_difference_depth", res$plot, transform = normalize_plot)
+  vdiffr::expect_doppelganger("plot_tg_difference_depth", res$plot)
 })
 
 ## ------------------------------------------------------------------------
 ## ------------------------------------------------------------------------
 
-## test_that("create_tg_animation is working with type = cells", {
-##     expect_type(
-##         create_tg_animation(mock_tg_frame, condition_col = id, proportion_type = "overall", type = "cells", filename = "gifs/cells.gif"),
-##         "list"
-##     )
-## })
+test_that("create_tg_animation is working with type = cells", {
+    expect_type(
+        create_tg_animation(mock_tg_frame, condition_col = id, proportion_type = "overall", type = "cells", filename = "gifs/cells.gif"),
+        "list"
+    )
+})
 
-## test_that("create_tg_animation is working with type = quadrants", {
-##     expect_type(
-##         create_tg_animation(mock_tg_frame, condition_col = id, proportion_type = "overall", type = "quadrants", filename = "gifs/quadrants.gif"),
-##         "list"
-##     )
-## })
+test_that("create_tg_animation is working with type = quadrants", {
+    expect_type(
+        create_tg_animation(mock_tg_frame, condition_col = id, proportion_type = "overall", type = "quadrants", filename = "gifs/quadrants.gif"),
+        "list"
+    )
+})
 
 test_that("create_tg_animation is working with type = horizontal", {
     expect_type(
@@ -191,12 +191,12 @@ test_that("create_tg_animation is working with type = vertical", {
     )
 })
 
-## test_that("create_tg_animation is working with type = constraints", {
-##     expect_type(
-##         create_tg_animation(mock_tg_frame, condition_col = id, proportion_type = "overall", type = "constraints", filename = "gifs/constraints.gif"),
-##         "list"
-##     )
-## })
+test_that("create_tg_animation is working with type = constraints", {
+    expect_type(
+        create_tg_animation(mock_tg_frame, condition_col = id, proportion_type = "overall", type = "constraints", filename = "gifs/constraints.gif"),
+        "list"
+    )
+})
 
 test_that("create_tg_animation is working with type = depth", {
     expect_type(

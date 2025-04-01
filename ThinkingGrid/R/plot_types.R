@@ -16,8 +16,8 @@ get_quadrant_6x6 <- function(i, j) {
 validate_range <- function(value, ref_value, is_max = TRUE) {
     if (!is.null(value)) {
         if ((is_max && value < ref_value) || (!is_max && value > ref_value)) {
-            warning(paste(ifelse(is_max, "max_legend", "min_legend"),
-                          "value is out of bounds. Using the reference value instead."))
+            stop(paste(ifelse(is_max, "max_legend", "min_legend"),
+                          "value is out of bounds."))
             return(ref_value)
         }
         return(value)
@@ -302,8 +302,28 @@ compile_cells_plot_creator <- function() {
       if (!is.null(condition)) plot_data$condition <- condition
       return(plot_data)
   }
-    
+  # For cells plot, the proportioner simply returns the cell values in vector form
+  proportioner <- function(grid) {
+    as.vector(t(grid))  # Convert matrix to vector in column-major order
+  }
+
+  # Create data frame for cells plot
+  framer <- function() {
+    data.frame(dc = rep(1:6, each = 6), ac = rep(1:6, times = 6))
+  }
+  
+  # Define the aesthetics for cell tiles
+  aesthetics <- ggplot2::aes(x = dc, y = ac, fill = fill_value)
+  
+  # Define the geometry for cell tiles
+  geometry <- function(data) {
+    ggplot2::geom_tile(color = "white", linewidth = 0.5)
+  }
+  
+  # Compile the plot creator
+  compile_plot_creator(proportioner, framer, aesthetics, geometry)
 }
+create_cells_plot <- compile_cells_plot_creator()
 
 ################################################################################
 ## Quadrants.
@@ -321,8 +341,39 @@ compile_quadrant_plot_creator <- function() {
     return(proportions)
   }
 
+    # Define the proportioner function to extract values from the grid
+  proportioner <- function(grid) {
+    quad_data <- create_quadrant_data(grid)
+    return(as.vector(t(quad_data)))  # Convert to vector in column-major order
+  }
+  
+  # Create data frame for quadrant plot
+  framer <- function() {
+    data.frame(
+      x = c(2, 5, 2, 5),  # centers of the quadrants
+      y = c(2, 2, 5, 5),
+      width = rep(3, 4),  # each quadrant is 3x3
+      height = rep(3, 4),
+      quadrant = 1:4      # quadrant identifiers
+    )
+  }
+  
+  # Define the aesthetics for quadrant tiles
+  aesthetics <- ggplot2::aes(x = x, y = y, fill = fill_value, group = quadrant)
+  
+  # Define the geometry for quadrant tiles
+  geometry <- function(data) {
+    ggplot2::geom_tile(
+      ggplot2::aes(width = width, height = height),
+      color = "white", 
+      linewidth = 0.5
+    )
+  }
+  
+  # Compile the plot creator
+  compile_plot_creator(proportioner, framer, aesthetics, geometry)
 }
-
+create_quadrants_plot <- compile_quadrant_plot_creator()
 
 ################################################################################
 ## Vertical.
@@ -389,7 +440,7 @@ create_horizontal_plot <- compile_horizontal_plot_creator()
 ## Diagonal constraint.
 
 ## TODO: Implement this function.
-create_constraints_plot <- function(...) {
+compile_constraints_plot_creator <- function() {
     
   # Calculate constraint proportions
   calculate_constraint_props <- function(grid) {
@@ -411,10 +462,43 @@ create_constraints_plot <- function(...) {
   
   diagonal_band_width <- sqrt(72) / 11
   axis_projection <- diagonal_band_width * sqrt(2)
-  constraint_polygons <- get_constraint_polygons(axis_projection)
+  
+  proportioner <- function(prop_grid) {
+    constraint_props <- calculate_constraint_props(prop_grid)
     
+    # Get fresh polygon data for each call
+    plot_data <- get_constraint_polygons(axis_projection)
+    # Adjust for the constraint numbering (2-12 instead of 1-11)
+    for (i in 2:12) {
+      mask <- plot_data$constraint == i
+      if (any(mask)) {
+        # Use i-1 to access the correct element in constraint_props
+        plot_data$proportion[mask] <- constraint_props[i-1]
+      }
+    }
+    return(plot_data$proportion)
+  }
+  
+  framer <- function() {
+    get_constraint_polygons(axis_projection)
+  }
+  
+  # Rest of function remains the same
+  aesthetics <- ggplot2::aes(x = x,
+                             y = y,
+                             fill = fill_value,
+                             group = constraint)
+  
+  geometry <- function(data) {
+    ggplot2::geom_polygon(
+      color = "white",
+      linewidth = 0.5
+    )
+  }
+  
+  return(compile_plot_creator(proportioner, framer, aesthetics, geometry))
 }
-
+create_constraints_plot <- compile_constraints_plot_creator()
 ################################################################################
 ## Depth.
 
