@@ -126,14 +126,27 @@ data$block <- factor(ifelse(data$probe < 3, "Emotional Task", "Rest"),
                      levels = c("Emotional Task", "Rest"))
 
 ## Fit the models
-model3_free <- lmer(free ~ valence + I(valence^2) + block + block:valence + block:I(valence^2) +  (1 | id), data, 
-                    control = lmerControl(optimizer = "bobyqa"))
-model3_sticky <- lmer(sticky ~ valence + I(valence^2) + block + block:valence + block:I(valence^2) + (1 | id), data, 
-                      control = lmerControl(optimizer = "bobyqa"))
-model3_directed <- lmer(directed ~ valence + I(valence^2) + block + block:valence + block:I(valence^2) + (1 | id), data, 
-                        control = lmerControl(optimizer = "bobyqa"))
-model3_salience_directed <- lmer(salience_directed ~ valence + I(valence^2) + block + block:valence + block:I(valence^2) + (1 | id), data, 
-                                 control = lmerControl(optimizer = "bobyqa"))
+model3_free <- lmer(
+    free ~ valence + I(valence^2) + block + block:valence + block:I(valence^2) +  (1 | id),
+    data,
+    control = lmerControl(optimizer = "bobyqa")
+)
+model3_sticky <- lmer(
+    sticky ~ valence + I(valence^2) + block + block:valence + block:I(valence^2) +  (1 | id),
+    data,
+    control = lmerControl(optimizer = "bobyqa")
+)
+model3_directed <- lmer(
+    directed ~ valence + I(valence^2) + block + block:valence + block:I(valence^2) + (1 | id),
+    data, 
+    control = lmerControl(optimizer = "bobyqa")
+)
+model3_salience_directed <- lmer(
+    salience_directed ~ (
+        valence + I(valence^2) + block + block:valence + block:I(valence^2) + (1 | id)
+    ),
+    data, 
+    control = lmerControl(optimizer = "bobyqa"))
 
 
 ## Calculate predictions
