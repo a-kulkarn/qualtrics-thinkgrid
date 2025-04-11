@@ -5,28 +5,52 @@
 \title{Illustration of plot_tg function}
 \usage{
 plot_tg(
-  dc,
-  ac,
+  survey_results,
   proportion_type = "overall",
   type = "cells",
-  color_palette = "Greens",
+  colorer = NULL,
   x_label = "Directedness",
   y_label = "Stickiness",
   condition_col = NULL,
   comparison_type = "separate",
-  pos_palette = "Greens",
-  neg_palette = "Reds",
   max_legend = NULL,
   min_legend = NULL
 )
 }
 \arguments{
-\item{add_parameter_here}{{character} Description of the parameter}
+\item{survey_results}{{data.frame, required} Data frame containing survey results with columns "Deliberate.Constraints" and "Automatic.Constraints".}
+
+\item{proportion_type}{{character, optional} Type of proportion to calculate. Options are "overall" (default) or "condition". If "condition", a condition column must be provided using the condition_col parameter.}
+
+\item{type}{{character, optional} Type of plot to create. Options are "cells" (default), "quadrants", "horizontal", "vertical", "constraints", or "depth". Create a grid of proportions based on the type specified.}
+
+\item{colorer}{{function, optional} Function to color the grid cells. Default is NULL.}
+
+\item{x_label}{{character, optional} Label for the x-axis. Default is "Directedness".}
+
+\item{y_label}{{character, optional} Label for the y-axis. Default is "Stickiness".}
+
+\item{condition_col}{{character, optional} Required if proportion_type is "condition". Can be passed as a vector. If part of the data frame, pass it as data$condition_col.}
+
+\item{comparison_type}{{character, optional} Type of comparison to make when proportion_type is "condition". Options are "separate" (default) or "difference". If number of conditions is exactly 2, the plots will be shown side by side. Otherwise, the plots will be shown separately. The "difference" option requires exactly 2 conditions.}
+
+\item{max_legend}{{numeric, optional} Maximum value for the legend. Default is NULL. If NULL, the maximum value will be calculated from the data.}
+
+\item{min_legend}{{numeric, optional} Minimum value for the legend. Default is NULL. If NULL, the minimum value will be calculated from the data.}
+}
+\value{
+A list containing $plot and $prop_data. $plot is a ggplot object, and $prop_data is a data frame with the proportions.
 }
 \description{
 Illustration of plot_tg function
 }
 \examples{
 plot_tg(relevant_data)
+
+plot_tg(relevant_data, proportion_type = "condition", condition_col = relevant_data$condition_col)
+
+plot_tg(relevant_data, type = "cells", colorer = my_color_function)
+
+plot_tg(relevant_data, type = "quadrants", x_label = "X-axis label", y_label = "Y-axis label", proportion_type = "condition", condition_col = relevant_data$condition_col, comparison_type = "separate")
 
 }

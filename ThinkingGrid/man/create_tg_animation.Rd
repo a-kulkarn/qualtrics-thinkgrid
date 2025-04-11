@@ -5,30 +5,62 @@
 \title{Illustration of create_tg_animation function}
 \usage{
 create_tg_animation(
-  dc,
-  ac,
+  survey_results,
   condition_col,
   type = "cells",
   proportion_type = "overall",
+  colorer = NULL,
+  x_label = "Directedness",
+  y_label = "Stickiness",
+  max_legend = NULL,
+  min_legend = NULL,
   filename = "tg_animation.gif",
   duration = 1,
   width = 800,
   height = 800,
-  sorted_conditions = NULL,
-  color_palette = "Greens",
-  x_label = "Directedness",
-  y_label = "Stickiness",
-  max_legend = NULL,
-  min_legend = NULL
+  sorted_conditions = NULL
 )
 }
 \arguments{
-\item{add_parameter_here}{{character} Description of the parameter}
+\item{survey_results}{{data.frame, required} Data frame containing survey results with columns "Deliberate.Constraints" and "Automatic.Constraints".}
+
+\item{condition_col}{{character, required} Column name or vector containing the conditions for each observation. If part of the data frame, pass it as data$condition_col. If condition_col values are numeric, they will be sorted in ascending order. If they are character/factor, they will be displayed in random order unless sorted_conditions is provided.}
+
+\item{type}{{character, optional} Type of plot to create. Options are "cells" (default), "quadrants", "horizontal", "vertical", "constraints", or "depth". Create a grid of proportions based on the type specified.}
+
+\item{proportion_type}{{character, optional} Type of proportion to calculate. Currently only "overall" is supported.}
+
+\item{colorer}{{function, optional} Function to color the grid cells. Default is NULL.}
+
+\item{x_label}{{character, optional} Label for the x-axis. Default is "Directedness".}
+
+\item{y_label}{{character, optional} Label for the y-axis. Default is "Stickiness".}
+
+\item{max_legend}{{numeric, optional} Maximum value for the legend. Default is NULL. If NULL, the maximum value will be calculated from the data.}
+
+\item{min_legend}{{numeric, optional} Minimum value for the legend. Default is NULL. If NULL, the minimum value will be calculated from the data.}
+
+\item{filename}{{character, optional} Name of the output GIF file. Default is "tg_animation.gif".}
+
+\item{duration}{{numeric, optional} Duration of each frame in the GIF in seconds. Default is 1 second.}
+
+\item{width}{{numeric, optional} Width of the GIF in pixels. Default is 800 pixels.}
+
+\item{height}{{numeric, optional} Height of the GIF in pixels. Default is 800 pixels.}
+
+\item{sorted_conditions}{{character, optional} A vector of conditions in the desired order. If provided, the function will use this order for the animation. If not provided, the function will sort numeric conditions in ascending order and display character/factor conditions in random order. This vector must contain all unique values from the condition_col.}
 }
 \description{
 Illustration of create_tg_animation function
 }
 \examples{
-create_tg_animation(relevant_data)
+
+create_tg_animation(relevant_data, condition_col = relevant_data$condition_col)
+
+create_tg_animation(relevant_data, condition_col = relevant_data$condition_col, type = "constraints", filename = "my_animation.gif")
+
+create_tg_animation(relevant_data, condition_col = relevant_data$condition_col, type = "cells", sorted_conditions = c("Condition1", "Condition2", "Condition3"))
+
+#' @return A GIF file containing the animation of the Thinking Grid.
 
 }

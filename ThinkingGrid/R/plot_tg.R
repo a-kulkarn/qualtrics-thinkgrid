@@ -47,10 +47,36 @@ create_grid <- function(dc, ac, condition_filter = NULL, condition_col = NULL) {
 
 #' Illustration of plot_tg function
 #' 
-#' @param add_parameter_here {character} Description of the parameter
+#' @param survey_results {data.frame, required} Data frame containing survey results with columns "Deliberate.Constraints" and "Automatic.Constraints".
+#' 
+#' @param proportion_type {character, optional} Type of proportion to calculate. Options are "overall" (default) or "condition". If "condition", a condition column must be provided using the condition_col parameter.
+#' 
+#' @param type {character, optional} Type of plot to create. Options are "cells" (default), "quadrants", "horizontal", "vertical", "constraints", or "depth". Create a grid of proportions based on the type specified.
+#' 
+#' @param colorer {function, optional} Function to color the grid cells. Default is NULL.
+#' 
+#' @param x_label {character, optional} Label for the x-axis. Default is "Directedness".
+#' 
+#' @param y_label {character, optional} Label for the y-axis. Default is "Stickiness".
+#' 
+#' @param condition_col {character, optional} Required if proportion_type is "condition". Can be passed as a vector. If part of the data frame, pass it as data$condition_col.
+#' 
+#' @param comparison_type {character, optional} Type of comparison to make when proportion_type is "condition". Options are "separate" (default) or "difference". If number of conditions is exactly 2, the plots will be shown side by side. Otherwise, the plots will be shown separately. The "difference" option requires exactly 2 conditions.
+#' 
+#' @param min_legend {numeric, optional} Minimum value for the legend. Default is NULL. If NULL, the minimum value will be calculated from the data.
+#' 
+#' @param max_legend {numeric, optional} Maximum value for the legend. Default is NULL. If NULL, the maximum value will be calculated from the data.
 #' 
 #' @examples
 #' plot_tg(relevant_data)
+#' 
+#' plot_tg(relevant_data, proportion_type = "condition", condition_col = relevant_data$condition_col)
+#' 
+#' plot_tg(relevant_data, type = "cells", colorer = my_color_function)
+#' 
+#' plot_tg(relevant_data, type = "quadrants", x_label = "X-axis label", y_label = "Y-axis label", proportion_type = "condition", condition_col = relevant_data$condition_col, comparison_type = "separate")
+#' 
+#' @return A list containing $plot and $prop_data. $plot is a ggplot object, and $prop_data is a data frame with the proportions.
 #' 
 #' @export
 plot_tg <- function(survey_results,
@@ -191,10 +217,43 @@ plot_tg <- function(survey_results,
 
 #' Illustration of create_tg_animation function
 #' 
-#' @param add_parameter_here {character} Description of the parameter
+#' @param survey_results {data.frame, required} Data frame containing survey results with columns "Deliberate.Constraints" and "Automatic.Constraints".
+#' 
+#' @param condition_col {character, required} Column name or vector containing the conditions for each observation. If part of the data frame, pass it as data$condition_col. If condition_col values are numeric, they will be sorted in ascending order. If they are character/factor, they will be displayed in random order unless sorted_conditions is provided.
+#' 
+#' @param type {character, optional} Type of plot to create. Options are "cells" (default), "quadrants", "horizontal", "vertical", "constraints", or "depth". Create a grid of proportions based on the type specified.
+#' 
+#' @param proportion_type {character, optional} Type of proportion to calculate. Currently only "overall" is supported.
+#' 
+#' @param colorer {function, optional} Function to color the grid cells. Default is NULL.
+#' 
+#'@param x_label {character, optional} Label for the x-axis. Default is "Directedness".
+#' 
+#' @param y_label {character, optional} Label for the y-axis. Default is "Stickiness".
+#' 
+#' @param min_legend {numeric, optional} Minimum value for the legend. Default is NULL. If NULL, the minimum value will be calculated from the data.
+
+#' @param max_legend {numeric, optional} Maximum value for the legend. Default is NULL. If NULL, the maximum value will be calculated from the data. 
+#' 
+#' @param filename {character, optional} Name of the output GIF file. Default is "tg_animation.gif".
+#' 
+#' @param duration {numeric, optional} Duration of each frame in the GIF in seconds. Default is 1 second.
+#' 
+#' @param width {numeric, optional} Width of the GIF in pixels. Default is 800 pixels.
+#' 
+#' @param height {numeric, optional} Height of the GIF in pixels. Default is 800 pixels.
+#' 
+#' @param sorted_conditions {character, optional} A vector of conditions in the desired order. If provided, the function will use this order for the animation. If not provided, the function will sort numeric conditions in ascending order and display character/factor conditions in random order. This vector must contain all unique values from the condition_col.
 #' 
 #' @examples
-#' create_tg_animation(relevant_data)
+#' 
+#' create_tg_animation(relevant_data, condition_col = relevant_data$condition_col)
+#' 
+#' create_tg_animation(relevant_data, condition_col = relevant_data$condition_col, type = "constraints", filename = "my_animation.gif")
+#' 
+#' create_tg_animation(relevant_data, condition_col = relevant_data$condition_col, type = "cells", sorted_conditions = c("Condition1", "Condition2", "Condition3"))
+#' 
+#' #' @return A GIF file containing the animation of the Thinking Grid.
 #' 
 #' @export
 
