@@ -89,6 +89,12 @@ plot_tg <- function(survey_results,
                     comparison_type = "separate",
                     max_legend = NULL,
                     min_legend = NULL) {
+    # in survey resulst, drop rows where either Deliberate.Constraints or Automatic.Constraints is NA but first provide warning for how many rows are dropped
+    if (any(is.na(survey_results$Deliberate.Constraints)) || any(is.na(survey_results$Automatic.Constraints))) {
+        dropped_rows <- sum(is.na(survey_results$Deliberate.Constraints) | is.na(survey_results$Automatic.Constraints))
+        warning(paste("Dropping ", dropped_rows, " rows with NA values in Deliberate.Constraints or Automatic.Constraints"))
+        survey_results <- survey_results[!is.na(survey_results$Deliberate.Constraints) & !is.na(survey_results$Automatic.Constraints), ]
+    }
 
     dc <- survey_results$Deliberate.Constraints
     ac <- survey_results$Automatic.Constraints
