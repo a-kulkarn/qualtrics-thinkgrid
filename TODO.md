@@ -1,5 +1,5 @@
 - data
-    - [ ] add depth ratings to the csv file
+    - [x] add depth ratings to the csv file
     - [ ] check for nan values in the data and drop rows
     - [ ] the `condition_col` parameter should be a a column in the dataset
     - [ ] add  parameter that allows the user to subset data based on certain columns in the dataset   

@@ -10,6 +10,61 @@ def subset_qualtrics(data, identifier):
     return data
 
 
+def calculate_quadrant_depth(dc, ac):
+    # bottom left quadrant --> Free Depth
+    # top left quadrant --> Sticky Depth
+    # bottom right quadrant --> Directed Depth
+    # top right quadrant --> AffDir Depth
+
+    if dc < 4 and ac < 4:
+        if (dc == 1 and ac == 1):
+            depth = 5
+        elif (dc == 1 and ac == 2) or (dc == 2 and ac == 1):
+            depth = 4
+        elif (dc == 1 and ac == 3) or (dc == 2 and ac == 2) or (dc == 3 and ac == 1):
+            depth = 3
+        elif (dc == 2 and ac == 3) or (dc == 3 and ac == 2):
+            depth = 2
+        elif (dc == 3 and ac == 3):
+            depth = 1
+        return depth, 0, 0, 0
+    elif dc < 4 and ac >= 4:
+        if (dc == 1 and ac == 6):
+            depth = 5
+        elif (dc == 1 and ac == 5) or (dc == 2 and ac == 6):
+            depth = 4
+        elif (dc == 1 and ac == 4) or (dc == 2 and ac == 5) or (dc == 3 and ac == 6):
+            depth = 3
+        elif (dc == 2 and ac == 4) or (dc == 3 and ac == 5):
+            depth = 2
+        elif (dc == 3 and ac == 4):
+            depth = 1
+        return 0, 0, 0, depth
+    elif dc >= 4 and ac < 4:
+        if (dc == 6 and ac == 1):
+            depth = 5
+        elif (dc == 5 and ac == 1) or (dc == 6 and ac == 2):
+            depth = 4
+        elif (dc == 4 and ac == 1) or (dc == 5 and ac == 2) or (dc == 6 and ac == 3):
+            depth = 3
+        elif (dc == 4 and ac == 2) or (dc == 5 and ac == 3):
+            depth = 2
+        elif (dc == 4 and ac == 3):
+            depth = 1
+        return 0, depth, 0, 0
+    elif dc >= 4 and ac >= 4:
+        if (dc == 6 and ac == 6):
+            depth = 5
+        elif (dc == 5 and ac == 6) or (dc == 6 and ac == 5):
+            depth = 4
+        elif (dc == 4 and ac == 6) or (dc == 5 and ac == 5) or (dc == 6 and ac == 4):
+            depth = 3
+        elif (dc == 4 and ac == 5) or (dc == 5 and ac == 4):
+            depth = 2
+        elif (dc == 4 and ac == 4):
+            depth = 1
+        return 0, 0, depth, 0
+
 def read_qualtrics_data(outputFileDir, setup):
     # outputFileDir -- exported survery data from qualtrics.
     # setup -- setup file used to generate the survey. (Or possibly the list of identifiers.)
@@ -78,14 +133,38 @@ def read_qualtrics_data(outputFileDir, setup):
                 ac.append("not recorded")
         uidLocal += 1
 
-    output = pd.DataFrame(
-        list(zip(uid, probeid, dc, ac)),
-        columns=["uid", "Probe.Identifier", "Deliberate.Constraints", "Automatic.Constraints"],
+    free_depth, directed_depth, affdir_depth, sticky_depth = [], [], [], []
+
+    # iterate over each row in output and calculate quadrant depth
+    for dc_val, ac_val in zip(dc, ac):
+        if dc_val != "N/A" and ac_val != "N/A":
+            free, directed, affdir, sticky = calculate_quadrant_depth(int(dc_val), int(ac_val))
+            free_depth.append(free)
+            directed_depth.append(directed)
+            affdir_depth.append(affdir)
+            sticky_depth.append(sticky)
+
+        output = pd.DataFrame(
+        list(zip(uid, probeid, dc, ac, free_depth, directed_depth, affdir_depth, sticky_depth)),
+        columns=["uid", "Probe.Identifier", "Deliberate.Constraints", "Automatic.Constraints", "Free.Depth", "Directed.Depth", "AffDir.Depth", "Sticky.Depth"],
     )
 
-    # Cast types.
-    for col in ["Deliberate.Constraints", "Automatic.Constraints"]:
-        output[col] = output[col].astype(int)
+    for col in ["Deliberate.Constraints", "Automatic.Constraints", "Free.Depth", "Directed.Depth", "AffDir.Depth", "Sticky.Depth"]:
+            output[col] = output[col].astype(int)
+
+    # Reorder columns.
+    output = output[
+        [
+            "uid",
+            "Probe.Identifier",
+            "Deliberate.Constraints",
+            "Automatic.Constraints",
+            "Free.Depth",
+            "Directed.Depth",
+            "AffDir.Depth",
+            "Sticky.Depth",
+        ]
+    ]
 
     # Return.
     return output
