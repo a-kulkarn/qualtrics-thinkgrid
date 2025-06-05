@@ -133,7 +133,10 @@ plot_tg <- function(survey_results,
                     condition_column = NULL,
                     comparison_type = "separate",
                     max_legend = NULL,
-                    min_legend = NULL) {
+                    min_legend = NULL,
+                    plot_title = NULL,
+                    legend_title = NULL,
+                    plot_subtitle = NULL) {
 
     condition_required = FALSE
     if (proportion_type == "condition") {
@@ -148,7 +151,7 @@ plot_tg <- function(survey_results,
     # Check required packages
     check_install_package("RColorBrewer")
     check_install_package("ggplot2")
-
+    
     ## Options handling.
     ## ------------------------------------
     
@@ -191,6 +194,11 @@ plot_tg <- function(survey_results,
         prop_grid <- create_grid(dc, ac)
         condition_grids <- NULL
         
+        # Validate plot_subtitle is not a list for overall plot
+        if (!is.null(plot_subtitle) && is.list(plot_subtitle)) {
+            stop("For proportion_type='overall', plot_subtitle should be a single string, not a list.")
+        }
+        
     } else {  # condition-based analysis
         # Get unique conditions
         unique_conditions <- unique(condition_col)
@@ -207,6 +215,27 @@ plot_tg <- function(survey_results,
             })
             names(condition_grids) <- unique_conditions
             prop_grid <- NULL  # Not used for condition analysis
+            
+            # Validate plot_subtitle when using conditions
+            if (!is.null(plot_subtitle)) {
+                if (comparison_type == "separate") {
+                    # For separate plots, validate list length matches number of conditions
+                    if (!is.character(plot_subtitle)) {
+                        stop("For proportion_type='condition' and comparison_type='separate', plot_subtitle should be a character of strings, one for each condition.")
+                    }
+                    
+                    if (length(plot_subtitle) != length(unique_conditions)) {
+                        stop(paste("Number of subtitles (", length(plot_subtitle), 
+                               ") does not match number of conditions (", 
+                               length(unique_conditions), "). Please provide exactly one subtitle per condition."))
+                    }
+                } else if (comparison_type == "difference") {
+                    # For difference plot, we need a single subtitle
+                    if (is.list(plot_subtitle)) {
+                        stop("For comparison_type='difference', plot_subtitle should be a single string, not a list.")
+                    }
+                }
+            }
         }
     }
 
@@ -233,7 +262,8 @@ plot_tg <- function(survey_results,
 
     # All plot types now support condition-based visualization
     return(plot_fn(prop_grid, proportion_type, colorer, x_label, y_label,
-                 condition_grids, comparison_type, max_legend, min_legend))
+                 condition_grids, comparison_type, max_legend, min_legend,
+                 plot_title, legend_title, plot_subtitle))
 }
 
 
@@ -289,7 +319,10 @@ create_tg_animation <- function(survey_results,
                                 x_label = "Directedness",
                                 y_label = "Stickiness",
                                 max_legend = NULL,
-                                min_legend = NULL,                                
+                                min_legend = NULL,  
+                                plot_title = NULL,
+                                legend_title = NULL,
+                                plot_subtitle = NULL,
                                 filename = "tg_animation.gif",
                                 duration = 1,
                                 width = 800,
@@ -517,7 +550,8 @@ create_tg_animation <- function(survey_results,
   # Generate individual plots for each condition
   plot_list <- list()
   
-  for(cond in ordered_conditions) {
+  for(i in seq_along(ordered_conditions)) {
+    cond <- ordered_conditions[i]
     # Subset data for this condition
     df_subset <- df[df$condition == cond, ]
 
@@ -525,6 +559,20 @@ create_tg_animation <- function(survey_results,
         Deliberate.Constraints = df_subset$dc,
         Automatic.Constraints = df_subset$ac
     )
+    
+    # Determine subtitle for this condition
+    current_subtitle <- NULL
+    if (!is.null(plot_subtitle)) {
+      if (length(plot_subtitle) == 1) {
+        # Use the same subtitle for all conditions
+        current_subtitle <- plot_subtitle
+        message(paste("Condition '", cond, "' uses subtitle: '", current_subtitle, "'", sep=""))
+      } else {
+        # Use condition-specific subtitle (by index, not name)
+        current_subtitle <- plot_subtitle[i]
+        message(paste("Condition '", cond, "' uses subtitle: '", current_subtitle, "'", sep=""))
+      }
+    }
       
     # Create plot using plot_tg function
     p <- plot_tg(df_subset_relabelled, 
@@ -534,12 +582,30 @@ create_tg_animation <- function(survey_results,
                 x_label = x_label,
                 y_label = y_label,
                 max_legend = max_legend,
-                min_legend = min_legend)
+                min_legend = min_legend,
+                legend_title = legend_title,
+                plot_title = plot_title,  # Pass the plot_title parameter
+                plot_subtitle = current_subtitle)
     
-    # Add a title showing the condition
-    p$plot <- p$plot + 
-      ggplot2::ggtitle(paste("Condition:", cond)) +
-      ggplot2::theme(plot.title = ggplot2::element_text(size = 16, face = "bold", hjust = 0.5))
+    # Only add the "Condition: X" title if no subtitle is provided
+    if (is.null(current_subtitle)) {
+      # Create a combined title with user's plot_title and condition information
+      combined_title <- if (!is.null(plot_title)) {
+        paste0(plot_title, "\nCondition: ", cond)
+      } else {
+        paste("Condition:", cond)
+      }
+      
+      # Set the title only if we're not using user-provided subtitles
+      p$plot <- p$plot + 
+        ggplot2::ggtitle(combined_title) +
+        ggplot2::theme(plot.title = ggplot2::element_text(size = 16, face = "bold", hjust = 0.5))
+    } else if (!is.null(plot_title)) {
+      # If we have a subtitle and a plot_title, just set the plot_title
+      p$plot <- p$plot + 
+        ggplot2::ggtitle(plot_title) +
+        ggplot2::theme(plot.title = ggplot2::element_text(size = 16, face = "bold", hjust = 0.5))
+    }
     
     # Add to list
     plot_list[[as.character(cond)]] <- p$plot

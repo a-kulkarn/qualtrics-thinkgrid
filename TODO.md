@@ -6,8 +6,8 @@
 
 - Plot
     - [ ] add arrows to the plot
-    - [ ] add a legend_title parameter to the plot function
-    - [ ] add a title parameter to the plot function
+    - [x] add a legend_title parameter to the plot function
+    - [x] add a title parameter to the plot function
     - [x] default type should be "depth", not "cells"
     - [ ] coloring
         - [ ] default color filling should use colorbrewer, not `scale_fill_gradient2`

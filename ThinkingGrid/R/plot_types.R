@@ -82,7 +82,10 @@ plot_engine <- function(data,
                         aesthetics,
                         geometry,
                         comparison_type = NULL,
-                        title = NULL) {
+                        title = NULL,
+                        plot_title = NULL,
+                        legend_title = NULL,
+                        plot_subtitle = NULL) {
     
     p <- ggplot2::ggplot(data) +
         aesthetics + 
@@ -93,17 +96,32 @@ plot_engine <- function(data,
         ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
         base_plot_theme()
 
-    if (!is.null(comparison_type) && comparison_type == "difference") {
-        p <- p + ggplot2::labs(x = x_label,
-                               y = y_label,
-                               title = title,
-                               fill = "Difference (%)")
-    } else {
-        p <- p + ggplot2::labs(x = x_label, y = y_label, fill = "Percentage (%)")    
+    # For difference plots, generate a title if not provided
+    if (comparison_type == "difference") {
+        # Use user-provided plot_title if available, otherwise use default difference title
+        diff_title <- ifelse(!is.null(plot_title), plot_title, title)
+        p <- p + ggplot2::labs(title = diff_title)
+    } else if (!is.null(plot_title)) {
+        # For other plots, use plot_title if provided
+        p <- p + ggplot2::labs(title = plot_title)
+    }
+    
+    # Add subtitle if provided
+    if (!is.null(plot_subtitle)) {
+        p <- p + ggplot2::labs(subtitle = plot_subtitle)
     }
 
-    return(p)
+    # Set fill label
+    if (!is.null(comparison_type) && comparison_type == "difference") {
+        fill_title <- ifelse(is.null(legend_title), "Difference (%)", legend_title)
+    } else {
+        fill_title <- ifelse(is.null(legend_title), "Percentage (%)", legend_title)
+    }
     
+    # Set axis labels and fill title
+    p <- p + ggplot2::labs(x = x_label, y = y_label, fill = fill_title)
+
+    return(p)
 }
 
 
@@ -112,7 +130,8 @@ create_overall_plot <- function(data,
                                 plotter,
                                 framer,
                                 min_legend,
-                                max_legend) {
+                                max_legend,
+                                plot_subtitle = NULL) {
 
     proportions <- proportioner(data)
     limits <- c(validate_range(min_legend, 0, FALSE),
@@ -121,21 +140,37 @@ create_overall_plot <- function(data,
     vertical_data <- framer()
     vertical_data$fill_value <- proportions
 
-    p <- plotter(vertical_data, limits)
+    p <- plotter(vertical_data, limits, plot_subtitle = plot_subtitle)
     
     return(list(plot = p, prop_data = proportions))
 }
 
 create_separate_plot <- function(data,
-                                 proportioner,
-                                 plotter,
-                                 framer,
-                                 min_legend,
-                                 max_legend) {
+                               proportioner,
+                               plotter,
+                               framer,
+                               min_legend,
+                               max_legend,
+                               plot_subtitle = NULL) {
 
     condition_grids <- data
     unique_conditions <- names(condition_grids)
     proportions <- lapply(condition_grids, proportioner)
+
+    # Check if we have subtitles and validate them
+    has_subtitles <- !is.null(plot_subtitle) && length(plot_subtitle) > 0
+    if (has_subtitles) {
+        if (length(plot_subtitle) != length(unique_conditions)) {
+            stop(paste("Number of subtitles (", length(plot_subtitle), 
+                     ") does not match number of conditions (", 
+                     length(unique_conditions), "). Please provide exactly one subtitle per condition."))
+        }
+        
+        # Print which condition uses which subtitle for clarity
+        for (i in seq_along(unique_conditions)) {
+            message(paste("Condition '", unique_conditions[i], "' uses subtitle: '", plot_subtitle[i], "'", sep=""))
+        }
+    }
 
     if (length(unique_conditions) == 2) {
         cond1 <- unique_conditions[1]
@@ -160,8 +195,21 @@ create_separate_plot <- function(data,
         
         combined_data <- rbind(data1, data2)
 
+        # Create the plot with facets
         p <- plotter(combined_data, limits)
-        p <- p + ggplot2::facet_wrap(~ condition, ncol = 2)
+        
+        # If we have subtitles, use them as facet labels instead of condition names
+        if (has_subtitles) {
+            # Create custom facet labels using just the subtitles
+            facet_labels <- setNames(plot_subtitle, unique_conditions)
+            
+            # Apply custom labelled facets
+            p <- p + ggplot2::facet_wrap(~ condition, ncol = 2, labeller = ggplot2::as_labeller(facet_labels))
+        } else {
+            # Default facets with condition names
+            p <- p + ggplot2::facet_wrap(~ condition, ncol = 2)
+        }
+        
         return(list(plot = p, prop_data = proportions))
 
     } else {
@@ -172,10 +220,18 @@ create_separate_plot <- function(data,
         limits <- c(validate_range(min_legend, min_prop, FALSE),
                     validate_range(max_legend, max_prop))
 
-        for (cond in unique_conditions) {
+        for (i in seq_along(unique_conditions)) {
+            cond <- unique_conditions[i]
             data <- framer()
             data$fill_value <- proportions[[cond]]
-            condition_plots[[cond]] <- plotter(data, limits)
+            
+            # Use corresponding subtitle if available
+            subtitle <- NULL
+            if (has_subtitles) {
+                subtitle <- plot_subtitle[i]
+            }
+            
+            condition_plots[[cond]] <- plotter(data, limits, plot_subtitle = subtitle)
         }
 
         return(list(plot = condition_plots, prop_data = proportions))
@@ -187,7 +243,8 @@ create_difference_plot <- function(data,
                                    plotter,
                                    framer,
                                    min_legend,
-                                   max_legend) {
+                                   max_legend,
+                                   plot_subtitle = NULL) {
 
     condition_grids <- data
     unique_conditions <- names(condition_grids)
@@ -205,9 +262,12 @@ create_difference_plot <- function(data,
     
     max_diff <- validate_range(max_legend, max(abs(diff_data$fill_value)))
     limits <- c(-max_diff, max_diff)
-    title <- paste("Difference (%):", first_cond, "-", second_cond)
     
-    p <- plotter(diff_data, limits, title = title)
+    # Generate the difference description
+    diff_desc <- paste("Difference (%):", first_cond, "-", second_cond)
+    
+    # Pass diff_desc as title parameter - this is what was missing!
+    p <- plotter(diff_data, limits, title = diff_desc, plot_subtitle = plot_subtitle)
 
     return(list(
         plot = p,
@@ -247,7 +307,10 @@ compile_plot_creator <- function(proportioner,
              condition_grids = NULL,
              comparison_type = "separate",
              max_legend = NULL,
-             min_legend = NULL) {
+             min_legend = NULL,
+             plot_title = NULL,
+             legend_title = NULL,
+             plot_subtitle = NULL) {
 
         if (is.null(colorer)) {
             colorer <- default_colorer(with_negatives = (comparison_type == "difference"))
@@ -255,7 +318,7 @@ compile_plot_creator <- function(proportioner,
             stop("Not Implemented.")
         }
 
-        plotter <- function(data, limits, title = NULL) {
+        plotter <- function(data, limits, title = NULL, plot_subtitle = NULL) {
             plot_engine(
                 data,
                 limits,
@@ -265,7 +328,10 @@ compile_plot_creator <- function(proportioner,
                 aesthetics,
                 geometry,
                 comparison_type = comparison_type,
-                title = title
+                title = title,
+                plot_title = plot_title,
+                legend_title = legend_title,
+                plot_subtitle = plot_subtitle
             )
         }
 
@@ -284,7 +350,8 @@ compile_plot_creator <- function(proportioner,
             plotter = plotter,
             framer = framer,            
             min_legend,
-            max_legend
+            max_legend,
+            plot_subtitle = plot_subtitle
         ))
     }
 
