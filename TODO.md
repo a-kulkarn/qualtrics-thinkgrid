@@ -5,7 +5,7 @@
     - [ ] add  parameter that allows the user to subset data based on certain columns in the dataset   
 
 - Plot
-    - [ ] add arrows to the plot
+    - [x] add arrows to the plot
     - [x] add a legend_title parameter to the plot function
     - [x] add a title parameter to the plot function
     - [x] default type should be "depth", not "cells"

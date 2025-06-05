@@ -31,11 +31,13 @@ validate_range <- function(value, ref_value, is_max = TRUE) {
 base_plot_theme <- function() {
     plot_theme <- ggplot2::theme_minimal() +
     ggplot2::theme(
-      axis.text = ggplot2::element_text(size = 12),
-      axis.title = ggplot2::element_text(size = 14, face = "italic"),
+      axis.text = ggplot2::element_blank(),
+      axis.title = ggplot2::element_blank(),
       legend.title = ggplot2::element_text(size = 12),
       panel.grid = ggplot2::element_blank(),
-      plot.margin = grid::unit(c(1, 1, 2, 2), "lines")
+      plot.margin = grid::unit(c(2, 2, 2, 2), "lines"),  # More generous margins
+      plot.title = ggplot2::element_text(size = 16, face = "bold", hjust = 0.5),  # Ensure title is visible
+      plot.subtitle = ggplot2::element_text(size = 14, hjust = 0.5)  # Ensure subtitle is visible
     )
 }
 
@@ -87,40 +89,103 @@ plot_engine <- function(data,
                         legend_title = NULL,
                         plot_subtitle = NULL) {
     
+    # Determine if this is a faceted plot based on if 'condition' column exists
+    is_faceted <- "condition" %in% names(data)
+    
+    # Create a balanced theme with optimized margins
+    custom_theme <- ggplot2::theme_minimal() +
+        ggplot2::theme(
+            axis.text = ggplot2::element_blank(),
+            # Make axis titles smaller, italic, and remove bold styling
+            axis.title = ggplot2::element_text(size = 12, face = "italic"),
+            # Move x-axis title closer to axis
+            axis.title.x = ggplot2::element_text(vjust = 0, hjust = 0.5, margin = ggplot2::margin(t = 0.5, b = 2, unit = "lines")),
+            axis.title.y = ggplot2::element_text(angle = 90, vjust = 0.5, hjust = 0.5),
+            legend.title = ggplot2::element_text(size = 11),
+            legend.text = ggplot2::element_text(size = 9),
+            # Make legend more compact
+            legend.key.size = ggplot2::unit(0.8, "lines"),
+            legend.spacing = ggplot2::unit(0.2, "cm"),
+            # Position legend for better separation from axis labels
+            legend.position = if(is_faceted) "bottom" else "right",
+            # Add margin between the legend and the plot
+            legend.margin = ggplot2::margin(t = 15, r = 0, b = 0, l = 0),
+            panel.grid = ggplot2::element_blank(),
+            plot.margin = ggplot2::unit(c(3, 2, 2, 4), "lines"),
+            plot.title = ggplot2::element_text(size = 16, face = "bold", hjust = 0.5, margin = ggplot2::margin(b = 10)),
+            plot.subtitle = ggplot2::element_text(size = 14, hjust = 0.5, margin = ggplot2::margin(b = 10))
+        )
+    
+    # Adjust coordinate limits based on whether we're in a facet or not
+    x_limits <- if(is_faceted) c(0, 7) else c(0, 7)
+    y_limits <- if(is_faceted) c(0, 7) else c(0, 7)
+    
+    # Create base plot with fixed aspect ratio
     p <- ggplot2::ggplot(data) +
         aesthetics + 
         geometry(data) +
         colorer(limits) +
-        ggplot2::coord_fixed(ratio = 1, xlim = c(0.5, 6.5), ylim = c(0.5, 6.5)) +
-        ggplot2::scale_x_continuous(breaks = NULL, expand = c(0, 0)) +
-        ggplot2::scale_y_continuous(breaks = NULL, expand = c(0, 0)) +
-        base_plot_theme()
-
-    # For difference plots, generate a title if not provided
+        # Fixed coordinate system with breathing room
+        ggplot2::coord_fixed(
+            ratio = 1,  # Force 1:1 aspect ratio
+            xlim = x_limits,  
+            ylim = y_limits,
+            expand = FALSE,
+            clip = "off"    
+        ) +
+        ggplot2::scale_x_continuous(breaks = NULL) +
+        ggplot2::scale_y_continuous(breaks = NULL) +
+        custom_theme
+    
+    # Position axis elements depending on whether this is a faceted plot
+    x_pos <- 0.3
+    y_pos <- 0.3
+    
+    # Add axes with arrows that respect the coordinate system
+    p <- p + 
+        # X-axis with arrow head
+        ggplot2::geom_segment(
+            data = data.frame(x = x_pos, y = y_pos, xend = 7, yend = y_pos),
+            mapping = ggplot2::aes(x = x, y = y, xend = xend, yend = yend),
+            color = "black", linewidth = 0.7,  # Changed 'size' to 'linewidth'
+            arrow = ggplot2::arrow(length = ggplot2::unit(0.4, "cm"), type = "closed", ends = "last"),
+            inherit.aes = FALSE
+        ) +
+        # Y-axis with arrow head
+        ggplot2::geom_segment(
+            data = data.frame(x = x_pos, y = y_pos, xend = x_pos, yend = 7),
+            mapping = ggplot2::aes(x = x, y = y, xend = xend, yend = yend),
+            color = "black", linewidth = 0.7,  # Changed 'size' to 'linewidth'
+            arrow = ggplot2::arrow(length = ggplot2::unit(0.4, "cm"), type = "closed", ends = "last"),
+            inherit.aes = FALSE
+        )
+    
+    # Apply titles with explicit calls that work better with complex plots
+    # For difference plots
     if (comparison_type == "difference") {
-        # Use user-provided plot_title if available, otherwise use default difference title
-        diff_title <- ifelse(!is.null(plot_title), plot_title, title)
-        p <- p + ggplot2::labs(title = diff_title)
+        diff_title <- if(!is.null(plot_title)) plot_title else title
+        if (!is.null(diff_title)) {
+            p <- p + ggplot2::labs(title = diff_title)
+        }
     } else if (!is.null(plot_title)) {
-        # For other plots, use plot_title if provided
+        # For other plots
         p <- p + ggplot2::labs(title = plot_title)
     }
     
-    # Add subtitle if provided
+    # Add subtitle if provided - using labs instead of +labs for consistency
     if (!is.null(plot_subtitle)) {
         p <- p + ggplot2::labs(subtitle = plot_subtitle)
     }
-
-    # Set fill label
-    if (!is.null(comparison_type) && comparison_type == "difference") {
-        fill_title <- ifelse(is.null(legend_title), "Difference (%)", legend_title)
-    } else {
-        fill_title <- ifelse(is.null(legend_title), "Percentage (%)", legend_title)
-    }
     
-    # Set axis labels and fill title
-    p <- p + ggplot2::labs(x = x_label, y = y_label, fill = fill_title)
-
+    # Use standard axis title positions through labs() for better placement
+    p <- p + ggplot2::labs(
+        x = x_label,
+        y = y_label,
+        fill = ifelse(!is.null(comparison_type) && comparison_type == "difference",
+                      ifelse(is.null(legend_title), "Difference (%)", legend_title),
+                      ifelse(is.null(legend_title), "Percentage (%)", legend_title))
+    )
+    
     return(p)
 }
 
@@ -152,7 +217,7 @@ create_separate_plot <- function(data,
                                min_legend,
                                max_legend,
                                plot_subtitle = NULL) {
-
+    
     condition_grids <- data
     unique_conditions <- names(condition_grids)
     proportions <- lapply(condition_grids, proportioner)
@@ -195,7 +260,7 @@ create_separate_plot <- function(data,
         
         combined_data <- rbind(data1, data2)
 
-        # Create the plot with facets
+        # Create the plot with facets - use a custom plotter for faceted plots
         p <- plotter(combined_data, limits)
         
         # If we have subtitles, use them as facet labels instead of condition names
@@ -203,11 +268,47 @@ create_separate_plot <- function(data,
             # Create custom facet labels using just the subtitles
             facet_labels <- setNames(plot_subtitle, unique_conditions)
             
-            # Apply custom labelled facets
-            p <- p + ggplot2::facet_wrap(~ condition, ncol = 2, labeller = ggplot2::as_labeller(facet_labels))
+            # Apply custom labelled facets - optimize layout for better plot size
+            p <- p + ggplot2::facet_wrap(~ condition, ncol = 2, labeller = ggplot2::as_labeller(facet_labels)) +
+                # Optimize for better plot sizes in faceted view
+                ggplot2::theme(
+                    panel.spacing = ggplot2::unit(2, "lines"),
+                    strip.text = ggplot2::element_text(size = 14, face = "bold"),
+                    plot.margin = ggplot2::unit(c(2, 1, 1, 1), "lines"),
+                    plot.title = ggplot2::element_text(margin = ggplot2::margin(b = 5)),
+                    # Improve legend separation from x-axis label
+                    legend.box.margin = ggplot2::margin(t = 15, b = 0, l = 0, r = 0),
+                    legend.box.spacing = ggplot2::unit(0.5, "lines")
+                ) +
+                # Use a simplified legend for faceted plots with better positioning
+                ggplot2::guides(
+                    fill = ggplot2::guide_colorbar(
+                        barwidth = 10, barheight = 0.5,
+                        title.position = "top", 
+                        title.hjust = 0.5,
+                        title.vjust = 0
+                    )
+                )
         } else {
-            # Default facets with condition names
-            p <- p + ggplot2::facet_wrap(~ condition, ncol = 2)
+            p <- p + ggplot2::facet_wrap(~ condition, ncol = 2) +
+                ggplot2::theme(
+                    panel.spacing = ggplot2::unit(2, "lines"),
+                    strip.text = ggplot2::element_text(size = 14, face = "bold"),
+                    plot.margin = ggplot2::unit(c(2, 1, 1, 1), "lines"),
+                    plot.title = ggplot2::element_text(margin = ggplot2::margin(b = 5)),
+                    # Improve legend separation from x-axis label
+                    legend.box.margin = ggplot2::margin(t = 15, b = 0, l = 0, r = 0),
+                    legend.box.spacing = ggplot2::unit(0.5, "lines")
+                ) +
+                # Use a simplified legend for faceted plots with better positioning
+                ggplot2::guides(
+                    fill = ggplot2::guide_colorbar(
+                        barwidth = 10, barheight = 0.5,
+                        title.position = "top", 
+                        title.hjust = 0.5,
+                        title.vjust = 0
+                    )
+                )
         }
         
         return(list(plot = p, prop_data = proportions))
@@ -461,10 +562,10 @@ compile_vertical_plot_creator <- function() {
 
     geometry <- function(data) {
         ggplot2::geom_tile(
-                     ggplot2::aes(y = 3.5, height = 6),
-                     color = "white",
-                     linewidth = 0.5
-                 )
+            ggplot2::aes(y = 3.5, height = 6),
+            color = "white",
+            linewidth = 0.5
+        )
     }
 
     compile_plot_creator(proportioner, framer, aesthetics, geometry)
@@ -491,10 +592,10 @@ compile_horizontal_plot_creator <- function() {
 
     geometry <- function(data) {
         ggplot2::geom_tile(
-                     ggplot2::aes(x = 3.5, width = 6),
-                     color = "white",
-                     linewidth = 0.5
-                 )
+            ggplot2::aes(x = 3.5, width = 6),
+            color = "white",
+            linewidth = 0.5
+        )
     }
 
     compile_plot_creator(proportioner, framer, aesthetics, geometry)
@@ -612,10 +713,10 @@ compile_depth_plot_creator <- function() {
     
     geometry <- function(data) {
         ggplot2::geom_polygon(
-                     data = data,
-                     color = "white",
-                     linewidth = 0.5
-                 )
+            data = data,
+            color = "white",
+            linewidth = 0.5
+        )
     }
 
     return(compile_plot_creator(proportioner, framer, aesthetics, geometry))
