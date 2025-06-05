@@ -1,14 +1,14 @@
 - data
     - [x] add depth ratings to the csv file
     - [x] check for nan values in the data and drop rows
-    - [ ] the `condition_col` parameter should be a a column in the dataset
+    - [x] the `condition_col` parameter should be a a column in the dataset
     - [ ] add  parameter that allows the user to subset data based on certain columns in the dataset   
 
 - Plot
     - [ ] add arrows to the plot
     - [ ] add a legend_title parameter to the plot function
     - [ ] add a title parameter to the plot function
-    - [ ] default type should be "depth", not "cells"
+    - [x] default type should be "depth", not "cells"
     - [ ] coloring
         - [ ] default color filling should use colorbrewer, not `scale_fill_gradient2`
         - [ ] add a `color_palette` parameter to the plot function

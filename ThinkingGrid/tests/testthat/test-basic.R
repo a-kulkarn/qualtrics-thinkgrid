@@ -12,13 +12,15 @@ condition <- rep(c("a", "a", "a", "b", "b"), 20)
 
 mock_tg_frame <- data.frame(
     Deliberate.Constraints = dc,
-    Automatic.Constraints = ac
+    Automatic.Constraints = ac,
+    id = id,
+    condition = condition
 )
 
 skip_if_no_pandas <- function() {
   have_pandas <- reticulate::py_module_available("pandas")
   if (!have_pandas)
-    skip("pandas not available for testing")
+    testthat::skip("pandas not available for testing")
 }
 
 test_that("generate_survey does not crash", {
@@ -45,22 +47,22 @@ test_that("test pandas availability", {
     )
 })
 
-normalize_plot <- function(plot) {
-  plot +
-    # Set a consistent theme for fonts, margins, backgrounds, and grids
-    theme(
-      text = element_text(family = "sans", size = 12),
-      plot.margin = margin(5, 5, 5, 5),
-      panel.background = element_rect(fill = "white", color = NA),
-      panel.grid.major = element_line(color = "grey90"),
-      panel.grid.minor = element_line(color = "grey95")
-    ) +
-    # Fix coordinate expansion so that axis limits don't change unexpectedly
-    coord_cartesian(expand = FALSE) +
-    # Set manual color and fill scales to enforce consistency across systems
-    scale_color_manual(values = c("black", "blue", "red", "green", "orange", "purple")) +
-    scale_fill_manual(values = c("black", "blue", "red", "green", "orange", "purple"))
-}
+# normalize_plot <- function(plot) {
+#   plot +
+#     # Set a consistent theme for fonts, margins, backgrounds, and grids
+#     theme(
+#       text = element_text(family = "sans", size = 12),
+#       plot.margin = margin(5, 5, 5, 5),
+#       panel.background = element_rect(fill = "white", color = NA),
+#       panel.grid.major = element_line(color = "grey90"),
+#       panel.grid.minor = element_line(color = "grey95")
+#     ) +
+#     # Fix coordinate expansion so that axis limits don't change unexpectedly
+#     coord_cartesian(expand = FALSE) +
+#     # Set manual color and fill scales to enforce consistency across systems
+#     scale_color_manual(values = c("black", "blue", "red", "green", "orange", "purple")) +
+#     scale_fill_manual(values = c("black", "blue", "red", "green", "orange", "purple"))
+# }
 
 ## ------------------------------------------------------------------------
 
@@ -98,32 +100,32 @@ test_that("plot_tg produces correct plot for depth", {
 
 #Tests for condition plots without comparison_type (use "separate")
 test_that("plot_tg produces correct plot for condition (separate) with type = cells", {
-  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "cells", condition_col = condition)
+  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "cells", condition_column = "condition")
   vdiffr::expect_doppelganger("plot_tg_separate_cells", res$plot)
 })
 
 test_that("plot_tg produces correct plot for condition (separate) with type = quadrants", {
-  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "quadrants", condition_col = condition)
+  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "quadrants", condition_column = "condition")
   vdiffr::expect_doppelganger("plot_tg_separate_quadrants", res$plot)
 })
 
 test_that("plot_tg produces correct plot for condition (separate) with type = horizontal", {
-  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "horizontal", condition_col = condition)
+  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "horizontal", condition_column = "condition")
   vdiffr::expect_doppelganger("plot_tg_separate_horizontal", res$plot)
 })
 
 test_that("plot_tg produces correct plot for condition (separate) with type = vertical", {
-  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "vertical", condition_col = condition)
+  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "vertical", condition_column = "condition")
   vdiffr::expect_doppelganger("plot_tg_separate_vertical", res$plot)
 })
 
 test_that("plot_tg produces correct plot for condition (separate) with type = constraints", {
-  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "constraints", condition_col = condition)
+  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "constraints", condition_column = "condition")
   vdiffr::expect_doppelganger("plot_tg_separate_constraints", res$plot)
 })
 
 test_that("plot_tg produces correct plot for condition (separate) with type = depth", {
-  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "depth", condition_col = condition)
+  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "depth", condition_column = "condition")
   vdiffr::expect_doppelganger("plot_tg_separate_depth", res$plot)
 })
 
@@ -131,32 +133,32 @@ test_that("plot_tg produces correct plot for condition (separate) with type = de
 ## Tests for condition plots with comparison_type = "difference"
 
 test_that("plot_tg produces correct plot for condition (difference) with type = cells", {
-  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "cells", condition_col = condition, comparison_type = "difference")
+  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "cells", condition_column = "condition", comparison_type = "difference")
   vdiffr::expect_doppelganger("plot_tg_difference_cells", res$plot)
 })
 
 test_that("plot_tg produces correct plot for condition (difference) with type = quadrants", {
-  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "quadrants", condition_col = condition, comparison_type = "difference")
+  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "quadrants", condition_column = "condition", comparison_type = "difference")
   vdiffr::expect_doppelganger("plot_tg_difference_quadrants", res$plot)
 })
 
 test_that("plot_tg produces correct plot for condition (difference) with type = horizontal", {
-  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "horizontal", condition_col = condition, comparison_type = "difference")
+  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "horizontal", condition_column = "condition", comparison_type = "difference")
   vdiffr::expect_doppelganger("plot_tg_difference_horizontal", res$plot)
 })
 
 test_that("plot_tg produces correct plot for condition (difference) with type = vertical", {
-  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "vertical", condition_col = condition, comparison_type = "difference")
+  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "vertical", condition_column = "condition", comparison_type = "difference")
   vdiffr::expect_doppelganger("plot_tg_difference_vertical", res$plot)
 })
 
 test_that("plot_tg produces correct plot for condition (difference) with type = constraints", {
-  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "constraints", condition_col = condition, comparison_type = "difference")
+  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "constraints", condition_column = "condition", comparison_type = "difference")
   vdiffr::expect_doppelganger("plot_tg_difference_constraints", res$plot)
 })
 
 test_that("plot_tg produces correct plot for condition (difference) with type = depth", {
-  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "depth", condition_col = condition, comparison_type = "difference")
+  res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "depth", condition_column = "condition", comparison_type = "difference")
   vdiffr::expect_doppelganger("plot_tg_difference_depth", res$plot)
 })
 
@@ -165,42 +167,42 @@ test_that("plot_tg produces correct plot for condition (difference) with type = 
 
 test_that("create_tg_animation is working with type = cells", {
     expect_type(
-        create_tg_animation(mock_tg_frame, condition_col = id, proportion_type = "overall", type = "cells", filename = "gifs/cells.gif"),
+        create_tg_animation(mock_tg_frame, condition_column = "id", proportion_type = "overall", type = "cells", filename = "gifs/cells.gif"),
         "list"
     )
 })
 
 test_that("create_tg_animation is working with type = quadrants", {
     expect_type(
-        create_tg_animation(mock_tg_frame, condition_col = id, proportion_type = "overall", type = "quadrants", filename = "gifs/quadrants.gif"),
+        create_tg_animation(mock_tg_frame, condition_column = "id", proportion_type = "overall", type = "quadrants", filename = "gifs/quadrants.gif"),
         "list"
     )
 })
 
 test_that("create_tg_animation is working with type = horizontal", {
     expect_type(
-        create_tg_animation(mock_tg_frame, condition_col = id, proportion_type = "overall", type = "horizontal", filename = "gifs/horizontal.gif"),
+        create_tg_animation(mock_tg_frame, condition_column = "id", proportion_type = "overall", type = "horizontal", filename = "gifs/horizontal.gif"),
         "list"
     )
 })
 
 test_that("create_tg_animation is working with type = vertical", {
     expect_type(
-        create_tg_animation(mock_tg_frame, condition_col = id, proportion_type = "overall", type = "vertical", filename = "gifs/vertical.gif"),
+        create_tg_animation(mock_tg_frame, condition_column = "id", proportion_type = "overall", type = "vertical", filename = "gifs/vertical.gif"),
         "list"
     )
 })
 
 test_that("create_tg_animation is working with type = constraints", {
     expect_type(
-        create_tg_animation(mock_tg_frame, condition_col = id, proportion_type = "overall", type = "constraints", filename = "gifs/constraints.gif"),
+        create_tg_animation(mock_tg_frame, condition_column = "id", proportion_type = "overall", type = "constraints", filename = "gifs/constraints.gif"),
         "list"
     )
 })
 
 test_that("create_tg_animation is working with type = depth", {
     expect_type(
-        create_tg_animation(mock_tg_frame, condition_col = id, proportion_type = "overall", type = "depth", filename = "gifs/depth.gif"),
+        create_tg_animation(mock_tg_frame, condition_column = "id", proportion_type = "overall", type = "depth", filename = "gifs/depth.gif"),
         "list"
     )
 })

@@ -45,6 +45,49 @@ create_grid <- function(dc, ac, condition_filter = NULL, condition_col = NULL) {
     return(prop_grid)
 }
 
+check_dataframe <- function(df, dc_col, ac_col, check_condition, condition_col = NULL) {
+    if (!is.data.frame(df)) {
+        stop("survey_results must be a data frame")
+    }
+
+    if (!dc_col %in% names(df) || !ac_col %in% names(df)) {
+        stop(paste("Data frame must contain columns:", dc_col, "and", ac_col))
+    }
+
+    if (check_condition && is.null(condition_col)) {
+        stop("condition_column must be provided when proportion_type is 'condition'")
+    }
+
+    if (check_condition && !condition_col %in% names(df)) {
+        stop(paste("Data frame must contain column:", condition_col))
+    }
+
+    if (!is.numeric(df[[dc_col]]) || !is.numeric(df[[ac_col]])) {
+        stop("Deliberate.Constraints and Automatic.Constraints must be numeric vectors")
+    }
+
+    # drop any NA values
+    if (any(is.na(df[[dc_col]])) || any(is.na(df[[ac_col]]))) {
+        dropped_rows <- sum(is.na(df[[dc_col]]) | is.na(df[[ac_col]]))
+        warning(paste("Dropping", dropped_rows, "rows with NA values in", dc_col, "or", ac_col))
+        df <- df[!is.na(df[[dc_col]]) & !is.na(df[[ac_col]]), ]
+    }
+
+    dc <- df[[dc_col]]
+    ac <- df[[ac_col]]
+    if (check_condition) {
+        condition_col <- df[[condition_col]]
+        if (length(condition_col) != length(dc)) {
+            stop("condition_col must have the same length as Deliberate.Constraints and Automatic.Constraints")
+        }
+    } else {
+        condition_col <- NULL
+    }
+
+    return(list(dc = dc, ac = ac, condition_col = condition_col))
+
+}
+
 #' Illustration of plot_tg function
 #' 
 #' @param survey_results {data.frame, required} Data frame containing survey results with columns "Deliberate.Constraints" and "Automatic.Constraints".
@@ -81,57 +124,30 @@ create_grid <- function(dc, ac, condition_filter = NULL, condition_col = NULL) {
 #' @export
 plot_tg <- function(survey_results,
                     proportion_type = "overall",
-                    type = "cells",
+                    type = "depth",
                     colorer = NULL,
                     x_label = "Directedness",
                     y_label = "Stickiness",
-                    condition_col = NULL,
+                    dc_column = "Deliberate.Constraints",
+                    ac_column = "Automatic.Constraints",
+                    condition_column = NULL,
                     comparison_type = "separate",
                     max_legend = NULL,
                     min_legend = NULL) {
-    # in survey resulst, drop rows where either Deliberate.Constraints or Automatic.Constraints is NA but first provide warning for how many rows are dropped
-    if (any(is.na(survey_results$Deliberate.Constraints)) || any(is.na(survey_results$Automatic.Constraints))) {
-        dropped_rows <- sum(is.na(survey_results$Deliberate.Constraints) | is.na(survey_results$Automatic.Constraints))
-        warning(paste("Dropping ", dropped_rows, " rows with NA values in Deliberate.Constraints or Automatic.Constraints"))
-        survey_results <- survey_results[!is.na(survey_results$Deliberate.Constraints) & !is.na(survey_results$Automatic.Constraints), ]
+
+    condition_required = FALSE
+    if (proportion_type == "condition") {
+        condition_required = TRUE
     }
 
-    dc <- survey_results$Deliberate.Constraints
-    ac <- survey_results$Automatic.Constraints
-
-    if (proportion_type == "condition" && is.null(condition_col)) {
-        stop("condition_grids must be provided when proportion_type is 'condition'")
-    }
+    temp <- check_dataframe(survey_results, dc_column, ac_column, condition_required, condition_column)
+    dc <- temp$dc
+    ac <- temp$ac
+    condition_col <- temp$condition_col
     
     # Check required packages
     check_install_package("RColorBrewer")
     check_install_package("ggplot2")
-    
-    # Validate inputs
-    # ---------------
-    # Check if ac and dc are either both vectors or both matrices
-    if (is.vector(dc) && is.vector(ac)) {
-        if (length(dc) != length(ac)) {
-            stop("dc and ac must have the same length")
-        }
-        # Check condition if proportion_type is "condition"
-        if (proportion_type == "condition" && is.null(condition_col)) {
-            stop("condition_col parameter must be provided when proportion_type is 'condition'")
-        }
-        if (proportion_type == "condition" && length(condition_col) != length(dc)) {
-            stop("condition must have the same length as dc and ac")
-        }
-    } else if (is.matrix(dc) && is.matrix(ac)) {
-        if (nrow(dc) != nrow(ac) || ncol(dc) != ncol(ac)) {
-            stop("dc and ac must have the same dimensions")
-        }
-        # Matrices don't support condition comparison
-        if (proportion_type == "condition") {
-            stop("condition-based proportion not supported with matrix inputs")
-        }
-    } else {
-        stop("dc and ac must be either both vectors or both matrices")
-    }
 
     ## Options handling.
     ## ------------------------------------
@@ -143,7 +159,7 @@ plot_tg <- function(survey_results,
 
     ## Validate comparison_type when condition is present
     if (proportion_type == "condition" && !(comparison_type %in% c("separate", "difference"))) {
-        stop("Invalid comparison_type. Using default 'separate'.")
+        stop("Invalid comparison_type. Please use 'separate' or 'difference'.")
     }
     
     # Validate color palettes
@@ -264,8 +280,10 @@ plot_tg <- function(survey_results,
 #' @export
 
 create_tg_animation <- function(survey_results,
-                                condition_col,
-                                type = "cells",
+                                dc_column = "Deliberate.Constraints",
+                                ac_column = "Automatic.Constraints",
+                                condition_column = NULL,
+                                type = "depth",
                                 proportion_type = "overall",
                                 colorer = NULL,
                                 x_label = "Directedness",
@@ -283,8 +301,10 @@ create_tg_animation <- function(survey_results,
   check_install_package("ggplot2")
   check_install_package("gifski")
 
-  dc <- survey_results$Deliberate.Constraints
-  ac <- survey_results$Automatic.Constraints
+  temp <- check_dataframe(survey_results, dc_column, ac_column, TRUE, condition_column)
+  dc <- temp$dc
+  ac <- temp$ac
+  condition_col <- temp$condition_col
   
   # Convert condition_col to factor
   df <- data.frame(dc = dc, ac = ac, condition = condition_col)
@@ -502,8 +522,8 @@ create_tg_animation <- function(survey_results,
     df_subset <- df[df$condition == cond, ]
 
     df_subset_relabelled <- data.frame(
-        Deliberate.Constraints <- df_subset$dc,
-        Automatic.Constraints <- df_subset$ac
+        Deliberate.Constraints = df_subset$dc,
+        Automatic.Constraints = df_subset$ac
     )
       
     # Create plot using plot_tg function
