@@ -9,15 +9,4 @@
     - [x] add a legend_title parameter to the plot function
     - [x] add a title parameter to the plot function
     - [x] default type should be "depth", not "cells"
-    - [ ] coloring
-        - [ ] default color filling should use colorbrewer, not `scale_fill_gradient2`
-        - [ ] add a `color_palette` parameter to the plot function
-        - [ ] add a `zero_white` parameter to the plot function (binary)
-        - [ ] if `zero_white` is False, use colorbrewer
-        - [ ] if `zero_white` is True, use colorbrewer but adjust the color palette such that zero is white
-        - [ ] coloring for `comparison_type == "difference"` is to be implemented
-        - [ ] if `comparison_type == "difference"`
-            - [ ] check if `zero_white` is True
-            - [ ] if `zero_white` is True *and* `color_palette` is not None, use the color palette and set the midpoint to zero, change midpoint to white
-            - [ ] if `zero_white` is True *and* `positive_palette` and `negative_palette` are not None, set to them around the zero midpoint
-            
+    - [x] coloring

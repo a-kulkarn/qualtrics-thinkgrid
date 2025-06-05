@@ -96,10 +96,10 @@ check_dataframe <- function(df, dc_col, ac_col, check_condition, condition_col =
 #' 
 #' @param type {character, optional} Type of plot to create. Options are "cells" (default), "quadrants", "horizontal", "vertical", "constraints", or "depth". Create a grid of proportions based on the type specified.
 #' 
-#' @param colorer {function, optional} Function to color the grid cells. Default is NULL.
-#' 
+#' @param colorer {function, optional} Function to color the grid cells. Default is NULL. Use create_custom_colorer() to create one with specific colors and scaling.
+#' @param palette {character, optional} Name of diverging palette from colorspace package. Default is "RdYlBu". Other options include "RdBu", "PiYG", "BrBG", "PuOr", "RdGy".
+#' @param zero_color {character, optional} Color for zero values. Default is "#FFFFFF" (white) for clear distinction.
 #' @param x_label {character, optional} Label for the x-axis. Default is "Directedness".
-#' 
 #' @param y_label {character, optional} Label for the y-axis. Default is "Stickiness".
 #' 
 #' @param condition_col {character, optional} Required if proportion_type is "condition". Can be passed as a vector. If part of the data frame, pass it as data$condition_col.
@@ -112,12 +112,9 @@ check_dataframe <- function(df, dc_col, ac_col, check_condition, condition_col =
 #' 
 #' @examples
 #' plot_tg(relevant_data)
-#' 
 #' plot_tg(relevant_data, proportion_type = "condition", condition_col = relevant_data$condition_col)
-#' 
 #' plot_tg(relevant_data, type = "cells", colorer = my_color_function)
-#' 
-#' plot_tg(relevant_data, type = "quadrants", x_label = "X-axis label", y_label = "Y-axis label", proportion_type = "condition", condition_col = relevant_data$condition_col, comparison_type = "separate")
+#' plot_tg(relevant_data, type = "quadrants", palette = "RdBu", x_label = "X-axis label", y_label = "Y-axis label", proportion_type = "condition", condition_col = relevant_data$condition_col, comparison_type = "separate")
 #' 
 #' @return A list containing $plot and $prop_data. $plot is a ggplot object, and $prop_data is a data frame with the proportions.
 #' 
@@ -126,6 +123,8 @@ plot_tg <- function(survey_results,
                     proportion_type = "overall",
                     type = "depth",
                     colorer = NULL,
+                    palette = "RdYlBu",
+                    zero_color = "#FFFFFF",
                     x_label = "Directedness",
                     y_label = "Stickiness",
                     dc_column = "Deliberate.Constraints",
@@ -137,12 +136,12 @@ plot_tg <- function(survey_results,
                     plot_title = NULL,
                     legend_title = NULL,
                     plot_subtitle = NULL) {
-
+    
     condition_required = FALSE
     if (proportion_type == "condition") {
         condition_required = TRUE
     }
-
+    
     temp <- check_dataframe(survey_results, dc_column, ac_column, condition_required, condition_column)
     dc <- temp$dc
     ac <- temp$ac
@@ -159,26 +158,12 @@ plot_tg <- function(survey_results,
     if (!(proportion_type %in% c("overall", "condition"))) {
         stop("Invalid proportion_type.")
     }
-
+    
     ## Validate comparison_type when condition is present
     if (proportion_type == "condition" && !(comparison_type %in% c("separate", "difference"))) {
         stop("Invalid comparison_type. Please use 'separate' or 'difference'.")
     }
     
-    # Validate color palettes
-    ## if (!color_palette %in% rownames(RColorBrewer::brewer.pal.info)) {
-    ##     warning("Invalid color palette. Using default Greens palette.")
-    ##     color_palette <- "Greens"
-    ## }
-    ## if (!pos_palette %in% rownames(RColorBrewer::brewer.pal.info)) {
-    ##     warning("Invalid positive palette. Using default Greens palette.")
-    ##     pos_palette <- "Greens"
-    ## }
-    ## if (!neg_palette %in% rownames(RColorBrewer::brewer.pal.info)) {
-    ##     warning("Invalid negative palette. Using default Reds palette.")
-    ##     neg_palette <- "Reds"
-    ## }
-
     # Validate plot type
     valid_types <- c("quadrants", "horizontal", "vertical", "constraints", "depth", "cells")
     if (!(type %in% valid_types)) {
@@ -187,7 +172,7 @@ plot_tg <- function(survey_results,
     
     # Process data
     # ------------
-        
+    
     # Calculate proportions based on proportion_type
     if (proportion_type == "overall") {
         # Single grid for overall proportions
@@ -238,7 +223,15 @@ plot_tg <- function(survey_results,
             }
         }
     }
-
+    
+    # Create default colorer if none provided
+    if (is.null(colorer)) {
+        colorer <- create_custom_colorer(
+            palette = palette,
+            zero_color = zero_color
+        )
+    }
+    
     # Generate visualization
     # ---------------------
     
@@ -259,13 +252,12 @@ plot_tg <- function(survey_results,
     
     # Call the appropriate plot function
     plot_fn <- plot_functions[[type]]
-
+    
     # All plot types now support condition-based visualization
     return(plot_fn(prop_grid, proportion_type, colorer, x_label, y_label,
                  condition_grids, comparison_type, max_legend, min_legend,
                  plot_title, legend_title, plot_subtitle))
 }
-
 
 #' Illustration of create_tg_animation function
 #' 
@@ -278,14 +270,16 @@ plot_tg <- function(survey_results,
 #' @param proportion_type {character, optional} Type of proportion to calculate. Currently only "overall" is supported.
 #' 
 #' @param colorer {function, optional} Function to color the grid cells. Default is NULL.
+#' @param palette {character, optional} Name of diverging palette from colorspace package. Default is "RdYlBu".
+#' @param zero_color {character, optional} Color for zero values. Default is "#FFFFFF".
 #' 
-#'@param x_label {character, optional} Label for the x-axis. Default is "Directedness".
+#' @param x_label {character, optional} Label for the x-axis. Default is "Directedness".
 #' 
 #' @param y_label {character, optional} Label for the y-axis. Default is "Stickiness".
 #' 
 #' @param min_legend {numeric, optional} Minimum value for the legend. Default is NULL. If NULL, the minimum value will be calculated from the data.
-
-#' @param max_legend {numeric, optional} Maximum value for the legend. Default is NULL. If NULL, the maximum value will be calculated from the data. 
+#' 
+#' @param max_legend {numeric, optional} Maximum value for the legend. Default is NULL. If NULL, the maximum value will be calculated from the data.
 #' 
 #' @param filename {character, optional} Name of the output GIF file. Default is "tg_animation.gif".
 #' 
@@ -298,17 +292,15 @@ plot_tg <- function(survey_results,
 #' @param sorted_conditions {character, optional} A vector of conditions in the desired order. If provided, the function will use this order for the animation. If not provided, the function will sort numeric conditions in ascending order and display character/factor conditions in random order. This vector must contain all unique values from the condition_col.
 #' 
 #' @examples
-#' 
 #' create_tg_animation(relevant_data, condition_col = relevant_data$condition_col)
 #' 
 #' create_tg_animation(relevant_data, condition_col = relevant_data$condition_col, type = "constraints", filename = "my_animation.gif")
 #' 
 #' create_tg_animation(relevant_data, condition_col = relevant_data$condition_col, type = "cells", sorted_conditions = c("Condition1", "Condition2", "Condition3"))
 #' 
-#' #' @return A GIF file containing the animation of the Thinking Grid.
+#' @return A GIF file containing the animation of the Thinking Grid.
 #' 
 #' @export
-
 create_tg_animation <- function(survey_results,
                                 dc_column = "Deliberate.Constraints",
                                 ac_column = "Automatic.Constraints",
@@ -316,10 +308,12 @@ create_tg_animation <- function(survey_results,
                                 type = "depth",
                                 proportion_type = "overall",
                                 colorer = NULL,
+                                palette = "RdYlBu",
+                                zero_color = "#FFFFFF",
                                 x_label = "Directedness",
                                 y_label = "Stickiness",
                                 max_legend = NULL,
-                                min_legend = NULL,  
+                                min_legend = NULL,
                                 plot_title = NULL,
                                 legend_title = NULL,
                                 plot_subtitle = NULL,
@@ -327,17 +321,24 @@ create_tg_animation <- function(survey_results,
                                 duration = 1,
                                 width = 800,
                                 height = 800,
-                                sorted_conditions = NULL
-                                ) {
+                                sorted_conditions = NULL) {
   
   check_install_package("RColorBrewer")
   check_install_package("ggplot2")
   check_install_package("gifski")
-
+  
   temp <- check_dataframe(survey_results, dc_column, ac_column, TRUE, condition_column)
   dc <- temp$dc
   ac <- temp$ac
   condition_col <- temp$condition_col
+  
+  # Create default colorer if none provided  
+  if (is.null(colorer)) {
+      colorer <- create_custom_colorer(
+          palette = palette,
+          zero_color = zero_color
+      )
+  }
   
   # Convert condition_col to factor
   df <- data.frame(dc = dc, ac = ac, condition = condition_col)
@@ -357,8 +358,8 @@ create_tg_animation <- function(survey_results,
     # Check if all values in condition_col are present in sorted_conditions
     extra_values <- setdiff(unique_conditions, sorted_conditions)
     if(length(extra_values) > 0) {
-      stop(paste("The following values in condition_col are not present in sorted_conditions :", 
-                   paste(extra_values, collapse = ", ")))
+      stop(paste("The following values in condition_col are not present in sorted_conditions:", 
+                 paste(extra_values, collapse = ", ")))
     }
     
     # Use the provided order
@@ -374,42 +375,26 @@ create_tg_animation <- function(survey_results,
       message("Character conditions are being displayed in random order. Provide sorted_conditions parameter for custom ordering.")
     }
   }
-  
+
   # Define helper functions to calculate proportions based on plot type
   # (These correspond to the functions in plot_types.R)
   
-  # Helper function to create basic proportion grid
-  create_grid <- function(dc_subset, ac_subset) {
-    # Initialize grid
-    grid <- matrix(0, nrow = 6, ncol = 6)
-    
-    # Count occurrences
-    for (i in 1:length(dc_subset)) {
-      if (dc_subset[i] >= 1 && dc_subset[i] <= 6 && 
-          ac_subset[i] >= 1 && ac_subset[i] <= 6) {
-        grid[ac_subset[i], dc_subset[i]] <- grid[ac_subset[i], dc_subset[i]] + 1
-      }
-    }
-    
-    # Calculate proportions as percentages
-    total <- sum(grid)
-    if (total > 0) {
-      prop_grid <- grid / total * 100  # Convert to percentage
-    } else {
-      prop_grid <- grid
-    }
-    
-    return(prop_grid)
-  }
+  # Calculate proportion values for this subset using the existing create_grid function
+  # from the parent scope, avoiding code duplication
   
   # Function to calculate quadrant proportions
   calculate_quadrant_props <- function(grid) {
-    quadrant_grid <- matrix(0, nrow = 2, ncol = 2)
+    # Initialize matrix for 2x2 quadrants
+    quadrant_grid <- matrix(0, nrow = 2, ncol = 2) 
     
     # Define quadrants (bottom-left, bottom-right, top-left, top-right)
+    # Bottom-left
     quadrant_grid[1,1] <- sum(grid[1:3, 1:3])  # Bottom-left
+    # Bottom-right
     quadrant_grid[1,2] <- sum(grid[1:3, 4:6])  # Bottom-right
+    # Top-left
     quadrant_grid[2,1] <- sum(grid[4:6, 1:3])  # Top-left
+    # Top-right
     quadrant_grid[2,2] <- sum(grid[4:6, 4:6])  # Top-right
     
     return(quadrant_grid)
@@ -436,32 +421,23 @@ create_tg_animation <- function(survey_results,
     
     # Constraint 2 (ac=1, dc=1)
     constraint_props[1] <- grid[1, 1]
-    
     # Constraint 3 (ac=1,dc=2 and ac=2,dc=1)
     constraint_props[2] <- grid[1, 2] + grid[2, 1]
-    
     # Constraint 4 (ac=1,dc=3 and ac=2,dc=2 and ac=3,dc=1)
     constraint_props[3] <- grid[1, 3] + grid[2, 2] + grid[3, 1]
-    
     # Constraint 5 (ac=1,dc=4 and ac=2,dc=3 and ac=3,dc=2 and ac=4,dc=1)
     constraint_props[4] <- grid[1, 4] + grid[2, 3] + grid[3, 2] + grid[4, 1]
-    
     # Constraint 6 (ac=1,dc=5 and ac=2,dc=4 and ac=3,dc=3 and ac=4,dc=2 and ac=5,dc=1)
     constraint_props[5] <- grid[1, 5] + grid[2, 4] + grid[3, 3] + grid[4, 2] + grid[5, 1]
-    
     # Constraint 7 (ac=1,dc=6 and ac=2,dc=5 and ac=3,dc=4 and ac=4,dc=3 and ac=5,dc=2 and ac=6,dc=1)
     constraint_props[6] <- grid[1, 6] + grid[2, 5] + grid[3, 4] + grid[4, 3] + grid[5, 2] + grid[6, 1]
-    
     # Constraint 8 (ac=2,dc=6 and ac=3,dc=5 and ac=4,dc=4 and ac=5,dc=3 and ac=6,dc=2)
     constraint_props[7] <- grid[2, 6] + grid[3, 5] + grid[4, 4] + grid[5, 3] + grid[6, 2]
-    
     # Constraint 9 (ac=3,dc=6 and ac=4,dc=5 and ac=5,dc=4 and ac=6,dc=3)
     constraint_props[8] <- grid[3, 6] + grid[4, 5] + grid[5, 4] + grid[6, 3]
-    
     # Constraint 10 (ac=4,dc=6 and ac=5,dc=5 and ac=6,dc=4)
-    constraint_props[9] <- grid[4, 6] + grid[5, 5] + grid[6, 4]
-    
-    # Constraint 11 (ac=5,dc=6 and ac=6,dc=5)
+    constraint_props[9] <- grid[4, 6] + grid[5, 5] + grid[6, 4] 
+      # Constraint 11 (ac=5,dc=6 and ac=6,dc=5)
     constraint_props[10] <- grid[5, 6] + grid[6, 5]
     
     # Constraint 12 (ac=6,dc=6)
@@ -471,7 +447,7 @@ create_tg_animation <- function(survey_results,
   }
   
   # Function to calculate depth proportions
-  calculate_depth_props <- function(grid) {
+  calculate_depth_props <- function(grid) { 
     # Initialize matrix to store depth proportions for each quadrant (4 quadrants, 5 depths)
     depth_props <- matrix(0, nrow = 4, ncol = 5)
     
@@ -495,8 +471,7 @@ create_tg_animation <- function(survey_results,
     depth_props[3, 3] <- grid[4, 1] + grid[5, 2] + grid[6, 3]  # Depth 3
     depth_props[3, 4] <- grid[5, 1] + grid[6, 2]  # Depth 4
     depth_props[3, 5] <- grid[6, 1]  # Depth 5
-    
-    # Quadrant 4 (top-right, dc 4-6, ac 4-6)
+     # Quadrant 4 (top-right, dc 4-6, ac 4-6)
     depth_props[4, 1] <- grid[4, 4]  # Depth 1
     depth_props[4, 2] <- grid[4, 5] + grid[5, 4]  # Depth 2
     depth_props[4, 3] <- grid[4, 6] + grid[5, 5] + grid[6, 4]  # Depth 3
@@ -513,8 +488,7 @@ create_tg_animation <- function(survey_results,
                          "horizontal" = calculate_horizontal_props,
                          "vertical" = calculate_vertical_props,
                          "constraints" = calculate_constraint_props,
-                         "depth" = calculate_depth_props,
-                         function(grid) grid)  # Default to cells
+                         "depth" = calculate_depth_props)
   
   # If legend limits are not provided, calculate them from all conditions
   if(is.null(max_legend) || is.null(min_legend)) {
@@ -524,13 +498,10 @@ create_tg_animation <- function(survey_results,
     for(cond in ordered_conditions) {
       # Subset data for this condition
       df_subset <- df[df$condition == cond, ]
-      
       # Create basic proportion grid
       base_grid <- create_grid(df_subset$dc, df_subset$ac)
-      
       # Apply the type-specific calculation
       type_specific_props <- calc_function(base_grid)
-      
       # Store non-zero proportions
       all_proportions[[as.character(cond)]] <- type_specific_props[type_specific_props > 0]
     }
@@ -549,7 +520,6 @@ create_tg_animation <- function(survey_results,
   
   # Generate individual plots for each condition
   plot_list <- list()
-  
   for(i in seq_along(ordered_conditions)) {
     cond <- ordered_conditions[i]
     # Subset data for this condition
@@ -578,13 +548,13 @@ create_tg_animation <- function(survey_results,
     p <- plot_tg(df_subset_relabelled, 
                 proportion_type = "overall", 
                 type = type,
-                colorer = colorer,
+                colorer = colorer,  # Use the configured colorer
                 x_label = x_label,
                 y_label = y_label,
                 max_legend = max_legend,
                 min_legend = min_legend,
+                plot_title = plot_title,
                 legend_title = legend_title,
-                plot_title = plot_title,  # Pass the plot_title parameter
                 plot_subtitle = current_subtitle)
     
     # Only add the "Condition: X" title if no subtitle is provided
@@ -613,7 +583,6 @@ create_tg_animation <- function(survey_results,
   
   # Create a gif from the plots
   if(length(plot_list) > 1) {
-    
     # Create temporary directory for frames
     temp_dir <- tempfile()
     dir.create(temp_dir)
@@ -633,6 +602,11 @@ create_tg_animation <- function(survey_results,
                   width = width, 
                   height = height, 
                   delay = duration)
+    
+    # Clean up temporary files
+    file.remove(file_list)
+    unlink(temp_dir)
+    
     return(invisible(plot_list))
   } else {
     message("Only one condition found, no animation created")
