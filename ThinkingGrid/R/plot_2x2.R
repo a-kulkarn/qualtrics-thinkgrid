@@ -107,20 +107,32 @@ thinkgrid_quadrant_plot <- function(...) {
     ##     plots = plots[1]
     ## }
 
-    g <- ggplot2::ggplotGrob(plots[[1]] + ggplot2::theme(legend.position="right"))$grobs
-    legend <- g[[which(sapply(g, function(x) x$name) == "guide-box")]]
-    lwidth <- sum(legend$width)
+    ## Extract legend from the first element if possible.
+    legend <- tryCatch({
+        g <- ggplot2::ggplotGrob(plots[[1]] + ggplot2::theme(legend.position="right"))$grobs
+        g[[which(sapply(g, function(x) x$name) == "guide-box")]]
+        
+    }, error = function(e) {
+        ggplot2::zeroGrob()
+        
+    })
     
+    lwidth <- grid::widthDetails(legend)
+
+    ## Construct grid arrangement.
     inner <- do.call(
         gridExtra::arrangeGrob,
         lapply(
             plots,
             function(x)
-                x +
-                ggplot2::theme(
-                    legend.position="none",
-                    plot.margin = ggplot2::margin(20,20,20,20)
-                )
+                if (is(x, "rastergrob")) {
+                    x
+                } else {
+                    x +
+                        ggplot2::theme(legend.position="none",
+                                       plot.margin = ggplot2::margin(20,20,20,20)
+                                       )
+                }
         )
     )
 
