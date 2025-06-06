@@ -80,7 +80,7 @@ install_thinkgrid <- function(envname = "r-thinkgrid") {
 #' @export
 check_python_available <- function(install_if_NA = FALSE){
     if(!is.null(reticulate::py_discover_config()$python)){
-        py_ver <- py_discover_config()$version
+        py_ver <- reticulate::py_discover_config()$version
         print(paste("Python version", py_ver, "is available"))
     } else {
         print("Python is not available")
