@@ -110,6 +110,10 @@ check_dataframe <- function(df, dc_col, ac_col, check_condition, condition_col =
 #' 
 #' @param max_legend {numeric, optional} Maximum value for the legend. Default is NULL. If NULL, the maximum value will be calculated from the data.
 #' 
+#' @param gradient_scaling {character, optional} Type of scaling to apply to color gradient mapping. Options are "linear" (default) or "enhanced". "enhanced" makes small differences more visible in the color gradient.
+#' @param enhanced_threshold_pct {numeric, optional} Percentage of maximum value to use as threshold for enhanced scaling (default: 50). Values below this percentage get expanded.
+#' @param enhanced_expansion_factor {numeric, optional} Factor by which to expand the lower range in enhanced scaling (default: 1.5). Higher values give more distinction to small values.
+#' 
 #' @examples
 #' plot_tg(relevant_data)
 #' plot_tg(relevant_data, proportion_type = "condition", condition_col = relevant_data$condition_col)
@@ -125,6 +129,9 @@ plot_tg <- function(survey_results,
                     colorer = NULL,
                     palette = "RdYlBu",
                     zero_color = "#FFFFFF",
+                    gradient_scaling = "linear",
+                    enhanced_threshold_pct = 50,
+                    enhanced_expansion_factor = 1.5,
                     x_label = "Directedness",
                     y_label = "Stickiness",
                     dc_column = "Deliberate.Constraints",
@@ -228,7 +235,10 @@ plot_tg <- function(survey_results,
     if (is.null(colorer)) {
         colorer <- create_custom_colorer(
             palette = palette,
-            zero_color = zero_color
+            zero_color = zero_color,
+            gradient_scaling = gradient_scaling,
+            enhanced_threshold_pct = enhanced_threshold_pct,
+            enhanced_expansion_factor = enhanced_expansion_factor
         )
     }
     
@@ -310,6 +320,9 @@ create_tg_animation <- function(survey_results,
                                 colorer = NULL,
                                 palette = "RdYlBu",
                                 zero_color = "#FFFFFF",
+                                gradient_scaling = "linear",
+                                enhanced_threshold_pct = 50,
+                                enhanced_expansion_factor = 1.5,
                                 x_label = "Directedness",
                                 y_label = "Stickiness",
                                 max_legend = NULL,
@@ -336,7 +349,10 @@ create_tg_animation <- function(survey_results,
   if (is.null(colorer)) {
       colorer <- create_custom_colorer(
           palette = palette,
-          zero_color = zero_color
+          zero_color = zero_color,
+          gradient_scaling = gradient_scaling,
+          enhanced_threshold_pct = enhanced_threshold_pct,
+          enhanced_expansion_factor = enhanced_expansion_factor
       )
   }
   
