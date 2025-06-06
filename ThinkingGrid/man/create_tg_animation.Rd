@@ -6,14 +6,21 @@
 \usage{
 create_tg_animation(
   survey_results,
-  condition_col,
-  type = "cells",
+  dc_column = "Deliberate.Constraints",
+  ac_column = "Automatic.Constraints",
+  condition_column = NULL,
+  type = "depth",
   proportion_type = "overall",
   colorer = NULL,
+  palette = "RdYlBu",
+  zero_color = "#FFFFFF",
   x_label = "Directedness",
   y_label = "Stickiness",
   max_legend = NULL,
   min_legend = NULL,
+  plot_title = NULL,
+  legend_title = NULL,
+  plot_subtitle = NULL,
   filename = "tg_animation.gif",
   duration = 1,
   width = 800,
@@ -24,13 +31,15 @@ create_tg_animation(
 \arguments{
 \item{survey_results}{{data.frame, required} Data frame containing survey results with columns "Deliberate.Constraints" and "Automatic.Constraints".}
 
-\item{condition_col}{{character, required} Column name or vector containing the conditions for each observation. If part of the data frame, pass it as data$condition_col. If condition_col values are numeric, they will be sorted in ascending order. If they are character/factor, they will be displayed in random order unless sorted_conditions is provided.}
-
 \item{type}{{character, optional} Type of plot to create. Options are "cells" (default), "quadrants", "horizontal", "vertical", "constraints", or "depth". Create a grid of proportions based on the type specified.}
 
 \item{proportion_type}{{character, optional} Type of proportion to calculate. Currently only "overall" is supported.}
 
 \item{colorer}{{function, optional} Function to color the grid cells. Default is NULL.}
+
+\item{palette}{{character, optional} Name of diverging palette from colorspace package. Default is "RdYlBu".}
+
+\item{zero_color}{{character, optional} Color for zero values. Default is "#FFFFFF".}
 
 \item{x_label}{{character, optional} Label for the x-axis. Default is "Directedness".}
 
@@ -49,18 +58,20 @@ create_tg_animation(
 \item{height}{{numeric, optional} Height of the GIF in pixels. Default is 800 pixels.}
 
 \item{sorted_conditions}{{character, optional} A vector of conditions in the desired order. If provided, the function will use this order for the animation. If not provided, the function will sort numeric conditions in ascending order and display character/factor conditions in random order. This vector must contain all unique values from the condition_col.}
+
+\item{condition_col}{{character, required} Column name or vector containing the conditions for each observation. If part of the data frame, pass it as data$condition_col. If condition_col values are numeric, they will be sorted in ascending order. If they are character/factor, they will be displayed in random order unless sorted_conditions is provided.}
+}
+\value{
+A GIF file containing the animation of the Thinking Grid.
 }
 \description{
 Illustration of create_tg_animation function
 }
 \examples{
-
 create_tg_animation(relevant_data, condition_col = relevant_data$condition_col)
 
 create_tg_animation(relevant_data, condition_col = relevant_data$condition_col, type = "constraints", filename = "my_animation.gif")
 
 create_tg_animation(relevant_data, condition_col = relevant_data$condition_col, type = "cells", sorted_conditions = c("Condition1", "Condition2", "Condition3"))
-
-#' @return A GIF file containing the animation of the Thinking Grid.
 
 }

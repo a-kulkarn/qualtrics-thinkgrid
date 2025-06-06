@@ -1,6 +1,11 @@
 ##################################################
 ## Quadrant background.
 
+#' Illustration of thinkgrid_quadrant_background function
+#'
+#' Does something.
+#'
+#' @export
 thinkgrid_quadrant_background <- function() {
     ## Imports
     unit <- ggplot2::unit
@@ -83,6 +88,12 @@ thinkgrid_quadrant_background <- function() {
 ##################################################
 ## Quadrant plot.
 
+
+#' Illustration of thinkgrid_quadrant_plot function
+#'
+#' Does something.
+#'
+#' @export
 thinkgrid_quadrant_plot <- function(...) {
     ## Imports.
     unit <- ggplot2::unit
