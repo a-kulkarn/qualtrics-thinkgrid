@@ -44,7 +44,7 @@ thinkgrid_quadrant_background <- function() {
     i <- 1
     for (color in list("#FFE6E6", "#F9EBEE", "#E8F0F8", "#E6F3F2")) {
         P <- ggplot2::ggplot(sdf, aes(x = x, y = y)) + 
-            ggplot2::geom_tile(aes(fill = color), color = "white", size = 5) +
+            ggplot2::geom_tile(aes(fill = color), color = "white", linewidth = 5) +
             ggplot2::scale_fill_identity() +
             ## coord_fixed() +
             ggplot2::theme_void() +
