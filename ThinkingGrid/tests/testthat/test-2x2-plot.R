@@ -153,6 +153,11 @@ result <- ThinkingGrid::thinkgrid_quadrant_plot(p_sticky, p_salience, p_free, p_
 A <- result[[1]]
 B <- result[[2]]
 
-grid::grid.newpage()  # Clear the graphics device
-grid::grid.draw(B)
-grid::grid.draw(A)
+
+test_that("Grid draws 2x2 overlay", {
+    grid::grid.newpage()  # Clear the graphics device
+    grid::grid.draw(B)
+    grid::grid.draw(A)
+    obj <- grid.grab(wrap.grobs = TRUE)
+    vdiffr::expect_doppelganger("plot_2x2", obj)
+})
