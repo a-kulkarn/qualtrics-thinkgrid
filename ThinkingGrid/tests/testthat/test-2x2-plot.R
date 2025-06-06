@@ -3,20 +3,6 @@ rm(list = ls())
 ls()
 graphics.off()
 
-## Load libraries
-## library(dplyr)
-## library(ragg)
-## library(magick)
-## library(lme4)
-## library(sjPlot)
-## library(ggplot2)
-## library(png)
-## library(grid)
-## library(gridExtra)
-## library(tidyr)
-## library(ggeffects)
-## library(cowplot)
-
 ## New prediction function
 get_predictions <- function(model, newdata) {
   ## Create prediction data frames for both conditions
@@ -116,10 +102,6 @@ data <- data %>%
     dplyr::rename(valence = val) %>%
     dplyr::rename(id = pid)
 
-# data$total_correct <- data$directed_correct + data$sticky_correct + data$free_correct
-
-# data <- data[data$total_correct == 3, ]
-
 ## Create block variable
 data$probe <- as.numeric(as.character(data$probe))
 data$block <- factor(ifelse(data$probe < 3, "Emotional Task", "Rest"),
@@ -166,15 +148,6 @@ p_free <- create_subplot(free_preds, valence_seq, "free")
 p_directed <- create_subplot(directed_preds, valence_seq, "directed")
 
 ## Update the final plot with adjusted legend positioning
-## plots = list(
-##     sticky = p_sticky,
-##     salience = p_salience,
-##     free = p_free,
-##     directed = p_directed
-## )
-
-# A <- thinkgrid_quadrant_plot(plots)
-
 result <- ThinkingGrid::thinkgrid_quadrant_plot(p_sticky, p_salience, p_free, p_directed)
 
 A <- result[[1]]

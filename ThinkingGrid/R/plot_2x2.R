@@ -23,7 +23,7 @@ thinkgrid_quadrant_background <- function() {
         x0 = unit(0.1, "npc"), y0 = unit(0.5, "npc"),
         x1 = unit(0.9, "npc"), y1 = unit(0.5, "npc"),
         arrow = arrow(length = unit(0.5, "npc"), type = "closed"),
-        gp=gpar(col = "red", size = 3)
+        gp=gpar(col = "red", linewidth = 3)
     )
 
     labely <- grid::textGrob("Salience", rot = 90)
@@ -31,7 +31,7 @@ thinkgrid_quadrant_background <- function() {
         x0 = unit(0.5, "npc"), y0 = unit(0.1, "npc"),
         x1 = unit(0.5, "npc"), y1 = unit(0.9, "npc"),
         arrow = arrow(length = unit(0.5, "npc"), type = "closed"),
-        gp=gpar(col = "navy", size = 3)
+        gp=gpar(col = "navy", linewidth = 3)
     )
 
     ## Prepare the 3x3 sub-grids.
