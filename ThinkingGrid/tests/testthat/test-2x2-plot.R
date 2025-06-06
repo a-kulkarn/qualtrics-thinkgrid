@@ -109,14 +109,8 @@ create_subplot <- function(predictions, valence_seq, measure_name) {
 ## Main script.
 
 ## Read data and rename variables
-## data <- read.csv("taxicab_Affect_Induction.csv")
-data <- read.csv("~/thinking-grid/demo-files/taxicab_Affect_Induction.csv")
-
-## data <- read.csv("~/thinking-grid/qualtrics-thinkgrid/ThinkingGrid/inst/test_data/test2x2data.csv")
-
-## data_path <- system.file("test_data", "study3A.csv", package = "ThinkingGrid")
-## data_path <- file.path("test_data", "study3A.csv", package = "ThinkingGrid")
-## data <- read.csv(data_path)
+data_path <- system.file("test_data", "test-2x2-data.csv", package = "ThinkingGrid")
+data <- read.csv(data_path)
 
 data <- data %>%
     dplyr::rename(valence = val) %>%
