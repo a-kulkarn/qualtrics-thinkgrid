@@ -1,5 +1,7 @@
 
 test_that("Grid draws 2x2 overlay", {
+    skip_on_cran()
+
     foo <- create_test_2x2_plots()
     p_sticky <- foo$p_sticky
     p_salience <- foo$p_salience
@@ -19,6 +21,8 @@ test_that("Grid draws 2x2 overlay", {
 
 
 test_that("Grid overlays images", {
+    skip_on_cran()
+    
     foo <- create_test_2x2_plots()
     p_sticky <- foo$p_sticky
     p_salience <- foo$p_salience
@@ -43,6 +47,8 @@ test_that("Grid overlays images", {
 })
 
 test_that("Image can be first", {
+    skip_on_cran()
+    
     foo <- create_test_2x2_plots()
     p_sticky <- foo$p_sticky
     p_salience <- foo$p_salience
