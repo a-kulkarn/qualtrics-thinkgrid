@@ -41,14 +41,20 @@ base_plot_theme <- function() {
     )
 }
 
-#' Create custom color scale using ColorBrewer/colorspace palettes
+#' Create custom color scale with enhanced visibility for small values
 #' 
 #' @param palette Name of diverging palette from colorspace package (default: "RdYlBu")
 #' @param zero_color Color for zero values (default: "#FFFFFF" - white for clear distinction)
 #' @param n_colors Number of color steps (default: 11)
+#' @param gradient_scaling Type of gradient scaling: "linear" or "enhanced" (default: "enhanced")
+#' @param enhanced_threshold_pct Percentage of maximum value to use as threshold for enhanced scaling (default: 50)
+#' @param enhanced_expansion_factor Factor by which to expand the lower range in enhanced scaling (default: 1.5)
 create_custom_colorer <- function(palette = "RdYlBu",
                                   zero_color = "#FFFFFF",
-                                  n_colors = 11) {
+                                  n_colors = 11,
+                                  gradient_scaling = "enhanced",
+                                  enhanced_threshold_pct = 50,
+                                  enhanced_expansion_factor = 1.5) {
   
   # Check if colorspace is available
   if (!requireNamespace("colorspace", quietly = TRUE)) {
@@ -63,68 +69,66 @@ create_custom_colorer <- function(palette = "RdYlBu",
     if (min_val < 0 && max_val > 0) {
       # Diverging scale
       create_diverging_scale_palette(palette, zero_color, 
-                                   limits, n_colors, data_values)
+                                   limits, n_colors, data_values, gradient_scaling, 
+                                   enhanced_threshold_pct, enhanced_expansion_factor)
     } else if (min_val >= 0) {
-      # Sequential scale (positive only) - use just the positive side
+      # Sequential scale (positive only)
       create_sequential_scale_palette(palette, zero_color, "positive",
-                                    limits, n_colors, data_values)
+                                    limits, n_colors, data_values, gradient_scaling,
+                                    enhanced_threshold_pct, enhanced_expansion_factor)
     } else {
-      # Sequential scale (negative only) - use just the negative side
+      # Sequential scale (negative only)
       create_sequential_scale_palette(palette, zero_color, "negative",
-                                    limits, n_colors, data_values)
+                                    limits, n_colors, data_values, gradient_scaling,
+                                    enhanced_threshold_pct, enhanced_expansion_factor)
     }
   }
 }
 
-create_diverging_scale_palette <- function(palette_name, zero_color, limits, n_colors, data_values) {
+create_diverging_scale_palette <- function(palette_name, zero_color, limits, n_colors, data_values, 
+                                         gradient_scaling = "enhanced", enhanced_threshold_pct = 50,
+                                         enhanced_expansion_factor = 1.5) {
   min_val <- limits[1]
   max_val <- limits[2]
   
-  # Create symmetric breaks around zero - always linear
+  # Create symmetric range around zero
   max_abs <- max(abs(min_val), abs(max_val))
   
-  # Create symmetric breaks for both sides
-  n_half <- ceiling(n_colors/2)
-  pos_breaks <- seq(0, max_abs, length.out = n_half)
-  neg_breaks <- seq(-max_abs, 0, length.out = n_half)
+  # Apply gradient scaling transformation
+  scaled_values <- apply_gradient_scaling(seq(0, max_abs, length.out = ceiling(n_colors/2)), 
+                                        gradient_scaling, enhanced_threshold_pct, 
+                                        enhanced_expansion_factor)
   
-  # Combine breaks, removing duplicate zero
-  breaks <- c(neg_breaks[-length(neg_breaks)], pos_breaks)
+  # Create breaks with proper scaling
+  pos_breaks_scaled <- scaled_values
+  neg_breaks_scaled <- -rev(scaled_values[-1])  # Remove duplicate zero
+  
+  # Combine breaks
+  all_breaks_scaled <- c(neg_breaks_scaled, pos_breaks_scaled)
+  
+  # Convert back to original scale for the actual breaks
+  pos_breaks_original <- inverse_gradient_scaling(pos_breaks_scaled, gradient_scaling, enhanced_threshold_pct, enhanced_expansion_factor, max_abs)
+  neg_breaks_original <- -rev(pos_breaks_original[-1])
+  all_breaks_original <- c(neg_breaks_original, pos_breaks_original)
   
   # Generate the palette using colorspace
   rdylbu_standard <- colorspace::divergingx_hcl(12, palette = palette_name)
   
-  # Create the full color palette from negative to positive
-  # Negative side: dark red to white
+  # Create the full color palette
   negative_colors <- rdylbu_standard[1:6]
-  # Positive side: white to dark blue  
   positive_colors <- rdylbu_standard[7:12]
-  
-  # Create the complete color sequence: negative -> zero_color -> positive
   all_palette_colors <- c(negative_colors, zero_color, positive_colors)
   
-  # Create a single color ramp function for the entire range
+  # Create color ramp
   complete_palette <- grDevices::colorRampPalette(all_palette_colors)
+  final_colors <- complete_palette(length(all_breaks_scaled))
   
-  # Generate colors for all breaks
-  final_colors <- complete_palette(length(breaks))
-  
-  # Create more detailed breaks for legend display
-  legend_breaks <- if (max_abs <= 20) {
-    seq(-ceiling(max_abs/2)*2, ceiling(max_abs/2)*2, by = 2)
-  } else if (max_abs <= 50) {
-    seq(-ceiling(max_abs/5)*5, ceiling(max_abs/5)*5, by = 5)
-  } else {
-    seq(-ceiling(max_abs/10)*10, ceiling(max_abs/10)*10, by = 10)
-  }
-  
-  # Filter breaks to be within our limits and include 0
-  legend_breaks <- legend_breaks[legend_breaks >= min_val & legend_breaks <= max_val]
-  if (!0 %in% legend_breaks) legend_breaks <- sort(c(legend_breaks, 0))
+  # Create legend breaks based on original values
+  legend_breaks <- create_nice_breaks(min_val, max_val, max_abs)
   
   ggplot2::scale_fill_gradientn(
     colors = final_colors,
-    values = scales::rescale(breaks),
+    values = scales::rescale(all_breaks_scaled),
     limits = limits,
     breaks = legend_breaks,
     na.value = "#ffffff",
@@ -141,11 +145,16 @@ create_diverging_scale_palette <- function(palette_name, zero_color, limits, n_c
   )
 }
 
-create_sequential_scale_palette <- function(palette_name, zero_color, side, limits, n_colors, data_values) {
+create_sequential_scale_palette <- function(palette_name, zero_color, side, limits, n_colors, data_values, 
+                                          gradient_scaling = "enhanced", enhanced_threshold_pct = 50,
+                                          enhanced_expansion_factor = 1.5) {
   min_val <- max(0, limits[1]) 
   max_val <- limits[2]
 
-  breaks <- seq(min_val, max_val, length.out = n_colors)
+  # Apply gradient scaling to create breaks
+  original_breaks <- seq(min_val, max_val, length.out = n_colors)
+  scaled_breaks <- apply_gradient_scaling(original_breaks, gradient_scaling, 
+                                        enhanced_threshold_pct, enhanced_expansion_factor)
   
   # Generate the palette using colorspace
   rdylbu_standard <- colorspace::divergingx_hcl(12, palette = palette_name)
@@ -159,22 +168,14 @@ create_sequential_scale_palette <- function(palette_name, zero_color, side, limi
   
   # Create color ramp
   color_ramp <- grDevices::colorRampPalette(colors)
-  final_colors <- color_ramp(length(breaks))
+  final_colors <- color_ramp(length(scaled_breaks))
   
   # Create legend breaks
-  legend_breaks <- if (max_val <= 20) {
-    seq(0, ceiling(max_val), by = 1)
-  } else if (max_val <= 50) {
-    seq(0, ceiling(max_val/5)*5, by = 5)
-  } else {
-    seq(0, ceiling(max_val/10)*10, by = 10)
-  }
-  
-  legend_breaks <- legend_breaks[legend_breaks >= min_val & legend_breaks <= max_val]
+  legend_breaks <- create_nice_breaks(min_val, max_val, max_val)
   
   ggplot2::scale_fill_gradientn(
     colors = final_colors,
-    values = scales::rescale(breaks),
+    values = scales::rescale(scaled_breaks),
     limits = limits,
     breaks = legend_breaks,
     na.value = "#ffffff",
@@ -191,218 +192,96 @@ create_sequential_scale_palette <- function(palette_name, zero_color, side, limi
   )
 }
 
-# Updated default_colorer that uses the new palette system
-default_colorer <- function(palette = "RdYlBu") {
-  
-  create_custom_colorer(
-    palette = palette,
-    zero_color = "#FFFFFF"
+# Helper function to apply gradient scaling transformations
+apply_gradient_scaling <- function(values, gradient_scaling = "enhanced", enhanced_threshold_pct = 50, enhanced_expansion_factor = 1.5) {
+  switch(gradient_scaling,
+    "linear" = values,
+    "enhanced" = {
+      # Enhanced scaling for better distinction of small values
+      # CORRECTED LOGIC: We want to compress the SCALED values for small numbers
+      # so they get MORE color distinction in the final gradient
+      max_val <- max(abs(values), na.rm = TRUE)
+      if (max_val == 0) return(values)
+      
+      # Use the specified percentage of the maximum as the threshold for "small values"
+      threshold <- max_val * (enhanced_threshold_pct / 100)
+      
+      # Calculate compression factor for the lower range to give it MORE colors
+      # If we compress the lower X% by factor 1/F, we expand the upper (100-X)% by factor E
+      # To maintain overall scale: X% * (1/F) + (100-X)% * E ≈ 100%
+      # Solving: E = (100 - X%/F) / (100 - X%)
+      threshold_pct_decimal <- enhanced_threshold_pct / 100
+      enhanced_compression_factor <- 1 / enhanced_expansion_factor
+      upper_expansion_factor <- (1 - threshold_pct_decimal * enhanced_compression_factor) / (1 - threshold_pct_decimal)
+      
+      sign(values) * ifelse(
+        abs(values) <= threshold,
+        # COMPRESS lower range (values below threshold get LESS scaled space but MORE color distinction)
+        abs(values) * enhanced_compression_factor,
+        # EXPAND upper range (values above threshold get MORE scaled space but LESS color distinction)
+        threshold * enhanced_compression_factor + (abs(values) - threshold) * upper_expansion_factor
+      )
+    },
+    values  # default to linear
   )
 }
 
-################################################################################
-## General Toolsing.
-
-## YYY
-plot_engine <- function(data,
-                        limits,
-                        x_label,
-                        y_label,
-                        colorer,
-                        aesthetics,
-                        geometry,
-                        comparison_type = NULL,
-                        title = NULL,
-                        plot_title = NULL,
-                        legend_title = NULL,
-                        plot_subtitle = NULL) {
-    
-    # Determine if this is a faceted plot based on if 'condition' column exists
-    is_faceted <- "condition" %in% names(data)
-    
-    # Create a balanced theme with optimized margins
-    custom_theme <- ggplot2::theme_minimal() +
-        ggplot2::theme(
-            axis.text = ggplot2::element_blank(),
-            # Make axis titles smaller, italic, and remove bold styling
-            axis.title = ggplot2::element_text(size = 12, face = "italic"),
-            # Move x-axis title closer to axis
-            axis.title.x = ggplot2::element_text(vjust = 0, hjust = 0.5, margin = ggplot2::margin(t = 0.5, b = 2, unit = "lines")),
-            axis.title.y = ggplot2::element_text(angle = 90, vjust = 0.5, hjust = 0.5),
-            legend.title = ggplot2::element_text(size = 11),
-            legend.text = ggplot2::element_text(size = 9),
-            # Make legend more compact
-            legend.key.size = ggplot2::unit(0.8, "lines"),
-            legend.spacing = ggplot2::unit(0.2, "cm"),
-            # Position legend consistently on the right for all plots
-            legend.position = "right",
-            # Add margin between the legend and the plot
-            legend.margin = ggplot2::margin(t = 15, r = 0, b = 0, l = 0),
-            # Remove the border around the entire plot
-            panel.border = ggplot2::element_blank(),
-            panel.grid = ggplot2::element_blank(),
-            plot.margin = ggplot2::unit(c(3, 2, 2, 4), "lines"),
-            plot.title = ggplot2::element_text(size = 16, face = "bold", hjust = 0.5, margin = ggplot2::margin(b = 10)),
-            plot.subtitle = ggplot2::element_text(size = 14, hjust = 0.5, margin = ggplot2::margin(b = 10))
-        )
+# Helper function to inverse gradient scaling (for creating proper breaks)
+inverse_gradient_scaling <- function(scaled_values, gradient_scaling = "enhanced", 
+                                   enhanced_threshold_pct = 50, enhanced_expansion_factor = 1.5, 
+                                   max_val) {
+  switch(gradient_scaling,
+    "linear" = scaled_values,
+    "enhanced" = {
+      # Inverse of the enhanced scaling
+      if (max_val == 0) return(scaled_values)
+      
+      threshold <- max_val * (enhanced_threshold_pct / 100)
+      enhanced_compression_factor <- 1 / enhanced_expansion_factor
+      threshold_scaled <- threshold * enhanced_compression_factor
+      
+      # Calculate upper expansion factor the same way as in apply_gradient_scaling
+      threshold_pct_decimal <- enhanced_threshold_pct / 100
+      upper_expansion_factor <- (1 - threshold_pct_decimal * enhanced_compression_factor) / (1 - threshold_pct_decimal)
+      
+      sign(scaled_values) * ifelse(
+        abs(scaled_values) <= threshold_scaled,
+        # Scale back up from compressed lower range
+        abs(scaled_values) / enhanced_compression_factor,
+        # Scale back down from expanded upper range
+        (abs(scaled_values) - threshold_scaled) / upper_expansion_factor + threshold
+      )
+    },
+    scaled_values  # default
+  )
 }
 
-#' Create custom color scale using ColorBrewer/colorspace palettes
-#' 
-#' @param palette Name of diverging palette from colorspace package (default: "RdYlBu")
-#' @param zero_color Color for zero values (default: "#FFFFFF" - white for clear distinction)
-#' @param n_colors Number of color steps (default: 11)
-create_custom_colorer <- function(palette = "RdYlBu",
-                                  zero_color = "#FFFFFF",
-                                  n_colors = 11) {
-  
-  # Check if colorspace is available
-  if (!requireNamespace("colorspace", quietly = TRUE)) {
-    stop("Package 'colorspace' is required for palette generation. Please install it with: install.packages('colorspace')")
-  }
-  
-  function(limits, data_values = NULL) {
-    min_val <- limits[1]
-    max_val <- limits[2]
-    
-    # Determine if we need diverging or sequential scale
-    if (min_val < 0 && max_val > 0) {
-      # Diverging scale
-      create_diverging_scale_palette(palette, zero_color, 
-                                   limits, n_colors, data_values)
-    } else if (min_val >= 0) {
-      # Sequential scale (positive only) - use just the positive side
-      create_sequential_scale_palette(palette, zero_color, "positive",
-                                    limits, n_colors, data_values)
-    } else {
-      # Sequential scale (negative only) - use just the negative side
-      create_sequential_scale_palette(palette, zero_color, "negative",
-                                    limits, n_colors, data_values)
-    }
-  }
-}
-
-create_diverging_scale_palette <- function(palette_name, zero_color, limits, n_colors, data_values) {
-  min_val <- limits[1]
-  max_val <- limits[2]
-  
-  # Create symmetric breaks around zero - always linear
-  max_abs <- max(abs(min_val), abs(max_val))
-  
-  # Create symmetric breaks for both sides
-  n_half <- ceiling(n_colors/2)
-  pos_breaks <- seq(0, max_abs, length.out = n_half)
-  neg_breaks <- seq(-max_abs, 0, length.out = n_half)
-  
-  # Combine breaks, removing duplicate zero
-  breaks <- c(neg_breaks[-length(neg_breaks)], pos_breaks)
-  
-  # Generate the palette using colorspace
-  rdylbu_standard <- colorspace::divergingx_hcl(12, palette = palette_name)
-  
-  # Create the full color palette from negative to positive
-  # Negative side: dark red to white
-  negative_colors <- rdylbu_standard[1:6]
-  # Positive side: white to dark blue  
-  positive_colors <- rdylbu_standard[7:12]
-  
-  # Create the complete color sequence: negative -> zero_color -> positive
-  all_palette_colors <- c(negative_colors, zero_color, positive_colors)
-  
-  # Create a single color ramp function for the entire range
-  complete_palette <- grDevices::colorRampPalette(all_palette_colors)
-  
-  # Generate colors for all breaks
-  final_colors <- complete_palette(length(breaks))
-  
-  # Create more detailed breaks for legend display
-  legend_breaks <- if (max_abs <= 20) {
-    seq(-ceiling(max_abs/2)*2, ceiling(max_abs/2)*2, by = 2)
+# Helper function to create nice legend breaks
+create_nice_breaks <- function(min_val, max_val, max_abs) {
+  if (max_abs <= 20) {
+    breaks <- seq(-ceiling(max_abs/2)*2, ceiling(max_abs/2)*2, by = 2)
   } else if (max_abs <= 50) {
-    seq(-ceiling(max_abs/5)*5, ceiling(max_abs/5)*5, by = 5)
+    breaks <- seq(-ceiling(max_abs/5)*5, ceiling(max_abs/5)*5, by = 5)
   } else {
-    seq(-ceiling(max_abs/10)*10, ceiling(max_abs/10)*10, by = 10)
+    breaks <- seq(-ceiling(max_abs/10)*10, ceiling(max_abs/10)*10, by = 10)
   }
   
-  # Filter breaks to be within our limits and include 0
-  legend_breaks <- legend_breaks[legend_breaks >= min_val & legend_breaks <= max_val]
-  if (!0 %in% legend_breaks) legend_breaks <- sort(c(legend_breaks, 0))
+  # Filter breaks to be within limits and include 0
+  breaks <- breaks[breaks >= min_val & breaks <= max_val]
+  if (!0 %in% breaks) breaks <- sort(c(breaks, 0))
   
-  ggplot2::scale_fill_gradientn(
-    colors = final_colors,
-    values = scales::rescale(breaks),
-    limits = limits,
-    breaks = legend_breaks,
-    na.value = "#ffffff",
-    guide = ggplot2::guide_colorbar(
-      title.position = "top",
-      title.hjust = 0.5,
-      barwidth = 1.2,
-      barheight = 15,
-      ticks.colour = "black",
-      ticks.linewidth = 0.5,
-      frame.colour = "black",
-      frame.linewidth = 0.5
-    )
-  )
+  return(breaks)
 }
 
-create_sequential_scale_palette <- function(palette_name, zero_color, side, limits, n_colors, data_values) {
-  min_val <- max(0, limits[1]) 
-  max_val <- limits[2]
-
-  breaks <- seq(min_val, max_val, length.out = n_colors)
-  
-  # Generate the palette using colorspace
-  rdylbu_standard <- colorspace::divergingx_hcl(12, palette = palette_name)
-  
-  # Choose colors based on side
-  if (side == "positive") {
-    colors <- c(zero_color, rdylbu_standard[7:12])
-  } else {
-    colors <- c(rdylbu_standard[1:6], zero_color)
-  }
-  
-  # Create color ramp
-  color_ramp <- grDevices::colorRampPalette(colors)
-  final_colors <- color_ramp(length(breaks))
-  
-  # Create legend breaks
-  legend_breaks <- if (max_val <= 20) {
-    seq(0, ceiling(max_val), by = 1)
-  } else if (max_val <= 50) {
-    seq(0, ceiling(max_val/5)*5, by = 5)
-  } else {
-    seq(0, ceiling(max_val/10)*10, by = 10)
-  }
-  
-  legend_breaks <- legend_breaks[legend_breaks >= min_val & legend_breaks <= max_val]
-  
-  ggplot2::scale_fill_gradientn(
-    colors = final_colors,
-    values = scales::rescale(breaks),
-    limits = limits,
-    breaks = legend_breaks,
-    na.value = "#ffffff",
-    guide = ggplot2::guide_colorbar(
-      title.position = "top",
-      title.hjust = 0.5,
-      barwidth = 1.2,
-      barheight = 15,
-      ticks.colour = "black",
-      ticks.linewidth = 0.5,
-      frame.colour = "black",
-      frame.linewidth = 0.5
-    )
-  )
-}
-
-# Updated default_colorer that uses the new palette system
-default_colorer <- function(palette = "RdYlBu") {
-  
+# Updated default_colorer with linear scaling as default
+default_colorer <- function(palette = "RdYlBu", gradient_scaling = "linear",
+                          enhanced_threshold_pct = 50, enhanced_expansion_factor = 1.5) {
   create_custom_colorer(
     palette = palette,
-    zero_color = "#FFFFFF"
+    zero_color = "#FFFFFF",
+    gradient_scaling = gradient_scaling,
+    enhanced_threshold_pct = enhanced_threshold_pct,
+    enhanced_expansion_factor = enhanced_expansion_factor
   )
 }
 
@@ -525,7 +404,6 @@ plot_engine <- function(data,
     return(p)
 }
 
-
 create_overall_plot <- function(data,
                                 proportioner,
                                 plotter,
@@ -617,7 +495,8 @@ create_separate_plot <- function(data,
                     legend.box.spacing = ggplot2::unit(0.5, "lines"),
                     # Remove panel borders
                     panel.border = ggplot2::element_blank(),
-                    strip.background = ggplot2::element_rect(color = "black", fill = "white", linewidth = 0.8)
+                    # Remove strip background and borders completely
+                    strip.background = ggplot2::element_blank()
                 ) +
                 # Use consistent vertical legend for faceted plots
                 ggplot2::guides(
@@ -640,7 +519,8 @@ create_separate_plot <- function(data,
                     legend.box.spacing = ggplot2::unit(0.5, "lines"),
                     # Remove panel borders
                     panel.border = ggplot2::element_blank(),
-                    strip.background = ggplot2::element_rect(color = "black", fill = "white", linewidth = 0.8)
+                    # Remove strip background and borders completely
+                    strip.background = ggplot2::element_blank()
                 ) +
                 # Use consistent vertical legend for faceted plots
                 ggplot2::guides(
@@ -756,9 +636,8 @@ compile_plot_creator <- function(proportioner,
              plot_subtitle = NULL) {
 
         if (is.null(colorer)) {
-            colorer <- default_colorer(with_negatives = (comparison_type == "difference"))
+            colorer <- default_colorer(gradient_scaling = "linear")
         }
-        # Remove the "Not Implemented" error - now custom colorers are supported
 
         plotter <- function(data, limits, title = NULL, plot_subtitle = NULL) {
             # Pass actual data values to colorer for quantile-based scaling

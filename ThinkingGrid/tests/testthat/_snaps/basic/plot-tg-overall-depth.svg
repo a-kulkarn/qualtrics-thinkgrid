@@ -57,37 +57,22 @@
 <image width='17.28' height='216.00' x='586.72' y='191.11' preserveAspectRatio='none' xlink:href='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAEsCAYAAAACUNnVAAAA10lEQVQ4jZ2Q0RHDMAhDn8hG3aM7dtKkHz1jwDi99scHSALJPJ6vyy6BIRiVqLOl3VCWR6kF7MyU03mnt6dvXp509/PAMrt2ij5MnqHF5Hw0H4ZiP8st32cBaHh1xqhMYIfAjNGaFFsFILVymaS4T75ejUJZUchGMnS4oWPa8CoaV46QEwUH6oGYTR4r8RQApVh4fBQDhi3MvFpk827Vls35/4qXrave30rZyjp/4o6CyqEko1m/oCXbUNyg3d1xg1I17XTVkTv0J/IN6hU0s8LbaP9Z1fPe8ysuUxgiGe8AAAAASUVORK5CYII='/>
 <rect x='586.72' y='191.11' width='17.28' height='216.00' style='stroke-width: 1.07;' />
 <polyline points='601.69,406.75 604.00,406.75 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
-<polyline points='601.69,385.22 604.00,385.22 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
 <polyline points='601.69,363.70 604.00,363.70 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
-<polyline points='601.69,342.17 604.00,342.17 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
 <polyline points='601.69,320.64 604.00,320.64 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
-<polyline points='601.69,299.11 604.00,299.11 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
 <polyline points='601.69,277.58 604.00,277.58 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
-<polyline points='601.69,256.06 604.00,256.06 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
 <polyline points='601.69,234.53 604.00,234.53 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
-<polyline points='601.69,213.00 604.00,213.00 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
 <polyline points='601.69,191.47 604.00,191.47 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
 <polyline points='589.02,406.75 586.72,406.75 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
-<polyline points='589.02,385.22 586.72,385.22 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
 <polyline points='589.02,363.70 586.72,363.70 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
-<polyline points='589.02,342.17 586.72,342.17 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
 <polyline points='589.02,320.64 586.72,320.64 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
-<polyline points='589.02,299.11 586.72,299.11 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
 <polyline points='589.02,277.58 586.72,277.58 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
-<polyline points='589.02,256.06 586.72,256.06 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
 <polyline points='589.02,234.53 586.72,234.53 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
-<polyline points='589.02,213.00 586.72,213.00 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
 <polyline points='589.02,191.47 586.72,191.47 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
 <text x='609.48' y='409.85' style='font-size: 9.00px; font-family: sans;' textLength='5.01px' lengthAdjust='spacingAndGlyphs'>0</text>
-<text x='609.48' y='388.32' style='font-size: 9.00px; font-family: sans;' textLength='5.01px' lengthAdjust='spacingAndGlyphs'>1</text>
 <text x='609.48' y='366.79' style='font-size: 9.00px; font-family: sans;' textLength='5.01px' lengthAdjust='spacingAndGlyphs'>2</text>
-<text x='609.48' y='345.26' style='font-size: 9.00px; font-family: sans;' textLength='5.01px' lengthAdjust='spacingAndGlyphs'>3</text>
 <text x='609.48' y='323.74' style='font-size: 9.00px; font-family: sans;' textLength='5.01px' lengthAdjust='spacingAndGlyphs'>4</text>
-<text x='609.48' y='302.21' style='font-size: 9.00px; font-family: sans;' textLength='5.01px' lengthAdjust='spacingAndGlyphs'>5</text>
 <text x='609.48' y='280.68' style='font-size: 9.00px; font-family: sans;' textLength='5.01px' lengthAdjust='spacingAndGlyphs'>6</text>
-<text x='609.48' y='259.15' style='font-size: 9.00px; font-family: sans;' textLength='5.01px' lengthAdjust='spacingAndGlyphs'>7</text>
 <text x='609.48' y='237.62' style='font-size: 9.00px; font-family: sans;' textLength='5.01px' lengthAdjust='spacingAndGlyphs'>8</text>
-<text x='609.48' y='216.10' style='font-size: 9.00px; font-family: sans;' textLength='5.01px' lengthAdjust='spacingAndGlyphs'>9</text>
 <text x='609.48' y='194.57' style='font-size: 9.00px; font-family: sans;' textLength='10.01px' lengthAdjust='spacingAndGlyphs'>10</text>
 <text x='337.45' y='54.21' text-anchor='middle' style='font-size: 16.00px; font-weight: bold; font-family: sans;' textLength='153.01px' lengthAdjust='spacingAndGlyphs'>plot_tg_overall_depth</text>
 </g>

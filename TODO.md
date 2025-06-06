@@ -2,7 +2,7 @@
     - [x] add depth ratings to the csv file
     - [x] check for nan values in the data and drop rows
     - [x] the `condition_col` parameter should be a a column in the dataset
-    - [ ] add  parameter that allows the user to subset data based on certain columns in the dataset   
+    - [x] add  parameter that allows the user to subset data based on certain columns in the dataset   
 
 - Plot
     - [x] add arrows to the plot

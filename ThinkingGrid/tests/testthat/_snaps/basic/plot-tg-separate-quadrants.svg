@@ -43,9 +43,7 @@
 <polygon points='612.15,427.01 621.97,421.34 612.15,415.67 ' style='stroke-width: 1.49; stroke-linecap: butt; fill: #000000;' />
 <line x1='351.44' y1='421.34' x2='351.44' y2='150.82' style='stroke-width: 1.49; stroke-linecap: butt;' />
 <polygon points='357.11,160.64 351.44,150.82 345.77,160.64 ' style='stroke-width: 1.49; stroke-linecap: butt; fill: #000000;' />
-<rect x='27.89' y='129.51' width='282.64' height='21.31' style='stroke-width: 1.71; fill: #FFFFFF;' />
 <text x='169.21' y='144.98' text-anchor='middle' style='font-size: 14.00px; font-weight: bold; fill: #1A1A1A; font-family: sans;' textLength='7.79px' lengthAdjust='spacingAndGlyphs'>a</text>
-<rect x='339.33' y='129.51' width='282.64' height='21.31' style='stroke-width: 1.71; fill: #FFFFFF;' />
 <text x='480.65' y='144.98' text-anchor='middle' style='font-size: 14.00px; font-weight: bold; fill: #1A1A1A; font-family: sans;' textLength='7.79px' lengthAdjust='spacingAndGlyphs'>b</text>
 <text x='324.93' y='458.61' text-anchor='middle' style='font-size: 12.00px; font-style: italic; font-family: sans;' textLength='70.05px' lengthAdjust='spacingAndGlyphs'>Directedness</text>
 <text transform='translate(23.90,292.14) rotate(-90)' text-anchor='middle' style='font-size: 12.00px; font-style: italic; font-family: sans;' textLength='54.04px' lengthAdjust='spacingAndGlyphs'>Stickiness</text>

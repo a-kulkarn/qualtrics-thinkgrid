@@ -45,7 +45,7 @@ create_grid <- function(dc, ac, condition_filter = NULL, condition_col = NULL) {
     return(prop_grid)
 }
 
-check_dataframe <- function(df, dc_col, ac_col, check_condition, condition_col = NULL) {
+check_dataframe <- function(df, dc_col, ac_col, check_condition, condition_col = NULL, subset_condition = NULL) {
     if (!is.data.frame(df)) {
         stop("survey_results must be a data frame")
     }
@@ -66,11 +66,96 @@ check_dataframe <- function(df, dc_col, ac_col, check_condition, condition_col =
         stop("Deliberate.Constraints and Automatic.Constraints must be numeric vectors")
     }
 
+    # Handle data subsetting if condition is provided
+    original_nrow <- nrow(df)
+    if (!is.null(subset_condition) && nchar(trimws(subset_condition)) > 0) {
+        message(paste("Applying subset condition:", subset_condition))
+        
+        # Extract column names mentioned in the condition
+        # This regex finds words that could be column names
+        potential_columns <- regmatches(subset_condition, gregexpr("\\b[a-zA-Z_][a-zA-Z0-9_\\.]*\\b", subset_condition))[[1]]
+        
+        # Filter to only actual column names from the dataframe
+        referenced_columns <- intersect(potential_columns, names(df))
+        
+        if (length(referenced_columns) == 0) {
+            warning("No valid column names detected in subset_condition. Proceeding without subsetting.")
+        } else {
+            # Check if all referenced columns exist
+            missing_cols <- setdiff(referenced_columns, names(df))
+            if (length(missing_cols) > 0) {
+                stop(paste("The following columns referenced in subset_condition do not exist in the data frame:", 
+                          paste(missing_cols, collapse = ", ")))
+            }
+            
+            # Validate the condition syntax by trying to parse it
+            tryCatch({
+                # Create a test environment with the column names
+                test_env <- new.env()
+                for (col in referenced_columns) {
+                    assign(col, df[[col]][1:min(5, nrow(df))], envir = test_env)  # Use first few rows for testing
+                }
+                
+                # Try to evaluate the condition in the test environment
+                eval(parse(text = subset_condition), envir = test_env)
+                
+            }, error = function(e) {
+                stop(paste("Invalid subset_condition syntax:", e$message, 
+                          "\nPlease check your condition string for proper R syntax."))
+            })
+            
+            # Apply the subset condition
+            tryCatch({
+                # Create environment with actual data
+                subset_env <- new.env()
+                for (col in names(df)) {
+                    assign(col, df[[col]], envir = subset_env)
+                }
+                
+                # Evaluate the condition
+                condition_result <- eval(parse(text = subset_condition), envir = subset_env)
+                
+                # Check if result is logical
+                if (!is.logical(condition_result)) {
+                    stop("subset_condition must evaluate to a logical vector (TRUE/FALSE values)")
+                }
+                
+                # Check if result has the right length
+                if (length(condition_result) != nrow(df)) {
+                    stop(paste("subset_condition result length (", length(condition_result), 
+                              ") does not match number of rows in data frame (", nrow(df), ")"))
+                }
+                
+                # Apply the subset
+                df <- df[condition_result & !is.na(condition_result), ]
+                
+                # Check if any rows remain
+                if (nrow(df) == 0) {
+                    stop("No rows remain after applying subset_condition. Please check your filtering criteria.")
+                }
+                
+                message(paste("Subset applied successfully.", nrow(df), "rows remaining out of", original_nrow, "original rows."))
+                
+            }, error = function(e) {
+                if (grepl("No rows remain", e$message)) {
+                    stop(e$message)  # Re-throw our custom error
+                } else {
+                    stop(paste("Error applying subset_condition:", e$message))
+                }
+            })
+        }
+    }
+
     # drop any NA values
     if (any(is.na(df[[dc_col]])) || any(is.na(df[[ac_col]]))) {
         dropped_rows <- sum(is.na(df[[dc_col]]) | is.na(df[[ac_col]]))
         warning(paste("Dropping", dropped_rows, "rows with NA values in", dc_col, "or", ac_col))
         df <- df[!is.na(df[[dc_col]]) & !is.na(df[[ac_col]]), ]
+    }
+
+    # Final check if any rows remain after NA removal
+    if (nrow(df) == 0) {
+        stop("No rows remain after removing NA values. Please check your data.")
     }
 
     dc <- df[[dc_col]]
@@ -84,7 +169,7 @@ check_dataframe <- function(df, dc_col, ac_col, check_condition, condition_col =
         condition_col <- NULL
     }
 
-    return(list(dc = dc, ac = ac, condition_col = condition_col))
+    return(list(dc = dc, ac = ac, condition_col = condition_col, filtered_df = df))
 
 }
 
@@ -110,6 +195,9 @@ check_dataframe <- function(df, dc_col, ac_col, check_condition, condition_col =
 #' 
 #' @param max_legend {numeric, optional} Maximum value for the legend. Default is NULL. If NULL, the maximum value will be calculated from the data.
 #' 
+#' @param gradient_scaling {character, optional} Type of scaling to apply to color gradient mapping. Options are "linear" (default) or "enhanced". "enhanced" makes small differences more visible in the color gradient.
+#' @param enhanced_threshold_pct {numeric, optional} Percentage of maximum value to use as threshold for enhanced scaling (default: 50). Values below this percentage get expanded.
+#' @param enhanced_expansion_factor {numeric, optional} Factor by which to expand the lower range in enhanced scaling (default: 1.5). Higher values give more distinction to small values.
 #' @examples
 #' plot_tg(relevant_data)
 #' plot_tg(relevant_data, proportion_type = "condition", condition_col = relevant_data$condition_col)
@@ -125,6 +213,9 @@ plot_tg <- function(survey_results,
                     colorer = NULL,
                     palette = "RdYlBu",
                     zero_color = "#FFFFFF",
+                    gradient_scaling = "linear",
+                    enhanced_threshold_pct = 50,
+                    enhanced_expansion_factor = 1.5,
                     x_label = "Directedness",
                     y_label = "Stickiness",
                     dc_column = "Deliberate.Constraints",
@@ -135,14 +226,15 @@ plot_tg <- function(survey_results,
                     min_legend = NULL,
                     plot_title = NULL,
                     legend_title = NULL,
-                    plot_subtitle = NULL) {
+                    plot_subtitle = NULL,
+                    subset_condition = NULL) {
     
     condition_required = FALSE
     if (proportion_type == "condition") {
         condition_required = TRUE
     }
     
-    temp <- check_dataframe(survey_results, dc_column, ac_column, condition_required, condition_column)
+    temp <- check_dataframe(survey_results, dc_column, ac_column, condition_required, condition_column, subset_condition)
     dc <- temp$dc
     ac <- temp$ac
     condition_col <- temp$condition_col
@@ -228,7 +320,10 @@ plot_tg <- function(survey_results,
     if (is.null(colorer)) {
         colorer <- create_custom_colorer(
             palette = palette,
-            zero_color = zero_color
+            zero_color = zero_color,
+            gradient_scaling = gradient_scaling,
+            enhanced_threshold_pct = enhanced_threshold_pct,
+            enhanced_expansion_factor = enhanced_expansion_factor
         )
     }
     
@@ -310,6 +405,9 @@ create_tg_animation <- function(survey_results,
                                 colorer = NULL,
                                 palette = "RdYlBu",
                                 zero_color = "#FFFFFF",
+                                gradient_scaling = "linear",
+                                enhanced_threshold_pct = 50,
+                                enhanced_expansion_factor = 1.5,
                                 x_label = "Directedness",
                                 y_label = "Stickiness",
                                 max_legend = NULL,
@@ -321,13 +419,14 @@ create_tg_animation <- function(survey_results,
                                 duration = 1,
                                 width = 800,
                                 height = 800,
-                                sorted_conditions = NULL) {
+                                sorted_conditions = NULL,
+                                subset_condition = NULL) {
   
   check_install_package("RColorBrewer")
   check_install_package("ggplot2")
   check_install_package("gifski")
   
-  temp <- check_dataframe(survey_results, dc_column, ac_column, TRUE, condition_column)
+  temp <- check_dataframe(survey_results, dc_column, ac_column, TRUE, condition_column, subset_condition)
   dc <- temp$dc
   ac <- temp$ac
   condition_col <- temp$condition_col
@@ -336,7 +435,10 @@ create_tg_animation <- function(survey_results,
   if (is.null(colorer)) {
       colorer <- create_custom_colorer(
           palette = palette,
-          zero_color = zero_color
+          zero_color = zero_color,
+          gradient_scaling = gradient_scaling,
+          enhanced_threshold_pct = enhanced_threshold_pct,
+          enhanced_expansion_factor = enhanced_expansion_factor
       )
   }
   
