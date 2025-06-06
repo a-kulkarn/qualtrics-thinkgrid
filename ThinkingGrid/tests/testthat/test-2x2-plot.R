@@ -165,7 +165,7 @@ test_that("Grid draws 2x2 overlay", {
 
 test_that("Grid overlays images", {
     rabbi <- png::readPNG(img_path)
-    rabbigrob = grid::rasterGrob(rabbi)
+    rabbigrob <- grid::rasterGrob(rabbi)
     
     result2 <- ThinkingGrid::thinkgrid_quadrant_plot(p_sticky, p_salience, p_free, rabbigrob)
 
@@ -184,7 +184,7 @@ test_that("Image can be first", {
     img_path <- system.file("test_data", "rabbiduck.png", package = "ThinkingGrid")
     
     rabbi <- png::readPNG(img_path)
-    rabbigrob = grid::rasterGrob(rabbi)
+    rabbigrob <- grid::rasterGrob(rabbi)
 
     result2 <- ThinkingGrid::thinkgrid_quadrant_plot(rabbigrob, p_salience, p_free, p_directed)
 
@@ -202,7 +202,7 @@ test_that("Image can be first", {
 test_that("All plots can be images.", {
     img_path <- system.file("test_data", "rabbiduck.png", package = "ThinkingGrid")
     rabbi <- png::readPNG(img_path)
-    rabbigrob = grid::rasterGrob(rabbi)
+    rabbigrob <- grid::rasterGrob(rabbi)
 
     result2 <- ThinkingGrid::thinkgrid_quadrant_plot(rabbigrob, rabbigrob, rabbigrob, rabbigrob)
 
