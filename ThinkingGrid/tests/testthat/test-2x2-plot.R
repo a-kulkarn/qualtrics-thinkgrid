@@ -98,10 +98,6 @@ create_subplot <- function(predictions, valence_seq, measure_name) {
 data_path <- system.file("test_data", "test-2x2-data.csv", package = "ThinkingGrid")
 data <- read.csv(data_path)
 
-data <- data %>%
-    dplyr::rename(valence = val) %>%
-    dplyr::rename(id = pid)
-
 ## Create block variable
 data$probe <- as.numeric(as.character(data$probe))
 data$block <- factor(ifelse(data$probe < 3, "Emotional Task", "Rest"),

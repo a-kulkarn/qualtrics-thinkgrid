@@ -1,4 +1,4 @@
-pid,condition,probe,dc,ac,val,val2,free,sticky,directed,salience_directed,directed_dc,directed_ac,directed_correct,sticky_dc,sticky_ac,sticky_correct,free_dc,free_ac,free_correct
+id,condition,probe,dc,ac,valence,val2,free,sticky,directed,salience_directed,directed_dc,directed_ac,directed_correct,sticky_dc,sticky_ac,sticky_correct,free_dc,free_ac,free_correct
 28,Negative,1,1,4,-2,4,0,-2,0,0,6,1,1,1,6,1,1,1,1
 28,Negative,2,5,1,-2,4,0,0,4,0,6,1,1,1,6,1,1,1,1
 28,Negative,3,1,1,0,0,5,0,0,0,6,1,1,1,6,1,1,1,1
