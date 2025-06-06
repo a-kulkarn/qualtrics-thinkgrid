@@ -11,6 +11,9 @@ plot_tg(
   colorer = NULL,
   palette = "RdYlBu",
   zero_color = "#FFFFFF",
+  gradient_scaling = "linear",
+  enhanced_threshold_pct = 50,
+  enhanced_expansion_factor = 1.5,
   x_label = "Directedness",
   y_label = "Stickiness",
   dc_column = "Deliberate.Constraints",
@@ -21,7 +24,8 @@ plot_tg(
   min_legend = NULL,
   plot_title = NULL,
   legend_title = NULL,
-  plot_subtitle = NULL
+  plot_subtitle = NULL,
+  subset_condition = NULL
 )
 }
 \arguments{
@@ -36,6 +40,12 @@ plot_tg(
 \item{palette}{{character, optional} Name of diverging palette from colorspace package. Default is "RdYlBu". Other options include "RdBu", "PiYG", "BrBG", "PuOr", "RdGy".}
 
 \item{zero_color}{{character, optional} Color for zero values. Default is "#FFFFFF" (white) for clear distinction.}
+
+\item{gradient_scaling}{{character, optional} Type of scaling to apply to color gradient mapping. Options are "linear" (default) or "enhanced". "enhanced" makes small differences more visible in the color gradient.}
+
+\item{enhanced_threshold_pct}{{numeric, optional} Percentage of maximum value to use as threshold for enhanced scaling (default: 50). Values below this percentage get expanded.}
+
+\item{enhanced_expansion_factor}{{numeric, optional} Factor by which to expand the lower range in enhanced scaling (default: 1.5). Higher values give more distinction to small values.}
 
 \item{x_label}{{character, optional} Label for the x-axis. Default is "Directedness".}
 

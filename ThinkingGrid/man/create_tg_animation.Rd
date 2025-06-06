@@ -14,6 +14,9 @@ create_tg_animation(
   colorer = NULL,
   palette = "RdYlBu",
   zero_color = "#FFFFFF",
+  gradient_scaling = "linear",
+  enhanced_threshold_pct = 50,
+  enhanced_expansion_factor = 1.5,
   x_label = "Directedness",
   y_label = "Stickiness",
   max_legend = NULL,
@@ -25,7 +28,8 @@ create_tg_animation(
   duration = 1,
   width = 800,
   height = 800,
-  sorted_conditions = NULL
+  sorted_conditions = NULL,
+  subset_condition = NULL
 )
 }
 \arguments{
