@@ -6,6 +6,11 @@ Authors@R:
            comment = c(ORCID = "YOUR-ORCID-ID"))
 Description: What the package does (one paragraph).
 Imports:
+    ggplot2,
+    gifski,
+    grid,
+    gridExtra,
+    RColorBrewer,
     reticulate (>= 1.40.0)
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
@@ -16,6 +21,8 @@ Suggests:
     colorspace,
     ggplot2,
     gifski,
+    png,
     testthat (>= 3.0.0),
-    vdiffr
+    vdiffr,
+    lme4
 Config/testthat/edition: 3

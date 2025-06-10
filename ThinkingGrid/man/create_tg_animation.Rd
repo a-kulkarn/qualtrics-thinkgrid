@@ -33,19 +33,9 @@ create_tg_animation(
 )
 }
 \arguments{
-\item{survey_results}{Data frame containing survey results with constraint response columns.}
+\item{survey_results}{{data.frame, required} Data frame containing survey results with columns "Deliberate.Constraints" and "Automatic.Constraints".}
 
-\item{dc_column}{Name of deliberate constraints column (default: "Deliberate.Constraints").}
-
-\item{ac_column}{Name of automatic constraints column (default: "Automatic.Constraints").}
-
-\item{condition_column}{Column name containing conditions for animation frames. Each unique value becomes one frame.}
-
-\item{type}{Type of visualization (default: "depth"). See plot_tg for options.}
-
-\item{proportion_type}{Currently only "overall" is supported for animations.}
-
-\item{colorer}{Custom colorer function. If NULL, uses default based on other parameters.}
+\item{condition_col}{{character, required} Column name or vector containing the conditions for each observation. If part of the data frame, pass it as data$condition_col. If condition_col values are numeric, they will be sorted in ascending order. If they are character/factor, they will be displayed in random order unless sorted_conditions is provided.}
 
 \item{palette}{Color palette (default: "RdYlBu"). See plot_tg for options.}
 
@@ -55,7 +45,7 @@ create_tg_animation(
 
 \item{enhanced_threshold_pct}{Enhanced scaling threshold percentage (default: 50).}
 
-\item{enhanced_expansion_factor}{Enhanced scaling expansion factor (default: 1.5).}
+\item{colorer}{{function, optional} Function to color the grid cells. Default is NULL.}
 
 \item{x_label}{X-axis label (default: "Directedness").}
 
@@ -79,12 +69,7 @@ create_tg_animation(
 
 \item{height}{GIF height in pixels (default: 800).}
 
-\item{sorted_conditions}{Vector specifying frame order. Must contain all unique values from condition_column. If NULL, numeric conditions are sorted in ascending order and character/factor conditions are in random order (with warning).}
-
-\item{subset_condition}{R expression string for subsetting data before analysis. Applied before splitting by conditions.}
-}
-\value{
-Invisibly returns list of ggplot objects (one per frame). The GIF file is saved to disk.
+\item{sorted_conditions}{{character, optional} A vector of conditions in the desired order. If provided, the function will use this order for the animation. If not provided, the function will sort numeric conditions in ascending order and display character/factor conditions in random order. This vector must contain all unique values from the condition_col.}
 }
 \description{
 Generate animated GIF showing Thinking Grid plots across different conditions or time points.
@@ -93,17 +78,13 @@ Generate animated GIF showing Thinking Grid plots across different conditions or
 The function creates one frame per unique value in condition_column. All frames use the same legend scale (calculated from all conditions) to ensure comparability across frames. Requires the 'gifski' package for GIF creation. Will prompt to install if missing.
 }
 \examples{
-# Basic animation across time points
-create_tg_animation(survey_data, 
-                    condition_column = "time_point",
-                    filename = "thinking_grid_over_time.gif")
 
-# Enhanced scaling for small differences
-create_tg_animation(survey_data,
-                    condition_column = "week",
-                    gradient_scaling = "enhanced",
-                    enhanced_threshold_pct = 40,
-                    enhanced_expansion_factor = 2.0,
-                    subset_condition = "completed_training == TRUE")
+create_tg_animation(relevant_data, condition_col = relevant_data$condition_col)
+
+create_tg_animation(relevant_data, condition_col = relevant_data$condition_col, type = "constraints", filename = "my_animation.gif")
+
+create_tg_animation(relevant_data, condition_col = relevant_data$condition_col, type = "cells", sorted_conditions = c("Condition1", "Condition2", "Condition3"))
+
+#' @return A GIF file containing the animation of the Thinking Grid.
 
 }

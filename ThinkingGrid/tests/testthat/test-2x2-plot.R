@@ -1,188 +1,97 @@
-## Remove all variables
-rm(list = ls())
-ls()
-graphics.off()
 
-## Load libraries
-## library(dplyr)
-## library(ragg)
-## library(magick)
-## library(lme4)
-## library(sjPlot)
-## library(ggplot2)
-## library(png)
-## library(grid)
-## library(gridExtra)
-## library(tidyr)
-## library(ggeffects)
-## library(cowplot)
+test_that("Grid draws 2x2 overlay", {
+    skip_on_cran()
 
-## New prediction function
-get_predictions <- function(model, newdata) {
-  ## Create prediction data frames for both conditions
-  pred_data_emotion <- data.frame(
-    valence = newdata$valence,
-    block = factor("Emotional Task", levels = c("Emotional Task", "Rest"))
-  )
-  
-  pred_data_rest <- data.frame(
-    valence = newdata$valence,
-    block = factor("Rest", levels = c("Emotional Task", "Rest"))
-  )
-  
-  ## Get predictions with standard errors
-  preds_emotion <- predict(model, newdata = pred_data_emotion, re.form = NA, se.fit = TRUE)
-  preds_rest <- predict(model, newdata = pred_data_rest, re.form = NA, se.fit = TRUE)
-  
-  ## Return predictions and confidence intervals for both conditions
-  list(
-    emotion = data.frame(
-      block = "Emotional Task",
-      fit = preds_emotion$fit,
-      ci_lower = preds_emotion$fit - 1.96 * preds_emotion$se.fit,
-      ci_upper = preds_emotion$fit + 1.96 * preds_emotion$se.fit
-    ),
-    rest = data.frame(
-      block = "Rest",
-      fit = preds_rest$fit,
-      ci_lower = preds_rest$fit - 1.96 * preds_rest$se.fit,
-      ci_upper = preds_rest$fit + 1.96 * preds_rest$se.fit
-    )
-  )
-}
+    foo <- create_test_2x2_plots()
+    p_sticky <- foo$p_sticky
+    p_salience <- foo$p_salience
+    p_free <- foo$p_free
+    p_directed <- foo$p_directed
 
-## Subplot creation function
-create_subplot <- function(predictions, valence_seq, measure_name) {
-  y_labels <- c(
-    "sticky" = "Salient",
-    "salience_directed" = "Salience Directed",
-    "free" = "Spontaneous",
-    "directed" = "Directed"
-  )
-  
-  ## Combine predictions for both conditions
-  plot_data <- rbind(
-    cbind(data.frame(valence = valence_seq), predictions$emotion),
-    cbind(data.frame(valence = valence_seq), predictions$rest)
-  )
-  
-  plot_data$block <- factor(plot_data$block, levels = c("Emotional Task", "Rest"))
-  
-  ## Set y-axis limits based on all data
-  y_max <- max(plot_data$ci_upper, na.rm = TRUE)
-  y_max <- ceiling(y_max * 2) / 2
-
-  ## Return the plot.
-  values = c("Emotional Task" = "darkorange", "Rest" = "steelblue")
-      
-  ggplot2::ggplot(plot_data, ggplot2::aes(x = valence, group = block)) +
-      ggplot2::geom_ribbon(ggplot2::aes(ymin = pmax(0, ci_lower), ymax = ci_upper, fill = block), 
-                           alpha = 0.3) +
-      ggplot2::geom_line(ggplot2::aes(y = fit, color = block), linewidth = 0.8) +
-      ggplot2::scale_x_continuous(limits = c(-2, 2)) +
-      ggplot2::scale_y_continuous(limits = c(0, y_max), expand = c(0, 0)) +
-      ggplot2::scale_color_manual(values = values) +
-      ggplot2::scale_fill_manual(values = values) +
-      ggplot2::theme_minimal() +
-      ggplot2::theme(
-          plot.background = ggplot2::element_blank(),
-          panel.background = ggplot2::element_blank(),      
-          ## legend.position = "none",
-          plot.margin = ggplot2::margin(5, 5, 5, 5),
-          aspect.ratio = 1,
-          axis.title = ggplot2::element_text(size = 14),
-          axis.text = ggplot2::element_text(size = 12),
-          axis.title.y = ggplot2::element_text(margin = ggplot2::margin(r = 10)),
-          panel.grid.major = ggplot2::element_line(color = "gray90", linewidth = 0.2),
-          panel.grid.minor = ggplot2::element_blank(),
-          axis.line = ggplot2::element_line(color = "black", linewidth = 0.5)
-      ) +
-      ggplot2::labs(
-          title = ggplot2::element_blank(),
-          y = y_labels[measure_name],
-          x = ggplot2::element_blank()
-      )
-}
+    result <- ThinkingGrid::thinkgrid_quadrant_plot(p_sticky, p_salience, p_free, p_directed)
+    A <- result[[1]]
+    B <- result[[2]]
+    
+    grid::grid.newpage()  # Clear the graphics device
+    grid::grid.draw(B)
+    grid::grid.draw(A)
+    obj <- grid::grid.grab(wrap.grobs = TRUE)
+    vdiffr::expect_doppelganger("plot_2x2", obj)
+})
 
 
-##################################################
-## Main script.
+test_that("Grid overlays images", {
+    skip_on_cran()
+    
+    foo <- create_test_2x2_plots()
+    p_sticky <- foo$p_sticky
+    p_salience <- foo$p_salience
+    p_free <- foo$p_free
+    p_directed <- foo$p_directed
 
-## Read data and rename variables
-## data <- read.csv("taxicab_Affect_Induction.csv")
-# data <- read.csv("~/thinking-grid/demo-files/taxicab_Affect_Induction.csv")
+    img_path <- system.file("test_data", "rabbiduck.png", package = "ThinkingGrid")    
+    rabbi <- png::readPNG(img_path)
+    rabbigrob <- grid::rasterGrob(rabbi)
+    
+    result2 <- ThinkingGrid::thinkgrid_quadrant_plot(p_sticky, p_salience, p_free, rabbigrob)
 
-data_path <- system.file("test_data", "study3A.csv", package = "ThinkingGrid")
-data <- read.csv(data_path)
+    C <- result2[[1]]
+    D <- result2[[2]]
 
-data <- data %>%
-    dplyr::rename(valence = val) %>%
-    dplyr::rename(id = pid)
+    grid::grid.newpage()  # Clear the graphics device
+    grid::grid.draw(D)
+    grid::grid.draw(C)
 
-# data$total_correct <- data$directed_correct + data$sticky_correct + data$free_correct
+    obj <- grid::grid.grab(wrap.grobs = TRUE)    
+    vdiffr::expect_doppelganger("plot_2x2_with_images", obj)    
+})
 
-# data <- data[data$total_correct == 3, ]
+test_that("Image can be first", {
+    skip_on_cran()
+    
+    foo <- create_test_2x2_plots()
+    p_sticky <- foo$p_sticky
+    p_salience <- foo$p_salience
+    p_free <- foo$p_free
+    p_directed <- foo$p_directed
+    
+    img_path <- system.file("test_data", "rabbiduck.png", package = "ThinkingGrid")    
+    rabbi <- png::readPNG(img_path)
+    rabbigrob <- grid::rasterGrob(rabbi)
 
-## Create block variable
-data$probe <- as.numeric(as.character(data$probe))
-data$block <- factor(ifelse(data$probe < 3, "Emotional Task", "Rest"),
-                     levels = c("Emotional Task", "Rest"))
+    result2 <- ThinkingGrid::thinkgrid_quadrant_plot(rabbigrob, p_salience, p_free, p_directed)
 
-## Fit the models
-model3_free <- lme4::lmer(
-    free ~ valence + I(valence^2) + block + block:valence + block:I(valence^2) +  (1 | id),
-    data,
-    control = lme4::lmerControl(optimizer = "bobyqa")
-)
-model3_sticky <- lme4::lmer(
-    sticky ~ valence + I(valence^2) + block + block:valence + block:I(valence^2) +  (1 | id),
-    data,
-    control = lme4::lmerControl(optimizer = "bobyqa")
-)
-model3_directed <- lme4::lmer(
-    directed ~ valence + I(valence^2) + block + block:valence + block:I(valence^2) + (1 | id),
-    data, 
-    control = lme4::lmerControl(optimizer = "bobyqa")
-)
-model3_salience_directed <- lme4::lmer(
-    salience_directed ~ (
-        valence + I(valence^2) + block + block:valence + block:I(valence^2) + (1 | id)
-    ),
-    data, 
-    control = lme4::lmerControl(optimizer = "bobyqa"))
+    C <- result2[[1]]
+    D <- result2[[2]]
 
+    grid::grid.newpage()  # Clear the graphics device
+    grid::grid.draw(D)
+    grid::grid.draw(C)
+    
+    obj <- grid::grid.grab(wrap.grobs = TRUE)    
+    vdiffr::expect_doppelganger("plot_2x2_with_image_first", obj)
+})
 
-## Calculate predictions
-valence_seq <- seq(min(data$valence), max(data$valence), length.out = 100)
-newdata <- data.frame(valence = valence_seq)
+test_that("All plots can be images.", {
+    foo <- create_test_2x2_plots()
+    p_sticky <- foo$p_sticky
+    p_salience <- foo$p_salience
+    p_free <- foo$p_free
+    p_directed <- foo$p_directed
+    
+    img_path <- system.file("test_data", "rabbiduck.png", package = "ThinkingGrid")
+    rabbi <- png::readPNG(img_path)
+    rabbigrob <- grid::rasterGrob(rabbi)
 
-## Get predictions for each model
-free_preds <- get_predictions(model3_free, newdata)
-sticky_preds <- get_predictions(model3_sticky, newdata)
-directed_preds <- get_predictions(model3_directed, newdata)
-salience_preds <- get_predictions(model3_salience_directed, newdata)
+    result2 <- ThinkingGrid::thinkgrid_quadrant_plot(rabbigrob, rabbigrob, rabbigrob, rabbigrob)
 
-## Create individual plots
-p_sticky <- create_subplot(sticky_preds, valence_seq, "sticky")
-p_salience <- create_subplot(salience_preds, valence_seq, "salience_directed")
-p_free <- create_subplot(free_preds, valence_seq, "free")
-p_directed <- create_subplot(directed_preds, valence_seq, "directed")
+    C <- result2[[1]]
+    D <- result2[[2]]
 
-## Update the final plot with adjusted legend positioning
-## plots = list(
-##     sticky = p_sticky,
-##     salience = p_salience,
-##     free = p_free,
-##     directed = p_directed
-## )
-
-# A <- thinkgrid_quadrant_plot(plots)
-
-result <- ThinkingGrid::thinkgrid_quadrant_plot(p_sticky, p_salience, p_free, p_directed)
-
-A <- result[[1]]
-B <- result[[2]]
-
-grid::grid.newpage()  # Clear the graphics device
-grid::grid.draw(B)
-grid::grid.draw(A)
+    grid::grid.newpage()  # Clear the graphics device
+    grid::grid.draw(D)
+    grid::grid.draw(C)
+    
+    obj <- grid::grid.grab(wrap.grobs = TRUE)    
+    vdiffr::expect_doppelganger("plot_2x2_with_all_images", obj)
+})

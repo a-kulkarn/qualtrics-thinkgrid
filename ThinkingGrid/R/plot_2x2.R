@@ -1,6 +1,11 @@
 ##################################################
 ## Quadrant background.
 
+#' Illustration of thinkgrid_quadrant_background function
+#'
+#' Does something.
+#'
+#' @export
 thinkgrid_quadrant_background <- function() {
     ## Imports
     unit <- ggplot2::unit
@@ -18,7 +23,7 @@ thinkgrid_quadrant_background <- function() {
         x0 = unit(0.1, "npc"), y0 = unit(0.5, "npc"),
         x1 = unit(0.9, "npc"), y1 = unit(0.5, "npc"),
         arrow = arrow(length = unit(0.5, "npc"), type = "closed"),
-        gp=gpar(col = "red", size = 3)
+        gp=gpar(col = "red", linewidth = 3)
     )
 
     labely <- grid::textGrob("Salience", rot = 90)
@@ -26,7 +31,7 @@ thinkgrid_quadrant_background <- function() {
         x0 = unit(0.5, "npc"), y0 = unit(0.1, "npc"),
         x1 = unit(0.5, "npc"), y1 = unit(0.9, "npc"),
         arrow = arrow(length = unit(0.5, "npc"), type = "closed"),
-        gp=gpar(col = "navy", size = 3)
+        gp=gpar(col = "navy", linewidth = 3)
     )
 
     ## Prepare the 3x3 sub-grids.
@@ -39,7 +44,7 @@ thinkgrid_quadrant_background <- function() {
     i <- 1
     for (color in list("#FFE6E6", "#F9EBEE", "#E8F0F8", "#E6F3F2")) {
         P <- ggplot2::ggplot(sdf, aes(x = x, y = y)) + 
-            ggplot2::geom_tile(aes(fill = color), color = "white", size = 5) +
+            ggplot2::geom_tile(aes(fill = color), color = "white", linewidth = 5) +
             ggplot2::scale_fill_identity() +
             ## coord_fixed() +
             ggplot2::theme_void() +
@@ -83,6 +88,12 @@ thinkgrid_quadrant_background <- function() {
 ##################################################
 ## Quadrant plot.
 
+
+#' Illustration of thinkgrid_quadrant_plot function
+#'
+#' Does something.
+#'
+#' @export
 thinkgrid_quadrant_plot <- function(...) {
     ## Imports.
     unit <- ggplot2::unit
@@ -96,20 +107,32 @@ thinkgrid_quadrant_plot <- function(...) {
     ##     plots = plots[1]
     ## }
 
-    g <- ggplot2::ggplotGrob(plots[[1]] + ggplot2::theme(legend.position="right"))$grobs
-    legend <- g[[which(sapply(g, function(x) x$name) == "guide-box")]]
-    lwidth <- sum(legend$width)
+    ## Extract legend from the first element if possible.
+    legend <- tryCatch({
+        g <- ggplot2::ggplotGrob(plots[[1]] + ggplot2::theme(legend.position="right"))$grobs
+        g[[which(sapply(g, function(x) x$name) == "guide-box")]]
+        
+    }, error = function(e) {
+        ggplot2::zeroGrob()
+        
+    })
     
+    lwidth <- grid::widthDetails(legend)
+
+    ## Construct grid arrangement.
     inner <- do.call(
         gridExtra::arrangeGrob,
         lapply(
             plots,
             function(x)
-                x +
-                ggplot2::theme(
-                    legend.position="none",
-                    plot.margin = ggplot2::margin(20,20,20,20)
-                )
+                if (is(x, "rastergrob")) {
+                    x
+                } else {
+                    x +
+                        ggplot2::theme(legend.position="none",
+                                       plot.margin = ggplot2::margin(20,20,20,20)
+                                       )
+                }
         )
     )
 
