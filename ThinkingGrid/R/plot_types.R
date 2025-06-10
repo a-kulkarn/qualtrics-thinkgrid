@@ -43,12 +43,32 @@ base_plot_theme <- function() {
 
 #' Create custom color scale with enhanced visibility for small values
 #' 
-#' @param palette Name of diverging palette from colorspace package (default: "RdYlBu")
-#' @param zero_color Color for zero values (default: "#FFFFFF" - white for clear distinction)
+#' @param palette Name of diverging palette from colorspace package (default: "RdYlBu"). Other options include "RdBu", "PiYG", "BrBG", "PuOr", "RdGy".
+#' @param zero_color Color for zero values in hex (default: "#FFFFFF" - white for clear distinction)
 #' @param n_colors Number of color steps (default: 11)
-#' @param gradient_scaling Type of gradient scaling: "linear" or "enhanced" (default: "enhanced")
-#' @param enhanced_threshold_pct Percentage of maximum value to use as threshold for enhanced scaling (default: 50)
-#' @param enhanced_expansion_factor Factor by which to expand the lower range in enhanced scaling (default: 1.5)
+#' @param gradient_scaling Type of gradient scaling: "linear" or "enhanced" (default: "enhanced"). "linear" uses standard color mapping. "enhanced" gives more color distinction to smaller values.
+#' @param enhanced_threshold_pct Percentage of maximum value to use as threshold for enhanced scaling (default: 50). Values below this percentage get more color distinction.
+#' @param enhanced_expansion_factor Factor controlling how much more color distinction small values get (default: 1.5). Higher values mean more distinction for small differences. Only used when gradient_scaling = "enhanced".
+#' 
+#' @return A colorer function that can be passed to plot_tg() or create_tg_animation()
+#' 
+#' @details 
+#' The enhanced scaling works by compressing small values in the scaled space, which gives them more colors in the final gradient. For example, if your data ranges from 0-20 percent and you use enhanced_threshold_pct = 50 with enhanced_expansion_factor = 2.0, then values 0-10 percent will get twice as much color distinction compared to linear scaling.
+#' 
+#' @examples
+#' # Basic usage with linear scaling
+#' colorer <- create_custom_colorer(gradient_scaling = "linear")
+#' plot_tg(data, colorer = colorer)
+#' 
+#' # Enhanced scaling for better small value distinction
+#' colorer <- create_custom_colorer(
+#'   gradient_scaling = "enhanced",
+#'   enhanced_threshold_pct = 30,
+#'   enhanced_expansion_factor = 2.0
+#' )
+#' plot_tg(data, colorer = colorer)
+#' 
+#' @export
 create_custom_colorer <- function(palette = "RdYlBu",
                                   zero_color = "#FFFFFF",
                                   n_colors = 11,

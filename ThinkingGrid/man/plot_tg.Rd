@@ -2,55 +2,106 @@
 % Please edit documentation in R/plot_tg.R
 \name{plot_tg}
 \alias{plot_tg}
-\title{Illustration of plot_tg function}
+\title{Create Thinking Grid Visualizations}
 \usage{
 plot_tg(
   survey_results,
   proportion_type = "overall",
-  type = "cells",
+  type = "depth",
   colorer = NULL,
+  palette = "RdYlBu",
+  zero_color = "#FFFFFF",
+  gradient_scaling = "linear",
+  enhanced_threshold_pct = 50,
+  enhanced_expansion_factor = 1.5,
   x_label = "Directedness",
   y_label = "Stickiness",
-  condition_col = NULL,
+  dc_column = "Deliberate.Constraints",
+  ac_column = "Automatic.Constraints",
+  condition_column = NULL,
   comparison_type = "separate",
   max_legend = NULL,
-  min_legend = NULL
+  min_legend = NULL,
+  plot_title = NULL,
+  legend_title = NULL,
+  plot_subtitle = NULL,
+  subset_condition = NULL
 )
 }
 \arguments{
-\item{survey_results}{{data.frame, required} Data frame containing survey results with columns "Deliberate.Constraints" and "Automatic.Constraints".}
+\item{survey_results}{Data frame containing survey results with constraint response columns.}
 
-\item{proportion_type}{{character, optional} Type of proportion to calculate. Options are "overall" (default) or "condition". If "condition", a condition column must be provided using the condition_col parameter.}
+\item{proportion_type}{Type of proportion calculation: "overall" (default) for single plot showing overall response patterns, or "condition" for separate plots for different conditions (requires condition_column).}
 
-\item{type}{{character, optional} Type of plot to create. Options are "cells" (default), "quadrants", "horizontal", "vertical", "constraints", or "depth". Create a grid of proportions based on the type specified.}
+\item{type}{Type of visualization: "depth" (default) shows distance from grid center in each quadrant, "cells" shows individual cell heatmap (6x6 grid), "quadrants" shows four-quadrant summary, "horizontal" shows horizontal bands (stickiness levels), "vertical" shows vertical bands (directedness levels), "constraints" shows diagonal constraint bands.}
 
-\item{colorer}{{function, optional} Function to color the grid cells. Default is NULL.}
+\item{colorer}{Custom colorer function. If NULL, uses default based on other parameters. Create with create_custom_colorer().}
 
-\item{x_label}{{character, optional} Label for the x-axis. Default is "Directedness".}
+\item{palette}{Color palette name from colorspace package (default: "RdYlBu"). Options: "RdBu", "PiYG", "BrBG", "PuOr", "RdGy".}
 
-\item{y_label}{{character, optional} Label for the y-axis. Default is "Stickiness".}
+\item{zero_color}{Color for zero values (default: "#FFFFFF").}
 
-\item{condition_col}{{character, optional} Required if proportion_type is "condition". Can be passed as a vector. If part of the data frame, pass it as data$condition_col.}
+\item{gradient_scaling}{Color gradient scaling method: "linear" (default) for standard linear color mapping, or "enhanced" for more color distinction to smaller values.}
 
-\item{comparison_type}{{character, optional} Type of comparison to make when proportion_type is "condition". Options are "separate" (default) or "difference". If number of conditions is exactly 2, the plots will be shown side by side. Otherwise, the plots will be shown separately. The "difference" option requires exactly 2 conditions.}
+\item{enhanced_threshold_pct}{For enhanced scaling: percentage of max value used as threshold (default: 50). Values below this get enhanced distinction.}
 
-\item{max_legend}{{numeric, optional} Maximum value for the legend. Default is NULL. If NULL, the maximum value will be calculated from the data.}
+\item{enhanced_expansion_factor}{For enhanced scaling: factor controlling how much more distinction small values get (default: 1.5). Higher values mean more distinction.}
 
-\item{min_legend}{{numeric, optional} Minimum value for the legend. Default is NULL. If NULL, the minimum value will be calculated from the data.}
+\item{x_label}{X-axis label (default: "Directedness").}
+
+\item{y_label}{Y-axis label (default: "Stickiness").}
+
+\item{dc_column}{Name of deliberate constraints column (default: "Deliberate.Constraints").}
+
+\item{ac_column}{Name of automatic constraints column (default: "Automatic.Constraints").}
+
+\item{condition_column}{Column name for grouping conditions. Required when proportion_type = "condition".}
+
+\item{comparison_type}{For condition plots: "separate" (default) for side-by-side plots for 2 conditions or separate plots for 3+, or "difference" for difference plot (condition1 - condition2, requires exactly 2 conditions).}
+
+\item{max_legend}{Maximum legend value. If NULL, calculated from data.}
+
+\item{min_legend}{Minimum legend value. If NULL, calculated from data.}
+
+\item{plot_title}{Main plot title.}
+
+\item{legend_title}{Legend title. If NULL, uses "Percentage (percent)" or "Difference (percent)".}
+
+\item{plot_subtitle}{Plot subtitle. For condition plots with comparison_type = "separate", provide a vector with one subtitle per condition.}
+
+\item{subset_condition}{R expression string for subsetting data before analysis. Uses standard R syntax. All referenced columns must exist in survey_results.}
 }
 \value{
-A list containing $plot and $prop_data. $plot is a ggplot object, and $prop_data is a data frame with the proportions.
+A list containing: plot (ggplot object or list of ggplot objects for 3+ conditions) and prop_data (calculated proportion data).
 }
 \description{
-Illustration of plot_tg function
+Generate various types of Thinking Grid plots from survey data containing deliberate and automatic constraint responses.
+}
+\details{
+The function expects constraint responses on a 1-6 scale where deliberate constraints (x-axis) range from 1 = low directedness to 6 = high directedness, and automatic constraints (y-axis) range from 1 = low stickiness to 6 = high stickiness.
+
+For enhanced scaling, the algorithm compresses small values in the color space to give them more visual distinction. This is useful when most responses are in lower ranges.
 }
 \examples{
-plot_tg(relevant_data)
+# Basic overall plot
+plot_tg(survey_data)
 
-plot_tg(relevant_data, proportion_type = "condition", condition_col = relevant_data$condition_col)
+# Cell-level heatmap with enhanced scaling for small values
+plot_tg(survey_data, 
+        type = "cells", 
+        gradient_scaling = "enhanced",
+        enhanced_threshold_pct = 30,
+        enhanced_expansion_factor = 2.0)
 
-plot_tg(relevant_data, type = "cells", colorer = my_color_function)
+# Compare conditions side by side
+plot_tg(survey_data, 
+        proportion_type = "condition",
+        condition_column = "treatment_group",
+        comparison_type = "separate")
 
-plot_tg(relevant_data, type = "quadrants", x_label = "X-axis label", y_label = "Y-axis label", proportion_type = "condition", condition_col = relevant_data$condition_col, comparison_type = "separate")
+# Subset data before analysis
+plot_tg(survey_data, 
+        subset_condition = "age > 25 & experience >= 2",
+        type = "quadrants")
 
 }

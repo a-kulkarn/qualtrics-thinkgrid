@@ -171,6 +171,34 @@ test_func <- function(){
     print("Hello World")
 }
 
+
+#' Illustration of extract_quadrant_depths function
+#' 
+#' @param data_file {character, needed} Path to csv or excel file containing the data.
+#' 
+#' @param dc_column {character, optional} Name of the column containing deliberate constraints. Default is "Deliberate.Constraints".
+#' 
+#' @param ac_column {character, optional} Name of the column containing automatic constraints. Default is "Automatic.Constraints".
+#' 
+#' @return data frame containing the quadrant depths. Columns include "Free.Depth", "Directed.Depth", "AffDir.Depth", and "Sticky.Depth".
+#' 
+#' @details 
+#' The function calculates the quadrant depths based on the deliberate and automatic constraints provided in the data file. The quadrant depths are calculated using the taxicab norm. Only one depth will be populated per observation, depending on the quadrant the observation falls into. The remaining three depths will be set to 0.
+#' 
+#' @examples
+#' extract_quadrant_depths("path/to/data_file.csv")
+#' 
+#' @export
+#' 
+extract_quadrant_depths <- function(data_file, dc_column = "Deliberate.Constraints", ac_column = "Automatic.Constraints") {
+    mod <- reticulate::import_from_path("extract_quadrant_depths", path = py_module_path())
+    res <- reticulate::py_to_r(mod$extract_quadrant_depths(data_file, dc_column, ac_column))
+    
+    ## Fixup attributes for comparison's sake.
+    attr(res, "pandas.index") <- NULL
+    return(res)
+}
+
 # setup_file <- "test_setup_file/testQuestion.csv"
 # data_file <- "test_qualtrics_output/testQuestionOutput.csv"
 # Qdata <- read_qualtrics_data(data_file, setup_file)

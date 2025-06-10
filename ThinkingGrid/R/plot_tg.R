@@ -173,38 +173,60 @@ check_dataframe <- function(df, dc_col, ac_col, check_condition, condition_col =
 
 }
 
-#' Illustration of plot_tg function
+#' Create Thinking Grid Visualizations
 #' 
-#' @param survey_results {data.frame, required} Data frame containing survey results with columns "Deliberate.Constraints" and "Automatic.Constraints".
+#' Generate various types of Thinking Grid plots from survey data containing deliberate and automatic constraint responses.
 #' 
-#' @param proportion_type {character, optional} Type of proportion to calculate. Options are "overall" (default) or "condition". If "condition", a condition column must be provided using the condition_col parameter.
+#' @param survey_results Data frame containing survey results with constraint response columns.
+#' @param proportion_type Type of proportion calculation: "overall" (default) for single plot showing overall response patterns, or "condition" for separate plots for different conditions (requires condition_column).
+#' @param type Type of visualization: "depth" (default) shows distance from grid center in each quadrant, "cells" shows individual cell heatmap (6x6 grid), "quadrants" shows four-quadrant summary, "horizontal" shows horizontal bands (stickiness levels), "vertical" shows vertical bands (directedness levels), "constraints" shows diagonal constraint bands.
+#' @param colorer Custom colorer function. If NULL, uses default based on other parameters. Create with create_custom_colorer().
+#' @param palette Color palette name from colorspace package (default: "RdYlBu"). Options: "RdBu", "PiYG", "BrBG", "PuOr", "RdGy".
+#' @param zero_color Color for zero values (default: "#FFFFFF").
+#' @param gradient_scaling Color gradient scaling method: "linear" (default) for standard linear color mapping, or "enhanced" for more color distinction to smaller values.
+#' @param enhanced_threshold_pct For enhanced scaling: percentage of max value used as threshold (default: 50). Values below this get enhanced distinction.
+#' @param enhanced_expansion_factor For enhanced scaling: factor controlling how much more distinction small values get (default: 1.5). Higher values mean more distinction.
+#' @param x_label X-axis label (default: "Directedness").
+#' @param y_label Y-axis label (default: "Stickiness").
+#' @param dc_column Name of deliberate constraints column (default: "Deliberate.Constraints").
+#' @param ac_column Name of automatic constraints column (default: "Automatic.Constraints").
+#' @param condition_column Column name for grouping conditions. Required when proportion_type = "condition".
+#' @param comparison_type For condition plots: "separate" (default) for side-by-side plots for 2 conditions or separate plots for 3+, or "difference" for difference plot (condition1 - condition2, requires exactly 2 conditions).
+#' @param min_legend Minimum legend value. If NULL, calculated from data.
+#' @param max_legend Maximum legend value. If NULL, calculated from data.
+#' @param plot_title Main plot title.
+#' @param legend_title Legend title. If NULL, uses "Percentage (percent)" or "Difference (percent)".
+#' @param plot_subtitle Plot subtitle. For condition plots with comparison_type = "separate", provide a vector with one subtitle per condition.
+#' @param subset_condition R expression string for subsetting data before analysis. Uses standard R syntax. All referenced columns must exist in survey_results.
 #' 
-#' @param type {character, optional} Type of plot to create. Options are "cells" (default), "quadrants", "horizontal", "vertical", "constraints", or "depth". Create a grid of proportions based on the type specified.
+#' @return A list containing: plot (ggplot object or list of ggplot objects for 3+ conditions) and prop_data (calculated proportion data).
 #' 
-#' @param colorer {function, optional} Function to color the grid cells. Default is NULL. Use create_custom_colorer() to create one with specific colors and scaling.
-#' @param palette {character, optional} Name of diverging palette from colorspace package. Default is "RdYlBu". Other options include "RdBu", "PiYG", "BrBG", "PuOr", "RdGy".
-#' @param zero_color {character, optional} Color for zero values. Default is "#FFFFFF" (white) for clear distinction.
-#' @param x_label {character, optional} Label for the x-axis. Default is "Directedness".
-#' @param y_label {character, optional} Label for the y-axis. Default is "Stickiness".
+#' @details 
+#' The function expects constraint responses on a 1-6 scale where deliberate constraints (x-axis) range from 1 = low directedness to 6 = high directedness, and automatic constraints (y-axis) range from 1 = low stickiness to 6 = high stickiness.
 #' 
-#' @param condition_col {character, optional} Required if proportion_type is "condition". Can be passed as a vector. If part of the data frame, pass it as data$condition_col.
+#' For enhanced scaling, the algorithm compresses small values in the color space to give them more visual distinction. This is useful when most responses are in lower ranges.
 #' 
-#' @param comparison_type {character, optional} Type of comparison to make when proportion_type is "condition". Options are "separate" (default) or "difference". If number of conditions is exactly 2, the plots will be shown side by side. Otherwise, the plots will be shown separately. The "difference" option requires exactly 2 conditions.
-#' 
-#' @param min_legend {numeric, optional} Minimum value for the legend. Default is NULL. If NULL, the minimum value will be calculated from the data.
-#' 
-#' @param max_legend {numeric, optional} Maximum value for the legend. Default is NULL. If NULL, the maximum value will be calculated from the data.
-#' 
-#' @param gradient_scaling {character, optional} Type of scaling to apply to color gradient mapping. Options are "linear" (default) or "enhanced". "enhanced" makes small differences more visible in the color gradient.
-#' @param enhanced_threshold_pct {numeric, optional} Percentage of maximum value to use as threshold for enhanced scaling (default: 50). Values below this percentage get expanded.
-#' @param enhanced_expansion_factor {numeric, optional} Factor by which to expand the lower range in enhanced scaling (default: 1.5). Higher values give more distinction to small values.
 #' @examples
-#' plot_tg(relevant_data)
-#' plot_tg(relevant_data, proportion_type = "condition", condition_col = relevant_data$condition_col)
-#' plot_tg(relevant_data, type = "cells", colorer = my_color_function)
-#' plot_tg(relevant_data, type = "quadrants", palette = "RdBu", x_label = "X-axis label", y_label = "Y-axis label", proportion_type = "condition", condition_col = relevant_data$condition_col, comparison_type = "separate")
+#' # Basic overall plot
+#' plot_tg(survey_data)
 #' 
-#' @return A list containing $plot and $prop_data. $plot is a ggplot object, and $prop_data is a data frame with the proportions.
+#' # Cell-level heatmap with enhanced scaling for small values
+#' plot_tg(survey_data, 
+#'         type = "cells", 
+#'         gradient_scaling = "enhanced",
+#'         enhanced_threshold_pct = 30,
+#'         enhanced_expansion_factor = 2.0)
+#' 
+#' # Compare conditions side by side
+#' plot_tg(survey_data, 
+#'         proportion_type = "condition",
+#'         condition_column = "treatment_group",
+#'         comparison_type = "separate")
+#' 
+#' # Subset data before analysis
+#' plot_tg(survey_data, 
+#'         subset_condition = "age > 25 & experience >= 2",
+#'         type = "quadrants")
 #' 
 #' @export
 plot_tg <- function(survey_results,
@@ -354,46 +376,54 @@ plot_tg <- function(survey_results,
                  plot_title, legend_title, plot_subtitle))
 }
 
-#' Illustration of create_tg_animation function
+#' Create Animated Thinking Grid Visualizations
 #' 
-#' @param survey_results {data.frame, required} Data frame containing survey results with columns "Deliberate.Constraints" and "Automatic.Constraints".
+#' Generate animated GIF showing Thinking Grid plots across different conditions or time points.
 #' 
-#' @param condition_col {character, required} Column name or vector containing the conditions for each observation. If part of the data frame, pass it as data$condition_col. If condition_col values are numeric, they will be sorted in ascending order. If they are character/factor, they will be displayed in random order unless sorted_conditions is provided.
+#' @param survey_results Data frame containing survey results with constraint response columns.
+#' @param dc_column Name of deliberate constraints column (default: "Deliberate.Constraints").
+#' @param ac_column Name of automatic constraints column (default: "Automatic.Constraints").
+#' @param condition_column Column name containing conditions for animation frames. Each unique value becomes one frame.
+#' @param type Type of visualization (default: "depth"). See plot_tg for options.
+#' @param proportion_type Currently only "overall" is supported for animations.
+#' @param colorer Custom colorer function. If NULL, uses default based on other parameters.
+#' @param palette Color palette (default: "RdYlBu"). See plot_tg for options.
+#' @param zero_color Color for zero values (default: "#FFFFFF").
+#' @param gradient_scaling Scaling method: "linear" (default) or "enhanced".
+#' @param enhanced_threshold_pct Enhanced scaling threshold percentage (default: 50).
+#' @param enhanced_expansion_factor Enhanced scaling expansion factor (default: 1.5).
+#' @param x_label X-axis label (default: "Directedness").
+#' @param y_label Y-axis label (default: "Stickiness").
+#' @param min_legend Minimum legend value. If NULL, calculated from all conditions.
+#' @param max_legend Maximum legend value. If NULL, calculated from all conditions.
+#' @param plot_title Main title appearing on all frames.
+#' @param legend_title Legend title.
+#' @param plot_subtitle Subtitle(s). Can be single string (same subtitle for all frames) or vector (one subtitle per condition in same order as sorted_conditions if provided).
+#' @param filename Output GIF filename (default: "tg_animation.gif").
+#' @param duration Duration of each frame in seconds (default: 1).
+#' @param width GIF width in pixels (default: 800).
+#' @param height GIF height in pixels (default: 800).
+#' @param sorted_conditions Vector specifying frame order. Must contain all unique values from condition_column. If NULL, numeric conditions are sorted in ascending order and character/factor conditions are in random order (with warning).
+#' @param subset_condition R expression string for subsetting data before analysis. Applied before splitting by conditions.
 #' 
-#' @param type {character, optional} Type of plot to create. Options are "cells" (default), "quadrants", "horizontal", "vertical", "constraints", or "depth". Create a grid of proportions based on the type specified.
+#' @return Invisibly returns list of ggplot objects (one per frame). The GIF file is saved to disk.
 #' 
-#' @param proportion_type {character, optional} Type of proportion to calculate. Currently only "overall" is supported.
-#' 
-#' @param colorer {function, optional} Function to color the grid cells. Default is NULL.
-#' @param palette {character, optional} Name of diverging palette from colorspace package. Default is "RdYlBu".
-#' @param zero_color {character, optional} Color for zero values. Default is "#FFFFFF".
-#' 
-#' @param x_label {character, optional} Label for the x-axis. Default is "Directedness".
-#' 
-#' @param y_label {character, optional} Label for the y-axis. Default is "Stickiness".
-#' 
-#' @param min_legend {numeric, optional} Minimum value for the legend. Default is NULL. If NULL, the minimum value will be calculated from the data.
-#' 
-#' @param max_legend {numeric, optional} Maximum value for the legend. Default is NULL. If NULL, the maximum value will be calculated from the data.
-#' 
-#' @param filename {character, optional} Name of the output GIF file. Default is "tg_animation.gif".
-#' 
-#' @param duration {numeric, optional} Duration of each frame in the GIF in seconds. Default is 1 second.
-#' 
-#' @param width {numeric, optional} Width of the GIF in pixels. Default is 800 pixels.
-#' 
-#' @param height {numeric, optional} Height of the GIF in pixels. Default is 800 pixels.
-#' 
-#' @param sorted_conditions {character, optional} A vector of conditions in the desired order. If provided, the function will use this order for the animation. If not provided, the function will sort numeric conditions in ascending order and display character/factor conditions in random order. This vector must contain all unique values from the condition_col.
+#' @details 
+#' The function creates one frame per unique value in condition_column. All frames use the same legend scale (calculated from all conditions) to ensure comparability across frames. Requires the 'gifski' package for GIF creation. Will prompt to install if missing.
 #' 
 #' @examples
-#' create_tg_animation(relevant_data, condition_col = relevant_data$condition_col)
+#' # Basic animation across time points
+#' create_tg_animation(survey_data, 
+#'                     condition_column = "time_point",
+#'                     filename = "thinking_grid_over_time.gif")
 #' 
-#' create_tg_animation(relevant_data, condition_col = relevant_data$condition_col, type = "constraints", filename = "my_animation.gif")
-#' 
-#' create_tg_animation(relevant_data, condition_col = relevant_data$condition_col, type = "cells", sorted_conditions = c("Condition1", "Condition2", "Condition3"))
-#' 
-#' @return A GIF file containing the animation of the Thinking Grid.
+#' # Enhanced scaling for small differences
+#' create_tg_animation(survey_data,
+#'                     condition_column = "week",
+#'                     gradient_scaling = "enhanced",
+#'                     enhanced_threshold_pct = 40,
+#'                     enhanced_expansion_factor = 2.0,
+#'                     subset_condition = "completed_training == TRUE")
 #' 
 #' @export
 create_tg_animation <- function(survey_results,
