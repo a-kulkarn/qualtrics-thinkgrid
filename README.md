@@ -1,4 +1,4 @@
-# ThinkingGrid <img src="man/figures/logo.jpg" align="right" />
+# ThinkingGrid <img src="ThinkingGrid/man/figures/logo.jpg" align="right" />
 
 An **R** package for analyzing data from "Thinking Grid" style experiments.
 Package that provides users functions to create qualtrics, extract and
