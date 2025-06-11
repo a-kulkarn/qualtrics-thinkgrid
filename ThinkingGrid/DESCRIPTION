@@ -1,9 +1,13 @@
 Package: ThinkingGrid
 Title: What the Package Does (One Line, Title Case)
 Version: 0.0.0.9000
-Authors@R: 
-    person("Vishal", "Kuvar", , "kuvar001@umn.edu", role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0002-6799-9790"))
+Authors@R:
+    c(
+      person("Avinash", "Kulkarni", , "avi.kulkarni.2.71@gmail.com", role = c("aut")),
+      person("Vishal", "Kuvar", , "kuvar001@umn.edu", role = c("aut", "cre"),
+             comment = c(ORCID = "0000-0002-6799-9790")),
+      person("Irving", "Zac", , "zci7c@virginia.edu", role = c("ctb", "fnd"))
+    )
 Description: A description here.
 Imports:
     cowplot,

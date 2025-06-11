@@ -11,5 +11,15 @@ A description here.
 \author{
 \strong{Maintainer}: Vishal Kuvar \email{kuvar001@umn.edu} (\href{https://orcid.org/0000-0002-6799-9790}{ORCID})
 
+Authors:
+\itemize{
+  \item Avinash Kulkarni \email{avi.kulkarni.2.71@gmail.com}
+}
+
+Other contributors:
+\itemize{
+  \item Irving Zac \email{zci7c@virginia.edu} [contributor, funder]
+}
+
 }
 \keyword{internal}
