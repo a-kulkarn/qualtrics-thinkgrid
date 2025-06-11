@@ -21,10 +21,10 @@ You'll want to grant _repo_ permissions to the token.
 
 Open an *R* session, and run the following:
 ```
-GITHUB_PAT=YOUR_GENERATED_PAT_HERE
+GITHUB_PAT <- YOUR_GENERATED_PAT_HERE
 devtools::install_github("a-kulkarn/qualtrics-thinkgrid",
                          subdir = "ThinkingGrid",
-                         auth_token = token,
+                         auth_token = GITHUB_PAT,
                          INSTALL_opts = "--install-tests")
 ```
 If all went well, you should have successfully downloaded the package source from the repo. 
