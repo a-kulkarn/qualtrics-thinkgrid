@@ -1,16 +1,6 @@
 ## Load required packages
 
 ################################################################################
-## Util.
-
-get_quadrant_6x6 <- function(i, j) {
-    (i < 4) && (j < 4) && return(1)
-    (i < 4) && (j > 3) && return(2)
-    (i > 3) && (j < 4) && return(3)    
-    return(4)
-}
-
-################################################################################
 ## Validation.
 
 validate_range <- function(value, ref_value, is_max = TRUE) {
@@ -923,7 +913,7 @@ calculate_depth_props <- function(grid) {
     for (i in 1:6) {
         for (j in 1:6) {
             q <- get_quadrant_6x6(i, j)
-            d <- round(abs(i - 3.5) + abs(j - 3.5))
+            d <- depth_6x6(i, j)
             depth_props[q, d] <- depth_props[q, d] + grid[i, j]
         }
     }

@@ -47,22 +47,6 @@ test_that("test pandas availability", {
     )
 })
 
-# normalize_plot <- function(plot) {
-#   plot +
-#     # Set a consistent theme for fonts, margins, backgrounds, and grids
-#     theme(
-#       text = element_text(family = "sans", size = 12),
-#       plot.margin = margin(5, 5, 5, 5),
-#       panel.background = element_rect(fill = "white", color = NA),
-#       panel.grid.major = element_line(color = "grey90"),
-#       panel.grid.minor = element_line(color = "grey95")
-#     ) +
-#     # Fix coordinate expansion so that axis limits don't change unexpectedly
-#     coord_cartesian(expand = FALSE) +
-#     # Set manual color and fill scales to enforce consistency across systems
-#     scale_color_manual(values = c("black", "blue", "red", "green", "orange", "purple")) +
-#     scale_fill_manual(values = c("black", "blue", "red", "green", "orange", "purple"))
-# }
 
 ## ------------------------------------------------------------------------
 

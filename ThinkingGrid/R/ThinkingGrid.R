@@ -1,12 +1,16 @@
-# run terminal command in R
-# py_path <- system("python -c 'import os, sys; print(os.path.dirname(sys.executable))'", intern = TRUE)
-# # check if default python installation exists
-# if (py_path == ""){
-#     py_path <- system("which python", intern = TRUE)
-# }
-# use_python(paste0(py_path, "/python"))
-# check if pandas is installed in the python environment
-# py_pandas <- system("python -c 'import pandas as pd; print(pd.__version__)'", intern = TRUE)
+################################################################################
+## Python env management.
+
+
+## run terminal command in R
+## py_path <- system("python -c 'import os, sys; print(os.path.dirname(sys.executable))'", intern = TRUE)
+## # check if default python installation exists
+## if (py_path == ""){
+##     py_path <- system("which python", intern = TRUE)
+## }
+## use_python(paste0(py_path, "/python"))
+## check if pandas is installed in the python environment
+## py_pandas <- system("python -c 'import pandas as pd; print(pd.__version__)'", intern = TRUE)
 
 py_script_path <- function(script_name){
     return(system.file("python", script_name, package="ThinkingGrid"))
@@ -94,6 +98,9 @@ check_python_available <- function(install_if_NA = FALSE){
     }
 }
 
+################################################################################
+## Survey functions.
+
 #' Illustration of generate_survey function
 #'
 #' @param survey_setup_file {character, required} Path to a csv file containing the survey setup. This file MUST have a column called "id". Each row in this column should be unique. Indivudial thinking grids will be created for each row in this column. The other column is called "question". This column contains the question text. Quotes around question text is not required. If the question text is not provided, the function will use default text. Please note that these columns are case sensitive.
@@ -178,6 +185,9 @@ read_qualtrics_data <- function(data_file, setup_file){
     return(res)
 }
 
+################################################################################
+## Depth calculations.
+
 #' Illustration of extract_quadrant_depths function
 #' 
 #' @param data_file {character, needed} Path to csv or excel file containing the data.
@@ -210,8 +220,31 @@ extract_quadrant_depths <- function(data_file, dc_column = "Deliberate.Constrain
 }
 
 
-depth <- function() {
-    q <- get_quadrant_6x6(i, j)
-    d <- round(abs(i - 3.5) + abs(j - 3.5))
-    depth_props[q, d] <- depth_props[q, d] + grid[i, j]
+get_quadrant_6x6 <- function(i, j) {
+    (i < 4) && (j < 4) && return(1)
+    (i < 4) && (j > 3) && return(2)
+    (i > 3) && (j < 4) && return(3)    
+    return(4)
+}
+
+
+depth_6x6 <- function(x, y) {
+    round(abs(x - 3.5) + abs(y - 3.5))
+}
+
+#' @export
+add_depths <- function(data, dc = "Deliberate.Constraints", ac = "Automatic.Constraints") {
+    X <- data[, c(ac, dc)]
+    d <- apply(X, 1, function(row) depth_6x6(row[1], row[2]))
+    q <- apply(X, 1, function(row) get_quadrant_6x6(row[1], row[2]))
+
+    Y <- data.frame(data)
+    Y["total_depth"] <- d
+    Y["quadrant"] <- q
+    Y["free"] <- (q == 1) * d
+    Y["directed"] <- (q == 2) * d
+    Y["sticky"] <- (q == 3) * d
+    Y["hybrid"] <- (q == 4) * d
+    
+    return(Y)
 }
