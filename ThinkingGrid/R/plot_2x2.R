@@ -1,7 +1,7 @@
 ##################################################
 ## Quadrant background.
 
-#' Illustration of thinkgrid_quadrant_background function
+#' Illustration of thinkgrid_quadrant_background function.
 #' @param arrowwidth {integer, optional} The width of the arrow objects.
 #' @param xlab {character, optional} Label for the x-axis.
 #' @param ylab {character, optional} Label for the y-axis.
@@ -125,15 +125,15 @@ default_inner_theme <- function(inner_margin = 20) {
 #' Illustration of thinkgrid_quadrant_plot function
 #'
 #' Creates a 2x2 quadrant plot with four ggplot objects.
-#' @param p_sticky {ggplot or rastergrob} A ggplot object for the "Sticky" quadrant.
-#' @param p_salience {ggplot or rastergrob} A ggplot object for the "Salience" quadrant.
-#' @param p_free {ggplot or rastergrob} A ggplot object for the "Free" quadrant.
-#' @param p_directed {ggplot or rastergrob} A ggplot object for the "Directed" quadrant.
-#' @param inner_theme {theme, optional} A theme for the inner subplots.
+#' @param p_sticky (ggplot or rastergrob) A ggplot object for the "Sticky" quadrant.
+#' @param p_salience (ggplot or rastergrob) A ggplot object for the "Salience" quadrant.
+#' @param p_free (ggplot or rastergrob) A ggplot object for the "Free" quadrant.
+#' @param p_directed (ggplot or rastergrob) A ggplot object for the "Directed" quadrant.
+#' @param inner_theme (theme, optional) A theme for the inner subplots.
 #' See `default_inner_theme` for more details.
-#' @param arrowwidth {integer, optional} Controls the thickness of the axis arrows.
-#' @param xlab {character, optional} Label for the x-axis.
-#' @param ylab{character, optional} Label for the y-axis.
+#' @param arrowwidth (integer, optional) Controls the thickness of the axis arrows.
+#' @param xlab (character, optional) Label for the x-axis.
+#' @param ylab (character, optional) Label for the y-axis.
 #' 
 #' @return A ggplot object (created via cowplot) which consists of the thinking grid
 #' background and the inlayed 2x2 subplots (or images) corresponding to the respective quadrant.

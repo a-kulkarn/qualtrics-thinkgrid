@@ -16,22 +16,22 @@ thinkgrid_quadrant_plot(
 )
 }
 \arguments{
-\item{p_sticky}{{ggplot or rastergrob} A ggplot object for the "Sticky" quadrant.}
+\item{p_sticky}{(ggplot or rastergrob) A ggplot object for the "Sticky" quadrant.}
 
-\item{p_salience}{{ggplot or rastergrob} A ggplot object for the "Salience" quadrant.}
+\item{p_salience}{(ggplot or rastergrob) A ggplot object for the "Salience" quadrant.}
 
-\item{p_free}{{ggplot or rastergrob} A ggplot object for the "Free" quadrant.}
+\item{p_free}{(ggplot or rastergrob) A ggplot object for the "Free" quadrant.}
 
-\item{p_directed}{{ggplot or rastergrob} A ggplot object for the "Directed" quadrant.}
+\item{p_directed}{(ggplot or rastergrob) A ggplot object for the "Directed" quadrant.}
 
-\item{inner_theme}{{theme, optional} A theme for the inner subplots.
+\item{inner_theme}{(theme, optional) A theme for the inner subplots.
 See \code{default_inner_theme} for more details.}
 
-\item{arrowwidth}{{integer, optional} Controls the thickness of the axis arrows.}
+\item{arrowwidth}{(integer, optional) Controls the thickness of the axis arrows.}
 
-\item{xlab}{{character, optional} Label for the x-axis.}
+\item{xlab}{(character, optional) Label for the x-axis.}
 
-\item{ylab{character, }{optional} Label for the y-axis.}
+\item{ylab(character, }{optional) Label for the y-axis.}
 }
 \value{
 A ggplot object (created via cowplot) which consists of the thinking grid
