@@ -140,7 +140,5 @@ create_test_2x2_plots <- function() {
     p_free <- create_subplot(free_preds, valence_seq, "free")
     p_directed <- create_subplot(directed_preds, valence_seq, "directed")
 
-
-    
     return(list(p_sticky=p_sticky, p_salience=p_salience, p_free=p_free, p_directed=p_directed))
 }
