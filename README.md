@@ -1,6 +1,9 @@
-# qualtrics-thinkgrid
+# ThinkingGrid <img src="man/figures/logo.jpg" align="right" />
 
 An **R** package for analyzing data from "Thinking Grid" style experiments.
+Package that provides users functions to create qualtrics, extract and
+analyze data, and visualize effects related to the Thinking Grid (add
+Irving cite here).
 
 ## Installation
 
@@ -16,13 +19,9 @@ You'll want to grant _repo_ permissions to the token.
 
 ### Step -1. Install the package using R.
 
-In a`terminal` session, set the `GITHUB_PAT` environment variable by
+Open an *R* session, and run the following:
 ```
-$ GITHUB_PAT=YOUR_GENERATED_PAT_HERE
-```
-Next, open an *R* session, and run the following:
-```
-token = "GITHUB_PAT"
+GITHUB_PAT=YOUR_GENERATED_PAT_HERE
 devtools::install_github("a-kulkarn/qualtrics-thinkgrid",
                          subdir = "ThinkingGrid",
                          auth_token = token,
@@ -30,6 +29,11 @@ devtools::install_github("a-kulkarn/qualtrics-thinkgrid",
 ```
 If all went well, you should have successfully downloaded the package source from the repo. 
 
+### Step 0. Install the package using R. (Public)
+
+_TODO: Not implemented while repo is still private._
+
+### Step 1. Install python dependencies.
 This package uses [reticulate](https://rstudio.github.io/reticulate/) to pass data
 from a python backend into **R**. 
 
@@ -56,3 +60,21 @@ ThinkingGrid::install_thinkgrid(YOUR_ENV_NAME_HERE)
 library(ThinkingGrid)
 ```
 We make no guarantees about package conflicts with the existing environment.
+
+## Usage
+
+The exposed functions in this package are listed by:
+```
+getNamespaceExports("ThinkingGrid")
+```
+
+One can access the inline documentation in the usual way. For example:
+```r
+?install_thinkgrid()
+```
+
+## Citation
+
+If you use this package please cite the manuscript below.
+
+**TODO: put citation info here.**
