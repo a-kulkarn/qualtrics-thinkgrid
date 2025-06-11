@@ -167,5 +167,7 @@ thinkgrid_quadrant_plot <- function(p_sticky, p_salience, p_free, p_directed) {
     )
 
     ## Return.
-    return(list(g1, g2))
+    return(
+        cowplot::ggdraw() + cowplot::draw_grob(g2) + cowplot::draw_grob(g1)
+    )
 }
