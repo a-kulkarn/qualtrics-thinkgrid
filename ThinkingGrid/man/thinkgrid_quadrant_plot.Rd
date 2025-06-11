@@ -31,7 +31,7 @@ See \code{default_inner_theme} for more details.}
 
 \item{xlab}{(character, optional) Label for the x-axis.}
 
-\item{ylab(character, }{optional) Label for the y-axis.}
+\item{ylab}{(character, optional) Label for the y-axis.}
 }
 \value{
 A ggplot object (created via cowplot) which consists of the thinking grid
