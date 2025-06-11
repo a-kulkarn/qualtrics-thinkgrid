@@ -178,14 +178,6 @@ read_qualtrics_data <- function(data_file, setup_file){
     return(res)
 }
 
-#' Illustration of test_func function
-#' #' A simple function to test the package.
-#' @export
-test_func <- function(){
-    print("Hello World")
-}
-
-
 #' Illustration of extract_quadrant_depths function
 #' 
 #' @param data_file {character, needed} Path to csv or excel file containing the data.
