@@ -10,22 +10,32 @@ thinkgrid_quadrant_plot(
   p_free,
   p_directed,
   inner_theme = NULL,
-  inner_margin = 20,
   arrowwidth = 1,
   xlab = "Executive Control",
   ylab = "Salience"
 )
 }
 \arguments{
-\item{p_sticky}{{ggplot} A ggplot object for the "Sticky" quadrant.}
+\item{p_sticky}{{ggplot or rastergrob} A ggplot object for the "Sticky" quadrant.}
 
-\item{p_salience}{{ggplot} A ggplot object for the "Salience" quadrant.}
+\item{p_salience}{{ggplot or rastergrob} A ggplot object for the "Salience" quadrant.}
 
-\item{p_free}{{ggplot} A ggplot object for the "Free" quadrant.}
+\item{p_free}{{ggplot or rastergrob} A ggplot object for the "Free" quadrant.}
 
-\item{p_directed}{{ggplot} A ggplot object for the "Directed" quadrant.
+\item{p_directed}{{ggplot or rastergrob} A ggplot object for the "Directed" quadrant.}
 
-#' @return A list containing two grid objects: one with the quadrant background and the plots, and another with the legend.}
+\item{inner_theme}{{theme, optional} A theme for the inner subplots.
+See \code{default_inner_theme} for more details.}
+
+\item{arrowwidth}{{integer, optional} Controls the thickness of the axis arrows.}
+
+\item{xlab}{{string, optional} Label for the x-axis.}
+
+\item{ylab{string, }{optional} Label for the y-axis.}
+}
+\value{
+A ggplot object (created via cowplot) which consists of the thinking grid
+background and the inlayed 2x2 subplots (or images) corresponding to the respective quadrant.
 }
 \description{
 Creates a 2x2 quadrant plot with four ggplot objects.

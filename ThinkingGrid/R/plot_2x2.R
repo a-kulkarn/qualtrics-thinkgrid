@@ -5,7 +5,6 @@
 #'
 #' Creates a 6x6 grid background image for the 2x2 thinkgrid plots.
 #'
-#' @export
 thinkgrid_quadrant_background <- function(arrowwidth = 1,
                                           title = NULL,
                                           xlab = "Executive Control",
@@ -85,6 +84,19 @@ thinkgrid_quadrant_background <- function(arrowwidth = 1,
 ##################################################
 ## Quadrant plot.
 
+#' Illustration of thinkgrid_quadrant_plot function
+#'
+#' The default theme settings for the subplots of a 2x2 quadrant plot. In order to display
+#' correctly, the important properties of the theme are:
+#' 1. The background are set to transparant elements.
+#' 2. The main plot titles and legends are removed. (Axis labels are kept.)
+#' 3. The aspect ratio is set to 1.00.
+#' 4. Margins are adjusted to set the plot within the background squares.
+#' 
+#' @param inner_margin {integer, optional} Controls the padding between the inner subplots.
+#' 
+#' @return A theme object with the settings for the subplots of a 2x2 quadrant plot.
+#'
 #' @export
 default_inner_theme <- function(inner_margin = 20) {
     im <- inner_margin
@@ -110,12 +122,18 @@ default_inner_theme <- function(inner_margin = 20) {
 #' Illustration of thinkgrid_quadrant_plot function
 #'
 #' Creates a 2x2 quadrant plot with four ggplot objects.
-#' @param p_sticky {ggplot} A ggplot object for the "Sticky" quadrant.
-#' @param p_salience {ggplot} A ggplot object for the "Salience" quadrant.
-#' @param p_free {ggplot} A ggplot object for the "Free" quadrant.
-#' @param p_directed {ggplot} A ggplot object for the "Directed" quadrant.
+#' @param p_sticky {ggplot or rastergrob} A ggplot object for the "Sticky" quadrant.
+#' @param p_salience {ggplot or rastergrob} A ggplot object for the "Salience" quadrant.
+#' @param p_free {ggplot or rastergrob} A ggplot object for the "Free" quadrant.
+#' @param p_directed {ggplot or rastergrob} A ggplot object for the "Directed" quadrant.
+#' @param inner_theme {theme, optional} A theme for the inner subplots.
+#' See `default_inner_theme` for more details.
+#' @param arrowwidth {integer, optional} Controls the thickness of the axis arrows.
+#' @param xlab {string, optional} Label for the x-axis.
+#' @param ylab{string, optional} Label for the y-axis.
 #' 
-#' #' @return A list containing two grid objects: one with the quadrant background and the plots, and another with the legend.
+#' @return A ggplot object (created via cowplot) which consists of the thinking grid
+#' background and the inlayed 2x2 subplots (or images) corresponding to the respective quadrant.
 #'
 #' @export
 thinkgrid_quadrant_plot <- function(p_sticky,
@@ -123,7 +141,6 @@ thinkgrid_quadrant_plot <- function(p_sticky,
                                     p_free,
                                     p_directed,
                                     inner_theme = NULL,
-                                    inner_margin = 20,
                                     arrowwidth = 1,
                                     xlab = "Executive Control",
                                     ylab = "Salience"
@@ -137,7 +154,7 @@ thinkgrid_quadrant_plot <- function(p_sticky,
 
     ## Handle options.
     if (is.null(inner_theme)) {
-        inner_theme <- default_inner_theme(inner_margin)
+        inner_theme <- default_inner_theme()
     }
     
     ## Pack arguments.
