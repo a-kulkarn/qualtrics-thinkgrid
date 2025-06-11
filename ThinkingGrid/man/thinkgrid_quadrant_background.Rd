@@ -4,8 +4,13 @@
 \alias{thinkgrid_quadrant_background}
 \title{Illustration of thinkgrid_quadrant_background function}
 \usage{
-thinkgrid_quadrant_background()
+thinkgrid_quadrant_background(
+  arrowwidth = 1,
+  title = NULL,
+  xlab = "Executive Control",
+  ylab = "Salience"
+)
 }
 \description{
-Does something.
+Creates a 6x6 grid background image for the 2x2 thinkgrid plots.
 }

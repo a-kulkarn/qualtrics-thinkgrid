@@ -4,7 +4,17 @@
 \alias{thinkgrid_quadrant_plot}
 \title{Illustration of thinkgrid_quadrant_plot function}
 \usage{
-thinkgrid_quadrant_plot(p_sticky, p_salience, p_free, p_directed)
+thinkgrid_quadrant_plot(
+  p_sticky,
+  p_salience,
+  p_free,
+  p_directed,
+  inner_theme = NULL,
+  inner_margin = 20,
+  arrowwidth = 1,
+  xlab = "Executive Control",
+  ylab = "Salience"
+)
 }
 \arguments{
 \item{p_sticky}{{ggplot} A ggplot object for the "Sticky" quadrant.}

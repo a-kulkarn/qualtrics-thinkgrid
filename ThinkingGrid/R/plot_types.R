@@ -914,6 +914,7 @@ compile_constraints_plot_creator <- function() {
   return(compile_plot_creator(proportioner, framer, aesthetics, geometry))
 }
 create_constraints_plot <- compile_constraints_plot_creator()
+
 ################################################################################
 ## Depth.
 

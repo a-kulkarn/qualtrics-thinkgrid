@@ -3,10 +3,14 @@
 
 #' Illustration of thinkgrid_quadrant_background function
 #'
-#' Does something.
+#' Creates a 6x6 grid background image for the 2x2 thinkgrid plots.
 #'
 #' @export
-thinkgrid_quadrant_background <- function() {
+thinkgrid_quadrant_background <- function(arrowwidth = 1,
+                                          title = NULL,
+                                          xlab = "Executive Control",
+                                          ylab = "Salience"
+                                          ) {
     ## Imports
     unit <- ggplot2::unit
     arrow <- ggplot2::arrow
@@ -14,24 +18,21 @@ thinkgrid_quadrant_background <- function() {
     gpar <- grid::gpar
     unit.c <- grid::unit.c
 
-
-    ## Create 6x6 grid background
-
     ## Create the axis labels and arrows manually.
-    labelx <- grid::textGrob("Executive Control")
+    labelx <- grid::textGrob(xlab)
     red_arrow <- grid::segmentsGrob(
         x0 = unit(0.1, "npc"), y0 = unit(0.5, "npc"),
         x1 = unit(0.9, "npc"), y1 = unit(0.5, "npc"),
         arrow = arrow(length = unit(0.5, "npc"), type = "closed"),
-        gp=gpar(col = "red", linewidth = 3)
+        gp=gpar(col = "red", lwd = arrowwidth)
     )
 
-    labely <- grid::textGrob("Salience", rot = 90)
+    labely <- grid::textGrob(ylab, rot = 90)
     blue_arrow <- grid::segmentsGrob(
         x0 = unit(0.5, "npc"), y0 = unit(0.1, "npc"),
         x1 = unit(0.5, "npc"), y1 = unit(0.9, "npc"),
         arrow = arrow(length = unit(0.5, "npc"), type = "closed"),
-        gp=gpar(col = "navy", linewidth = 3)
+        gp=gpar(col = "navy", lwd = arrowwidth)
     )
 
     ## Prepare the 3x3 sub-grids.
@@ -46,12 +47,8 @@ thinkgrid_quadrant_background <- function() {
         P <- ggplot2::ggplot(sdf, aes(x = x, y = y)) + 
             ggplot2::geom_tile(aes(fill = color), color = "white", linewidth = 5) +
             ggplot2::scale_fill_identity() +
-            ## coord_fixed() +
             ggplot2::theme_void() +
             ggplot2::theme(
-                ## axis.text = element_blank(),
-                ## plot.background = element_rect(fill = "white", color = "white"),
-                ## panel.background = element_rect(fill = "white", color = "white"),
                 plot.background = ggplot2::element_blank(),
                 panel.background = ggplot2::element_blank()
             )
@@ -88,6 +85,27 @@ thinkgrid_quadrant_background <- function() {
 ##################################################
 ## Quadrant plot.
 
+#' @export
+default_inner_theme <- function(inner_margin = 20) {
+    im <- inner_margin
+    
+    ggplot2::theme_minimal() +
+        ggplot2::theme(
+          plot.background = ggplot2::element_blank(),
+          panel.background = ggplot2::element_blank(),      
+          plot.margin = ggplot2::margin(im, im, im, im),
+          legend.position="none",
+          aspect.ratio = 1,
+          axis.title = ggplot2::element_text(size = 14),
+          axis.text = ggplot2::element_text(size = 12),
+          axis.title.y = ggplot2::element_text(margin = ggplot2::margin(r = 10)),
+          panel.grid.major = ggplot2::element_line(color = "gray90", linewidth = 0.2),
+          panel.grid.minor = ggplot2::element_blank(),
+          axis.line = ggplot2::element_line(color = "black", linewidth = 0.5)
+          ) +
+        ggplot2::labs(title = ggplot2::element_blank())
+}
+
 
 #' Illustration of thinkgrid_quadrant_plot function
 #'
@@ -100,18 +118,30 @@ thinkgrid_quadrant_background <- function() {
 #' #' @return A list containing two grid objects: one with the quadrant background and the plots, and another with the legend.
 #'
 #' @export
-thinkgrid_quadrant_plot <- function(p_sticky, p_salience, p_free, p_directed) {
+thinkgrid_quadrant_plot <- function(p_sticky,
+                                    p_salience,
+                                    p_free,
+                                    p_directed,
+                                    inner_theme = NULL,
+                                    inner_margin = 20,
+                                    arrowwidth = 1,
+                                    xlab = "Executive Control",
+                                    ylab = "Salience"
+                                    ) {
+    ## Probably should handle these options at some point.
+    title <- NULL
+
     ## Imports.
     unit <- ggplot2::unit
     unit.c <- grid::unit.c
 
+    ## Handle options.
+    if (is.null(inner_theme)) {
+        inner_theme <- default_inner_theme(inner_margin)
+    }
+    
+    ## Pack arguments.
     plots <- list(p_sticky, p_salience, p_free, p_directed)
-
-    ## if (length(plots) == 1 & is.list(plots)) {
-    ##     plots = plots[[1]]
-    ## } else if (length(plots) == 1 & is.vector(plots)) {
-    ##     plots = plots[1]
-    ## }
 
     ## Extract legend from the first element if possible.
     legend <- tryCatch({
@@ -134,10 +164,7 @@ thinkgrid_quadrant_plot <- function(p_sticky, p_salience, p_free, p_directed) {
                 if (is(x, "rastergrob")) {
                     x
                 } else {
-                    x +
-                        ggplot2::theme(legend.position="none",
-                                       plot.margin = ggplot2::margin(20,20,20,20)
-                                       )
+                    x + inner_theme
                 }
         )
     )
@@ -146,8 +173,11 @@ thinkgrid_quadrant_plot <- function(p_sticky, p_salience, p_free, p_directed) {
     height <- sum(inner$height)
     
     ## Construct the Grob structure and background.
-    img_grob <- thinkgrid_quadrant_background()
-    frame_grob <- thinkgrid_quadrant_background()
+    outer_args <- list(
+        arrowwidth = arrowwidth, title = title, xlab = xlab, ylab = ylab
+    )
+    img_grob <- do.call(thinkgrid_quadrant_background, outer_args)
+    frame_grob <- do.call(thinkgrid_quadrant_background, outer_args)
 
     ## Insert plots into the appropriate place in the Grob structure.
     frame_grob$grobs[[3]] <- inner

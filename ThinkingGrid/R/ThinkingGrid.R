@@ -209,6 +209,9 @@ extract_quadrant_depths <- function(data_file, dc_column = "Deliberate.Constrain
     return(res)
 }
 
-# setup_file <- "test_setup_file/testQuestion.csv"
-# data_file <- "test_qualtrics_output/testQuestionOutput.csv"
-# Qdata <- read_qualtrics_data(data_file, setup_file)
+
+depth <- function() {
+    q <- get_quadrant_6x6(i, j)
+    d <- round(abs(i - 3.5) + abs(j - 3.5))
+    depth_props[q, d] <- depth_props[q, d] + grid[i, j]
+}

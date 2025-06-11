@@ -3,6 +3,7 @@
 export(check_python_available)
 export(create_custom_colorer)
 export(create_tg_animation)
+export(default_inner_theme)
 export(extract_quadrant_depths)
 export(generate_survey)
 export(install_thinkgrid)
