@@ -9,9 +9,9 @@ add_depths(data, dc = "Deliberate.Constraints", ac = "Automatic.Constraints")
 \arguments{
 \item{data}{{data.frame, needed} Data frame containing columns for deliberate constraints and automatic constraints.}
 
-\item{dc_column}{{character, optional} Name of the column containing deliberate constraints. Default is "Deliberate.Constraints".}
+\item{dc}{{character, optional} Name of the column containing deliberate constraints. Default is "Deliberate.Constraints".}
 
-\item{ac_column}{{character, optional} Name of the column containing automatic constraints. Default is "Automatic.Constraints".}
+\item{ac}{{character, optional} Name of the column containing automatic constraints. Default is "Automatic.Constraints".}
 }
 \value{
 data frame containing the quadrant depths. Columns include "sticky", "hybrid", "free", "directed", "total_depth", and "quadrant". The value of quadrant is 1-4, corresponding to top-left, top-right, bottom-left, bottom-right.

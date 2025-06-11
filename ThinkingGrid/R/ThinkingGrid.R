@@ -188,29 +188,6 @@ read_qualtrics_data <- function(data_file, setup_file){
 ################################################################################
 ## Depth calculations.
 
-#' Illustration of extract_quadrant_depths function
-#' 
-#' @param data_file {character, needed} Path to csv or excel file containing the data.
-#' 
-#' @param dc_column {character, optional} Name of the column containing deliberate constraints. Default is "Deliberate.Constraints".
-#' 
-#' @param ac_column {character, optional} Name of the column containing automatic constraints. Default is "Automatic.Constraints".
-#' 
-#' @return data frame containing the quadrant depths. Columns include "Free.Depth", "Directed.Depth", "AffDir.Depth", and "Sticky.Depth".
-#' 
-#' @details 
-#' The function calculates the quadrant depths based on the deliberate and automatic constraints provided in the data file. The quadrant depths are calculated using the taxicab norm. Only one depth will be populated per observation, depending on the quadrant the observation falls into. The remaining three depths will be set to 0.
-#' 
-#' @examples
-#' # Calculate quadrant depths from survey data
-#' data_file <- system.file("extdata", "sample_data.csv", package = "ThinkingGrid")
-#' if (file.exists(data_file)) {
-#'   depth_results <- extract_quadrant_depths(data_file, dc_column = "dc", ac_column = "ac")
-#' }
-#' 
-
-
-
 get_quadrant_6x6 <- function(i, j) {
     (i < 4) && (j < 4) && return(1)
     (i < 4) && (j > 3) && return(2)
@@ -227,9 +204,9 @@ depth_6x6 <- function(x, y) {
 #' 
 #' @param data {data.frame, needed} Data frame containing columns for deliberate constraints and automatic constraints.
 #' 
-#' @param dc_column {character, optional} Name of the column containing deliberate constraints. Default is "Deliberate.Constraints".
+#' @param dc {character, optional} Name of the column containing deliberate constraints. Default is "Deliberate.Constraints".
 #' 
-#' @param ac_column {character, optional} Name of the column containing automatic constraints. Default is "Automatic.Constraints".
+#' @param ac {character, optional} Name of the column containing automatic constraints. Default is "Automatic.Constraints".
 #' 
 #' @return data frame containing the quadrant depths. Columns include "sticky", "hybrid", "free", "directed", "total_depth", and "quadrant". The value of quadrant is 1-4, corresponding to top-left, top-right, bottom-left, bottom-right.
 #' 
