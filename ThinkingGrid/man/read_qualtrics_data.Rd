@@ -26,6 +26,11 @@ Automatic.Constraints: The automatic constraints provided by the participant. (Y
 Illustration of read_qualtrics_data function
 }
 \examples{
-read_qualtrics_data("path/to/qualtrics/output.csv", "path/to/setup/survey_setup_file.csv")
+# Read Qualtrics survey data
+setup_file <- system.file("extdata", "sample_setup_file.csv", package = "ThinkingGrid")
+data_file <- system.file("extdata", "sample_qualtrics_output.csv", package = "ThinkingGrid")
+if (file.exists(setup_file) && file.exists(data_file)) {
+  survey_data <- read_qualtrics_data(data_file, setup_file)
+}
 
 }

@@ -1,0 +1,14 @@
+utils::globalVariables(c(
+  "ac",
+  "constraint",
+  "dc",
+  "depth",
+  "fill_value",
+  "height",
+  "quadrant",
+  "width",
+  "x",
+  "xend",
+  "y",
+  "yend"
+))

@@ -16,7 +16,9 @@ None
 Creates a virtual environment and installs the required python packages
 }
 \examples{
+\dontrun{
 install_thinkgrid()
 install_thinkgrid("new_environment_name")
+}
 
 }

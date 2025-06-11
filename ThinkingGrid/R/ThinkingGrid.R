@@ -1,4 +1,3 @@
-
 # run terminal command in R
 # py_path <- system("python -c 'import os, sys; print(os.path.dirname(sys.executable))'", intern = TRUE)
 # # check if default python installation exists
@@ -34,8 +33,10 @@ matplotlib <- NULL
 #' @return None
 #'
 #' @examples
+#' \dontrun{
 #' install_thinkgrid()
 #' install_thinkgrid("new_environment_name")
+#' }
 #'
 #' @export
 install_thinkgrid <- function(envname = "r-thinkgrid") {
@@ -74,8 +75,10 @@ install_thinkgrid <- function(envname = "r-thinkgrid") {
 #' @return None
 #'
 #' @examples
+#' \dontrun{
 #' check_python_available()
 #' check_python_available(install_if_NA = TRUE)
+#' }
 #'
 #' @export
 check_python_available <- function(install_if_NA = FALSE){
@@ -123,9 +126,13 @@ check_python_available <- function(install_if_NA = FALSE){
 #' @return None
 #'
 #' @examples
-#' generate_survey("path/to/setup/survey_setup_file.csv")
-#' generate_survey("path/to/setup/survey_setup_file.csv", "path/to/output/my_qsf_output")
-#' generate_survey("path/to/setup/survey_setup_file.csv", "path/to/output/my_qsf_output", question_text = FALSE)
+#' # Generate survey from sample setup file
+#' setup_file <- system.file("extdata", "sample_setup_file.csv", package = "ThinkingGrid")
+#' if (file.exists(setup_file)) {
+#'   generate_survey(setup_file, "_temp_output_")
+#'   # Clean up
+#'   file.remove("_temp_output_.qsf")
+#' }
 #' 
 #' @export
 generate_survey <- function(survey_setup_file,
@@ -154,7 +161,12 @@ generate_survey <- function(survey_setup_file,
 #' Automatic.Constraints: The automatic constraints provided by the participant. (Y-axis on the thinking grid)
 #' 
 #' @examples
-#' read_qualtrics_data("path/to/qualtrics/output.csv", "path/to/setup/survey_setup_file.csv")
+#' # Read Qualtrics survey data
+#' setup_file <- system.file("extdata", "sample_setup_file.csv", package = "ThinkingGrid")
+#' data_file <- system.file("extdata", "sample_qualtrics_output.csv", package = "ThinkingGrid")
+#' if (file.exists(setup_file) && file.exists(data_file)) {
+#'   survey_data <- read_qualtrics_data(data_file, setup_file)
+#' }
 #' 
 #' @export
 read_qualtrics_data <- function(data_file, setup_file){
@@ -166,6 +178,8 @@ read_qualtrics_data <- function(data_file, setup_file){
     return(res)
 }
 
+#' Illustration of test_func function
+#' #' A simple function to test the package.
 #' @export
 test_func <- function(){
     print("Hello World")
@@ -186,10 +200,13 @@ test_func <- function(){
 #' The function calculates the quadrant depths based on the deliberate and automatic constraints provided in the data file. The quadrant depths are calculated using the taxicab norm. Only one depth will be populated per observation, depending on the quadrant the observation falls into. The remaining three depths will be set to 0.
 #' 
 #' @examples
-#' extract_quadrant_depths("path/to/data_file.csv")
+#' # Calculate quadrant depths from survey data
+#' data_file <- system.file("extdata", "sample_data.csv", package = "ThinkingGrid")
+#' if (file.exists(data_file)) {
+#'   depth_results <- extract_quadrant_depths(data_file, dc_column = "dc", ac_column = "ac")
+#' }
 #' 
 #' @export
-#' 
 extract_quadrant_depths <- function(data_file, dc_column = "Deliberate.Constraints", ac_column = "Automatic.Constraints") {
     mod <- reticulate::import_from_path("extract_quadrant_depths", path = py_module_path())
     res <- reticulate::py_to_r(mod$extract_quadrant_depths(data_file, dc_column, ac_column))

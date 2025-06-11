@@ -91,15 +91,21 @@ thinkgrid_quadrant_background <- function() {
 
 #' Illustration of thinkgrid_quadrant_plot function
 #'
-#' Does something.
+#' Creates a 2x2 quadrant plot with four ggplot objects.
+#' @param p_sticky {ggplot} A ggplot object for the "Sticky" quadrant.
+#' @param p_salience {ggplot} A ggplot object for the "Salience" quadrant.
+#' @param p_free {ggplot} A ggplot object for the "Free" quadrant.
+#' @param p_directed {ggplot} A ggplot object for the "Directed" quadrant.
+#' 
+#' #' @return A list containing two grid objects: one with the quadrant background and the plots, and another with the legend.
 #'
 #' @export
-thinkgrid_quadrant_plot <- function(...) {
+thinkgrid_quadrant_plot <- function(p_sticky, p_salience, p_free, p_directed) {
     ## Imports.
     unit <- ggplot2::unit
     unit.c <- grid::unit.c
 
-    plots <- list(...)
+    plots <- list(p_sticky, p_salience, p_free, p_directed)
 
     ## if (length(plots) == 1 & is.list(plots)) {
     ##     plots = plots[[1]]

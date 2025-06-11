@@ -207,26 +207,36 @@ check_dataframe <- function(df, dc_col, ac_col, check_condition, condition_col =
 #' For enhanced scaling, the algorithm compresses small values in the color space to give them more visual distinction. This is useful when most responses are in lower ranges.
 #' 
 #' @examples
+#' # Create sample data for testing
+#' set.seed(123)  # For reproducible examples
+#' survey_data <- data.frame(
+#'   Deliberate.Constraints = sample(1:6, 100, replace = TRUE),
+#'   Automatic.Constraints = sample(1:6, 100, replace = TRUE),
+#'   treatment_group = sample(c("A", "B"), 100, replace = TRUE),
+#'   age = sample(20:60, 100, replace = TRUE),
+#'   experience = sample(1:5, 100, replace = TRUE)
+#' )
+#' 
 #' # Basic overall plot
-#' plot_tg(survey_data)
+#' result1 <- plot_tg(survey_data)
 #' 
 #' # Cell-level heatmap with enhanced scaling for small values
-#' plot_tg(survey_data, 
-#'         type = "cells", 
-#'         gradient_scaling = "enhanced",
-#'         enhanced_threshold_pct = 30,
-#'         enhanced_expansion_factor = 2.0)
+#' result2 <- plot_tg(survey_data, 
+#'                    type = "cells", 
+#'                    gradient_scaling = "enhanced",
+#'                    enhanced_threshold_pct = 30,
+#'                    enhanced_expansion_factor = 2.0)
 #' 
 #' # Compare conditions side by side
-#' plot_tg(survey_data, 
-#'         proportion_type = "condition",
-#'         condition_column = "treatment_group",
-#'         comparison_type = "separate")
+#' result3 <- plot_tg(survey_data, 
+#'                    proportion_type = "condition",
+#'                    condition_column = "treatment_group",
+#'                    comparison_type = "separate")
 #' 
 #' # Subset data before analysis
-#' plot_tg(survey_data, 
-#'         subset_condition = "age > 25 & experience >= 2",
-#'         type = "quadrants")
+#' result4 <- plot_tg(survey_data, 
+#'                    subset_condition = "age > 25 & experience >= 2",
+#'                    type = "quadrants")
 #' 
 #' @export
 plot_tg <- function(survey_results,
@@ -412,18 +422,37 @@ plot_tg <- function(survey_results,
 #' The function creates one frame per unique value in condition_column. All frames use the same legend scale (calculated from all conditions) to ensure comparability across frames. Requires the 'gifski' package for GIF creation. Will prompt to install if missing.
 #' 
 #' @examples
-#' # Basic animation across time points
+#' # Create sample data with time points for animation
+#' set.seed(123)  # For reproducible examples
+#' survey_data <- data.frame(
+#'   Deliberate.Constraints = sample(1:6, 300, replace = TRUE),
+#'   Automatic.Constraints = sample(1:6, 300, replace = TRUE),
+#'   time_point = rep(1:3, each = 100),
+#'   week = rep(1:3, each = 100),
+#'   completed_training = sample(c(TRUE, FALSE), 300, replace = TRUE)
+#' )
+#' 
+#' \donttest{
+#' # Basic animation across time points (creates temporary GIF file)
+#' temp_gif1 <- tempfile(fileext = ".gif")
 #' create_tg_animation(survey_data, 
 #'                     condition_column = "time_point",
-#'                     filename = "thinking_grid_over_time.gif")
+#'                     filename = temp_gif1)
+#' # Clean up temporary file
+#' if (file.exists(temp_gif1)) file.remove(temp_gif1)
 #' 
 #' # Enhanced scaling for small differences
+#' temp_gif2 <- tempfile(fileext = ".gif")
 #' create_tg_animation(survey_data,
 #'                     condition_column = "week",
 #'                     gradient_scaling = "enhanced",
 #'                     enhanced_threshold_pct = 40,
 #'                     enhanced_expansion_factor = 2.0,
-#'                     subset_condition = "completed_training == TRUE")
+#'                     subset_condition = "completed_training == TRUE",
+#'                     filename = temp_gif2)
+#' # Clean up temporary file
+#' if (file.exists(temp_gif2)) file.remove(temp_gif2)
+#' }
 #' 
 #' @export
 create_tg_animation <- function(survey_results,

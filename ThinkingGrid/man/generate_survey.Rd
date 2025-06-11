@@ -44,8 +44,12 @@ None
 Illustration of generate_survey function
 }
 \examples{
-generate_survey("path/to/setup/survey_setup_file.csv")
-generate_survey("path/to/setup/survey_setup_file.csv", "path/to/output/my_qsf_output")
-generate_survey("path/to/setup/survey_setup_file.csv", "path/to/output/my_qsf_output", question_text = FALSE)
+# Generate survey from sample setup file
+setup_file <- system.file("extdata", "sample_setup_file.csv", package = "ThinkingGrid")
+if (file.exists(setup_file)) {
+  generate_survey(setup_file, "_temp_output_")
+  # Clean up
+  file.remove("_temp_output_.qsf")
+}
 
 }

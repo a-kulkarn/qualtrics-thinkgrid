@@ -16,7 +16,9 @@ None
 Checks if python is available. Installs python if appropriate flag is set.
 }
 \examples{
+\dontrun{
 check_python_available()
 check_python_available(install_if_NA = TRUE)
+}
 
 }

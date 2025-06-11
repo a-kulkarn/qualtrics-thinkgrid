@@ -36,16 +36,20 @@ Create custom color scale with enhanced visibility for small values
 The enhanced scaling works by compressing small values in the scaled space, which gives them more colors in the final gradient. For example, if your data ranges from 0-20 percent and you use enhanced_threshold_pct = 50 with enhanced_expansion_factor = 2.0, then values 0-10 percent will get twice as much color distinction compared to linear scaling.
 }
 \examples{
+# Create dummy data for testing
+dummy_data <- data.frame(
+  Deliberate.Constraints = sample(1:6, 100, replace = TRUE),
+  Automatic.Constraints = sample(1:6, 100, replace = TRUE)
+)
+
 # Basic usage with linear scaling
 colorer <- create_custom_colorer(gradient_scaling = "linear")
-plot_tg(data, colorer = colorer)
 
 # Enhanced scaling for better small value distinction
-colorer <- create_custom_colorer(
+colorer_enhanced <- create_custom_colorer(
   gradient_scaling = "enhanced",
   enhanced_threshold_pct = 30,
   enhanced_expansion_factor = 2.0
 )
-plot_tg(data, colorer = colorer)
 
 }

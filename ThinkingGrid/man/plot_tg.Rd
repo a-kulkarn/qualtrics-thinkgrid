@@ -39,15 +39,21 @@ plot_tg(
 
 \item{palette}{Color palette name from colorspace package (default: "RdYlBu"). Options: "RdBu", "PiYG", "BrBG", "PuOr", "RdGy".}
 
-\item{colorer}{{function, optional} Function to color the grid cells. Default is NULL.}
+\item{zero_color}{Color for zero values (default: "#FFFFFF").}
+
+\item{gradient_scaling}{Color gradient scaling method: "linear" (default) for standard linear color mapping, or "enhanced" for more color distinction to smaller values.}
+
+\item{enhanced_threshold_pct}{For enhanced scaling: percentage of max value used as threshold (default: 50). Values below this get enhanced distinction.}
 
 \item{enhanced_expansion_factor}{For enhanced scaling: factor controlling how much more distinction small values get (default: 1.5). Higher values mean more distinction.}
 
 \item{x_label}{X-axis label (default: "Directedness").}
 
-\item{y_label}{{character, optional} Label for the y-axis. Default is "Stickiness".}
+\item{y_label}{Y-axis label (default: "Stickiness").}
 
-\item{condition_col}{{character, optional} Required if proportion_type is "condition". Can be passed as a vector. If part of the data frame, pass it as data$condition_col.}
+\item{dc_column}{Name of deliberate constraints column (default: "Deliberate.Constraints").}
+
+\item{ac_column}{Name of automatic constraints column (default: "Automatic.Constraints").}
 
 \item{condition_column}{Column name for grouping conditions. Required when proportion_type = "condition".}
 
@@ -57,7 +63,13 @@ plot_tg(
 
 \item{min_legend}{Minimum legend value. If NULL, calculated from data.}
 
-\item{min_legend}{{numeric, optional} Minimum value for the legend. Default is NULL. If NULL, the minimum value will be calculated from the data.}
+\item{plot_title}{Main plot title.}
+
+\item{legend_title}{Legend title. If NULL, uses "Percentage (percent)" or "Difference (percent)".}
+
+\item{plot_subtitle}{Plot subtitle. For condition plots with comparison_type = "separate", provide a vector with one subtitle per condition.}
+
+\item{subset_condition}{R expression string for subsetting data before analysis. Uses standard R syntax. All referenced columns must exist in survey_results.}
 }
 \value{
 A list containing: plot (ggplot object or list of ggplot objects for 3+ conditions) and prop_data (calculated proportion data).
@@ -71,12 +83,35 @@ The function expects constraint responses on a 1-6 scale where deliberate constr
 For enhanced scaling, the algorithm compresses small values in the color space to give them more visual distinction. This is useful when most responses are in lower ranges.
 }
 \examples{
-plot_tg(relevant_data)
+# Create sample data for testing
+set.seed(123)  # For reproducible examples
+survey_data <- data.frame(
+  Deliberate.Constraints = sample(1:6, 100, replace = TRUE),
+  Automatic.Constraints = sample(1:6, 100, replace = TRUE),
+  treatment_group = sample(c("A", "B"), 100, replace = TRUE),
+  age = sample(20:60, 100, replace = TRUE),
+  experience = sample(1:5, 100, replace = TRUE)
+)
 
-plot_tg(relevant_data, proportion_type = "condition", condition_col = relevant_data$condition_col)
+# Basic overall plot
+result1 <- plot_tg(survey_data)
 
-plot_tg(relevant_data, type = "cells", colorer = my_color_function)
+# Cell-level heatmap with enhanced scaling for small values
+result2 <- plot_tg(survey_data, 
+                   type = "cells", 
+                   gradient_scaling = "enhanced",
+                   enhanced_threshold_pct = 30,
+                   enhanced_expansion_factor = 2.0)
 
-plot_tg(relevant_data, type = "quadrants", x_label = "X-axis label", y_label = "Y-axis label", proportion_type = "condition", condition_col = relevant_data$condition_col, comparison_type = "separate")
+# Compare conditions side by side
+result3 <- plot_tg(survey_data, 
+                   proportion_type = "condition",
+                   condition_column = "treatment_group",
+                   comparison_type = "separate")
+
+# Subset data before analysis
+result4 <- plot_tg(survey_data, 
+                   subset_condition = "age > 25 & experience >= 2",
+                   type = "quadrants")
 
 }
