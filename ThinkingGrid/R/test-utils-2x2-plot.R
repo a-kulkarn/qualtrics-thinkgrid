@@ -1,5 +1,7 @@
 ## New prediction function
 get_predictions <- function(model, newdata) {
+    predict <- stats::predict
+    
   ## Create prediction data frames for both conditions
   pred_data_emotion <- data.frame(
     valence = newdata$valence,
@@ -89,7 +91,7 @@ create_subplot <- function(predictions, valence_seq, measure_name) {
 create_test_2x2_plots <- function() {
     ## Read data and rename variables
     data_path <- system.file("test_data", "test-2x2-data.csv", package = "ThinkingGrid")
-    data <- read.csv(data_path)
+    data <- utils::read.csv(data_path)
 
     ## Create block variable
     data$probe <- as.numeric(as.character(data$probe))
