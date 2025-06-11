@@ -68,11 +68,6 @@ create_subplot <- function(predictions, valence_seq, measure_name) {
       ggplot2::scale_fill_manual(values = values) +
       ggplot2::theme_minimal() +
       ggplot2::theme(
-          plot.background = ggplot2::element_blank(),
-          panel.background = ggplot2::element_blank(),      
-          ## legend.position = "none",
-          plot.margin = ggplot2::margin(5, 5, 5, 5),
-          aspect.ratio = 1,
           axis.title = ggplot2::element_text(size = 14),
           axis.text = ggplot2::element_text(size = 12),
           axis.title.y = ggplot2::element_text(margin = ggplot2::margin(r = 10)),
@@ -81,9 +76,7 @@ create_subplot <- function(predictions, valence_seq, measure_name) {
           axis.line = ggplot2::element_line(color = "black", linewidth = 0.5)
       ) +
       ggplot2::labs(
-          title = ggplot2::element_blank(),
-          y = y_labels[measure_name],
-          x = ggplot2::element_blank()
+          y = y_labels[measure_name]
       )
 }
 
