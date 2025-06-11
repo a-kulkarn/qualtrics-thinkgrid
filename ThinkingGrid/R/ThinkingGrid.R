@@ -200,6 +200,7 @@ read_qualtrics_data <- function(data_file, setup_file){
 #' 
 #' @export
 extract_quadrant_depths <- function(data_file, dc_column = "Deliberate.Constraints", ac_column = "Automatic.Constraints") {
+    ## TODO: XXX: Fix the workflow here.
     mod <- reticulate::import_from_path("extract_quadrant_depths", path = py_module_path())
     res <- reticulate::py_to_r(mod$extract_quadrant_depths(data_file, dc_column, ac_column))
     
