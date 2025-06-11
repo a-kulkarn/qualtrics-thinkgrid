@@ -208,16 +208,7 @@ read_qualtrics_data <- function(data_file, setup_file){
 #'   depth_results <- extract_quadrant_depths(data_file, dc_column = "dc", ac_column = "ac")
 #' }
 #' 
-#' @export
-extract_quadrant_depths <- function(data_file, dc_column = "Deliberate.Constraints", ac_column = "Automatic.Constraints") {
-    ## TODO: XXX: Fix the workflow here.
-    mod <- reticulate::import_from_path("extract_quadrant_depths", path = py_module_path())
-    res <- reticulate::py_to_r(mod$extract_quadrant_depths(data_file, dc_column, ac_column))
-    
-    ## Fixup attributes for comparison's sake.
-    attr(res, "pandas.index") <- NULL
-    return(res)
-}
+
 
 
 get_quadrant_6x6 <- function(i, j) {
@@ -232,19 +223,40 @@ depth_6x6 <- function(x, y) {
     round(abs(x - 3.5) + abs(y - 3.5))
 }
 
+#' Illustration of add_depths function
+#' 
+#' @param data {data.frame, needed} Data frame containing columns for deliberate constraints and automatic constraints.
+#' 
+#' @param dc_column {character, optional} Name of the column containing deliberate constraints. Default is "Deliberate.Constraints".
+#' 
+#' @param ac_column {character, optional} Name of the column containing automatic constraints. Default is "Automatic.Constraints".
+#' 
+#' @return data frame containing the quadrant depths. Columns include "sticky", "hybrid", "free", "directed", "total_depth", and "quadrant". The value of quadrant is 1-4, corresponding to top-left, top-right, bottom-left, bottom-right.
+#' 
+#' @details 
+#' The function calculates the quadrant depths based on the deliberate and automatic constraints provided in the data file. The quadrant depths are calculated using the taxicab norm. Only one depth will be populated per observation, depending on the quadrant the observation falls into. The remaining three depths will be set to 0.
+#' 
+#' @examples
+#' # Calculate quadrant depths from survey data
+#' data_file <- system.file("extdata", "sample_data.csv", package = "ThinkingGrid")
+#' if (file.exists(data_file)) {
+#'   depth_results <- extract_quadrant_depths(data_file, dc_column = "dc", ac_column = "ac")
+#' }
+#' 
 #' @export
 add_depths <- function(data, dc = "Deliberate.Constraints", ac = "Automatic.Constraints") {
-    X <- data[, c(ac, dc)]
+    X <- data[, c(dc, ac)]
     d <- apply(X, 1, function(row) depth_6x6(row[1], row[2]))
     q <- apply(X, 1, function(row) get_quadrant_6x6(row[1], row[2]))
 
     Y <- data.frame(data)
     Y["total_depth"] <- d
     Y["quadrant"] <- q
+    Y["sticky"] <- (q == 2) * d
+    Y["hybrid"] <- (q == 4) * d    
     Y["free"] <- (q == 1) * d
-    Y["directed"] <- (q == 2) * d
-    Y["sticky"] <- (q == 3) * d
-    Y["hybrid"] <- (q == 4) * d
+    Y["directed"] <- (q == 3) * d
+
     
     return(Y)
 }
