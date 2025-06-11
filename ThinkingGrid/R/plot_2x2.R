@@ -2,11 +2,14 @@
 ## Quadrant background.
 
 #' Illustration of thinkgrid_quadrant_background function
-#'
-#' Creates a 6x6 grid background image for the 2x2 thinkgrid plots.
+#' @param arrowwidth {integer, optional} The width of the arrow objects.
+#' @param xlab {character, optional} Label for the x-axis.
+#' @param ylab {character, optional} Label for the y-axis.
+#' 
+#' @return A plot containing the 6x6 grid background image for the 2x2 thinkgrid plots
+#' which also contains the xy-axis arrows and labels.
 #'
 thinkgrid_quadrant_background <- function(arrowwidth = 1,
-                                          title = NULL,
                                           xlab = "Executive Control",
                                           ylab = "Salience"
                                           ) {
@@ -129,8 +132,8 @@ default_inner_theme <- function(inner_margin = 20) {
 #' @param inner_theme {theme, optional} A theme for the inner subplots.
 #' See `default_inner_theme` for more details.
 #' @param arrowwidth {integer, optional} Controls the thickness of the axis arrows.
-#' @param xlab {string, optional} Label for the x-axis.
-#' @param ylab{string, optional} Label for the y-axis.
+#' @param xlab {character, optional} Label for the x-axis.
+#' @param ylab{character, optional} Label for the y-axis.
 #' 
 #' @return A ggplot object (created via cowplot) which consists of the thinking grid
 #' background and the inlayed 2x2 subplots (or images) corresponding to the respective quadrant.
@@ -145,9 +148,6 @@ thinkgrid_quadrant_plot <- function(p_sticky,
                                     xlab = "Executive Control",
                                     ylab = "Salience"
                                     ) {
-    ## Probably should handle these options at some point.
-    title <- NULL
-
     ## Imports.
     unit <- ggplot2::unit
     unit.c <- grid::unit.c
@@ -191,7 +191,7 @@ thinkgrid_quadrant_plot <- function(p_sticky,
     
     ## Construct the Grob structure and background.
     outer_args <- list(
-        arrowwidth = arrowwidth, title = title, xlab = xlab, ylab = ylab
+        arrowwidth = arrowwidth, xlab = xlab, ylab = ylab
     )
     img_grob <- do.call(thinkgrid_quadrant_background, outer_args)
     frame_grob <- do.call(thinkgrid_quadrant_background, outer_args)

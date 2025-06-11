@@ -6,11 +6,21 @@
 \usage{
 thinkgrid_quadrant_background(
   arrowwidth = 1,
-  title = NULL,
   xlab = "Executive Control",
   ylab = "Salience"
 )
 }
+\arguments{
+\item{arrowwidth}{{integer, optional} The width of the arrow objects.}
+
+\item{xlab}{{character, optional} Label for the x-axis.}
+
+\item{ylab}{{character, optional} Label for the y-axis.}
+}
+\value{
+A plot containing the 6x6 grid background image for the 2x2 thinkgrid plots
+which also contains the xy-axis arrows and labels.
+}
 \description{
-Creates a 6x6 grid background image for the 2x2 thinkgrid plots.
+Illustration of thinkgrid_quadrant_background function
 }

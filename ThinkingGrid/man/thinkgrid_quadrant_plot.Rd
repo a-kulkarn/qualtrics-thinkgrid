@@ -29,9 +29,9 @@ See \code{default_inner_theme} for more details.}
 
 \item{arrowwidth}{{integer, optional} Controls the thickness of the axis arrows.}
 
-\item{xlab}{{string, optional} Label for the x-axis.}
+\item{xlab}{{character, optional} Label for the x-axis.}
 
-\item{ylab{string, }{optional} Label for the y-axis.}
+\item{ylab{character, }{optional} Label for the y-axis.}
 }
 \value{
 A ggplot object (created via cowplot) which consists of the thinking grid
