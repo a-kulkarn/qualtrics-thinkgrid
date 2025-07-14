@@ -347,7 +347,7 @@ def generate_survey(
             num_questions_included += 1
 
     # Write file
-    with open("output-survey-{}.qsf".format(partition_number), "w") as F:
+    with open("{}.qsf".format(output_file_name), "w") as F:
         json.dump(survey, F)
 
     # Return a status.

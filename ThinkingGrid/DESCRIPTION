@@ -29,5 +29,8 @@ Suggests:
     png,
     testthat (>= 3.0.0),
     vdiffr,
-    lme4
+    lme4,
+    knitr,
+    rmarkdown
 Config/testthat/edition: 3
+VignetteBuilder: knitr
