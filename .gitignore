@@ -14,3 +14,4 @@ __pycache__/
 .vscode/
 qsf_output_files/
 install-test/github-token
+docs
