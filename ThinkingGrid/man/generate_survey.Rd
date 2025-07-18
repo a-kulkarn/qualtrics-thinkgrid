@@ -49,7 +49,7 @@ setup_file <- system.file("extdata", "sample_setup_file.csv", package = "Thinkin
 if (file.exists(setup_file)) {
   generate_survey(setup_file, "_temp_output_")
   # Clean up
-  file.remove("_temp_output_.qsf")
+  file.remove("_temp_output_-0.qsf")
 }
 
 }

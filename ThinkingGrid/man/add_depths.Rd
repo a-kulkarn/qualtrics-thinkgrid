@@ -26,7 +26,8 @@ The function calculates the quadrant depths based on the deliberate and automati
 # Calculate quadrant depths from survey data
 data_file <- system.file("extdata", "sample_data.csv", package = "ThinkingGrid")
 if (file.exists(data_file)) {
-  depth_results <- extract_quadrant_depths(data_file, dc_column = "dc", ac_column = "ac")
+  data_file <- read.csv(data_file)
+  depth_results <- add_depths(data_file, dc = "dc", ac = "ac")
 }
 
 }

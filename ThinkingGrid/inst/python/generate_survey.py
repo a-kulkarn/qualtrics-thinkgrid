@@ -260,7 +260,7 @@ def add_question_to_survey(survey, question, block_id, participant_id):
 
 def generate_survey(
         survey_setup_file,
-        output_file_name,
+        output_file_name = "output-survey",
         question_text = True,
         limit=5,
         gap=25,
@@ -327,7 +327,7 @@ def generate_survey(
 
         if max_survey_size and num_questions_included >= max_survey_size:
             # Write current batch
-            with open("output-survey-{}.qsf".format(partition_number), "w") as F:
+            with open("{}-{}.qsf".format(output_file_name, partition_number), "w") as F:
                 json.dump(survey, F)
 
             # Reset counters and survey object.
@@ -347,7 +347,7 @@ def generate_survey(
             num_questions_included += 1
 
     # Write file
-    with open("output-survey-{}.qsf".format(partition_number), "w") as F:
+    with open("{}-{}.qsf".format(output_file_name, partition_number), "w") as F:
         json.dump(survey, F)
 
     # Return a status.
@@ -361,7 +361,7 @@ def generate_survey(
 ################################################################################
 
 # if __name__ == "__main__":
-#     fname = "test_data/testQuestion.csv"
+#     fname = "extdata/sample_setup_file.csv"
 #     output = "output_survey"
 
 #     generate_survey(fname, output)

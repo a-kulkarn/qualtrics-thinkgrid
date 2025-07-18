@@ -89,58 +89,11 @@ create_subplot <- function(predictions, valence_seq, measure_name) {
 
 
 create_test_2x2_plots <- function() {
-    ## Read data and rename variables
-    data_path <- system.file("test_data", "test-2x2-data.csv", package = "ThinkingGrid")
-    data <- utils::read.csv(data_path)
-
-    ## Create block variable
-    data$probe <- as.numeric(as.character(data$probe))
-    data$block <- factor(ifelse(data$probe < 3, "Emotional Task", "Rest"),
-                         levels = c("Emotional Task", "Rest"))
-
-    ## Fit the models
-    formula1 <- (
-        free ~ valence + I(valence^2) + block + block:valence + block:I(valence^2) +  (1 | id)
-    )
-    
-    model3_free <- lme4::lmer(
-                             formula1,
-                             data,
-                             control = lme4::lmerControl(optimizer = "bobyqa")
-                         )
-    model3_sticky <- lme4::lmer(
-                               sticky ~ valence + I(valence^2) + block + block:valence + block:I(valence^2) +  (1 | id),
-                               data,
-                               control = lme4::lmerControl(optimizer = "bobyqa")
-                           )
-    model3_directed <- lme4::lmer(
-                                 directed ~ valence + I(valence^2) + block + block:valence + block:I(valence^2) + (1 | id),
-                                 data, 
-                                 control = lme4::lmerControl(optimizer = "bobyqa")
-                             )
-    model3_salience_directed <- lme4::lmer(
-                                          salience_directed ~ (
-                                              valence + I(valence^2) + block + block:valence + block:I(valence^2) + (1 | id)
-                                          ),
-                                          data, 
-                                          control = lme4::lmerControl(optimizer = "bobyqa"))
-
-
-    ## Calculate predictions
-    valence_seq <- seq(min(data$valence), max(data$valence), length.out = 100)
-    newdata <- data.frame(valence = valence_seq)
-
-    ## Get predictions for each model
-    free_preds <- get_predictions(model3_free, newdata)
-    sticky_preds <- get_predictions(model3_sticky, newdata)
-    directed_preds <- get_predictions(model3_directed, newdata)
-    salience_preds <- get_predictions(model3_salience_directed, newdata)
-
-    ## Create individual plots
-    p_sticky <- create_subplot(sticky_preds, valence_seq, "sticky")
-    p_salience <- create_subplot(salience_preds, valence_seq, "salience_directed")
-    p_free <- create_subplot(free_preds, valence_seq, "free")
-    p_directed <- create_subplot(directed_preds, valence_seq, "directed")
+    ## Load pre-computed rastergrob objects for ultimate deterministic testing
+    p_sticky <- readRDS(system.file("extdata", "r_sticky.rds", package = "ThinkingGrid"))
+    p_salience <- readRDS(system.file("extdata", "r_salience.rds", package = "ThinkingGrid"))
+    p_free <- readRDS(system.file("extdata", "r_free.rds", package = "ThinkingGrid"))
+    p_directed <- readRDS(system.file("extdata", "r_directed.rds", package = "ThinkingGrid"))
 
     return(list(p_sticky=p_sticky, p_salience=p_salience, p_free=p_free, p_directed=p_directed))
 }

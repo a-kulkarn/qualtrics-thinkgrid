@@ -152,7 +152,7 @@ default_inner_theme <- function(inner_margin = 20) {
 #'
 #' # However, it is possible to use images as the subplots. IDEALLY, one uses an image
 #' # type without backgrounds such as a PNG.
-#' img_path <- system.file("test_data", "rabbiduck.png", package = "ThinkingGrid")
+#' img_path <- system.file("extdata", "rabbiduck.png", package = "ThinkingGrid")
 #' rabbi <- png::readPNG(img_path)
 #' rabbigrob <- grid::rasterGrob(rabbi)  # Note you must raster the image!
 #'

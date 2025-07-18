@@ -10,5 +10,10 @@ utils::globalVariables(c(
   "x",
   "xend",
   "y",
-  "yend"
+  "yend",
+  "valence",
+  "block",
+  "ci_lower",
+  "ci_upper",
+  "fit"
 ))

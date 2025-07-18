@@ -30,16 +30,20 @@ knitr::kable(setup_data, caption = "Sample Setup File")
 
 The `generate_survey` function can be used to generate the Qualtrics survey. The output will be a `.qsf` file that can be imported into Qualtrics. The `question_text` argument determines whether the question text from the setup file is included in the survey. If set to `TRUE`, the question text will be included; if set to `FALSE`, "Insert text here" will be used as a placeholder for the question text.
 
-```{r generate_survey}
+```{r generate_survey, eval=FALSE}
 generate_survey(
   survey_setup_file = setup_file, # path to the setup file
-  question_text = TRUE, # whether to include question text in the survey
+  output_file_name = "my_thinking_grid_survey", # custom name for the output file
+  question_text = TRUE # whether to include question text in the survey
 )
 
-file.remove("output-survey-0.qsf") # remove the file after generating to avoid clutter
+# Clean up the generated file
+file.remove("my_thinking_grid_survey-0.qsf")
 ```
 
-The above code will generate a file named `qualtrics_survey.qsf` in the current working directory. This file can be imported into Qualtrics to create the survey. Once imported, you can further customize the survey in Qualtrics as needed.
+Note: The above code is not executed during vignette building to avoid creating temporary files. When you run this code interactively, it will generate a file named `my_thinking_grid_survey-0.qsf` in your current working directory.
+
+The above code will generate a file named `my_thinking_grid_survey-0.qsf` in the current working directory. This file can be imported into Qualtrics to create the survey. The filename follows the pattern `{output_file_name}-{partition_number}.qsf`, where the partition number starts from 0. Once imported, you can further customize the survey in Qualtrics as needed.
 
 # Read Qualtrics Survey Data
 
