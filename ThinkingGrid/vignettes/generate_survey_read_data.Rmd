@@ -33,11 +33,10 @@ The `generate_survey` function can be used to generate the Qualtrics survey. The
 ```{r generate_survey}
 generate_survey(
   survey_setup_file = setup_file, # path to the setup file
-  output_file_name = "qualtrics_survey", # name of the output file. Note that the extension (".qsf") will be added automatically.
   question_text = TRUE, # whether to include question text in the survey
 )
 
-file.remove("qualtrics_survey.qsf") # remove the file after generating to avoid clutter
+file.remove("output-survey-0.qsf") # remove the file after generating to avoid clutter
 ```
 
 The above code will generate a file named `qualtrics_survey.qsf` in the current working directory. This file can be imported into Qualtrics to create the survey. Once imported, you can further customize the survey in Qualtrics as needed.
@@ -55,6 +54,8 @@ survey_data <- read_qualtrics_data(
   setup_file = setup_file # path to the setup file
 )
 ```
+
+`read_qualtrics_data` returns a dataframe. `uid` is the unique identifier for each row in the Qualtrics output. `Deliberate.Constraints` and `Automatic.Constraints` columns correspond to the X and Y axes respectively; they span from one to six. Depths within each quadrant are denoted by `Free.Depth`, `Directed.Depth`, `AffDir.Depth`, and `Sticky.Depth`. These four columns represent the bottom-left, bottom-right, top-right, and top-left quadrants respectively. Values in these four columns range from zero to five.
 
 ```{r display_survey_data}
 knitr::kable(survey_data, caption = "Survey Data Read from Qualtrics")

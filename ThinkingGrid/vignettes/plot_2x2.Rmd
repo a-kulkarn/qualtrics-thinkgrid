@@ -1,0 +1,75 @@
+---
+title: "plot_2x2"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{plot_2x2}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 6, 
+  fig.height = 6,
+  warning=FALSE
+)
+```
+
+```{r setup}
+library(ThinkingGrid)
+library(lme4)
+library(sjPlot)
+library(png)
+library(grid)
+
+data_file <- system.file("test_data", "test-2x2-data.csv", package = "ThinkingGrid")
+tg_data <- read.csv(data_file)
+
+knitr::kable(head(tg_data))
+```
+
+The depths can be used as dependent variables in statistical analyses. The `thinkgrid_quadrant_plot` function provides a convenient way to visualize each of these analyses within their individual quadrants. Build the models and and their respective ggplot2 objects similar to the example shown below.
+
+```{r models_and_plots}
+free_model <- lmer(free_correct ~ valence + (1|id), data = tg_data)
+sticky_model <- lmer(sticky_correct ~ valence + (1|id), data = tg_data)
+directed_model <- lmer(directed_correct ~ valence + (1|id), data = tg_data)
+affdir_model <- lmer(salience_directed ~ valence + (1|id), data = tg_data)
+
+free_plot <- plot_model(free_model, type = "pred")
+sticky_plot <- plot_model(sticky_model, type = "pred")
+directed_plot <- plot_model(directed_model, type = "pred")
+affdir_plot <- plot_model(affdir_model, type = "pred")
+```
+
+Once the plots are made, simply pas them to the `thinkigrid_quadrant_plot` function.
+
+```{r thinkgrid_quadrant_plot1}
+combined_plot1 <- thinkgrid_quadrant_plot(
+  p_sticky = sticky_plot,
+  p_salience = affdir_plot,
+  p_free = free_plot,
+  p_directed = directed_plot
+)
+
+combined_plot1
+```
+
+This function also accepts images as arguments, as long as they are transparent (e.g., png). Instead of passing the ggplot2 objects, the png object can be passed instead.
+
+```{r thinkgrid_quadrant_plot2}
+image_file <- system.file("test_data", "rabbiduck.png", package = "ThinkingGrid")
+image <- readPNG(image_file)
+image <- rasterGrob(image)
+
+combined_plot2 <- thinkgrid_quadrant_plot(
+  p_sticky = image,
+  p_salience = affdir_plot,
+  p_free = image,
+  p_directed = directed_plot
+)
+
+combined_plot2
+```
