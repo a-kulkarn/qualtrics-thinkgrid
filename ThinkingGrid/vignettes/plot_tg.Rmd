@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 library(ThinkingGrid)
 library(gridExtra)
 
-data_file <- system.file("test_data", "test-2x2-data.csv", package = "ThinkingGrid")
+data_file <- system.file("extdata", "sample_data.csv", package = "ThinkingGrid")
 tg_data <- read.csv(data_file)
 
 knitr::kable(head(tg_data))

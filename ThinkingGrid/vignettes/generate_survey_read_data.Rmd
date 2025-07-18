@@ -22,7 +22,7 @@ library(ThinkingGrid)
 Generating a Qualtrics survey requires path to setup file that contains the question text and IDs. This file *must* have an `id` column and each entry in this column needs to be unique. In the Qualtrics file, number of questions will be generated equal to the number of rows in the setup file. The `question` column will be used as the question text in the Qualtrics survey and is optional.
 
 ```{r load_setup_file}
-setup_file <- system.file("test_data", "testQuestion.csv", package = "ThinkingGrid")
+setup_file <- system.file("extdata", "sample_setup_file.csv", package = "ThinkingGrid")
 setup_data <- read.csv(setup_file)
 
 knitr::kable(setup_data, caption = "Sample Setup File")
@@ -47,7 +47,7 @@ Once data collection is complete, download the survey data from Qualtrics in CSV
 
 ```{r read_survey_data}
 # Path to the downloaded Qualtrics survey data CSV file
-qualtrics_data_file <- system.file("test_data", "testQuestionOutput.csv", package = "ThinkingGrid")
+qualtrics_data_file <- system.file("extdata", "sample_qualtrics_output.csv", package = "ThinkingGrid")
 
 survey_data <- read_qualtrics_data(
   data_file = qualtrics_data_file, # path to the Qualtrics data file
