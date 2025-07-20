@@ -137,6 +137,6 @@ create_tg_animation(
   dc_column = "dc",
   ac_column = "ac",
   condition_column = "valence",
-  filename = "my_example_gif.gif"
+  filename = "example_gif.gif"
 )
 ```
