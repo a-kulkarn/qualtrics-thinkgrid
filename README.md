@@ -68,6 +68,24 @@ The exposed functions in this package are listed by:
 getNamespaceExports("ThinkingGrid")
 ```
 
+Currently, the package provides functions to:
+- Create a Qualtrics survey for a Thinking Grid experiment ```generate_survey()```
+- Extract data from a Qualtrics survey ```read_qualtrics_data()```
+- Add depths into each of the four quadrants of the Thinking Grid ```add_depths()```
+- Visualize graphs in their respective quadrants of the Thinking Grid ```thinkgrid_quadrant_plot()```
+- Visualize proportion of responses across various cross-sections of the Thinking Grid ```plot_tg()```
+- Create a GIF showing how proportions change across the Thinking Grid over time (or conditions)```create_tg_animation()```
+
+Vignettes are available to help you get started with the package. You can access them by running:
+```r
+browseVignettes("ThinkingGrid")
+```
+
+As of July 18, 2024, the package the following vignettes:
+- **generate_survey_read_data**: A walkthrough of how to generate a Qualtric survey and read the data back into R.
+- **plot_2x2**: A walkthrough of how to visualize the Thinking Grid data in a 2x2 plot and how to extract depths from the quadrants.
+- **plot_tg**: A walkthrough of how to visualize proportions of responses across the Thinking Grid and also how to create an animation of the proportions changing over time or conditions.
+
 One can access the inline documentation in the usual way. For example:
 ```r
 ?install_thinkgrid()

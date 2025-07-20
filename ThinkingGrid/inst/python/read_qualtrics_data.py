@@ -177,7 +177,7 @@ def read_qualtrics_data(outputFileDir, setup):
 ################################################################################
 
 # if __name__ == "__main__":
-#     setup_file = "test_data/testQuestion.csv"
-#     data_file = "test_data/testQuestionOutput.csv"    
+#     setup_file = "extdata/sample_setup_file.csv"
+#     data_file = "extdata/sample_qualtrics_output.csv"    
 #     res = read_qualtrics_data(data_file, setup_file)
 #     print(res)

@@ -1,5 +1,6 @@
 *~
 *.csv
+!ThinkingGrid/inst/extdata/*.csv
 *.gif
 *__pycache__/
 /invoice/*
@@ -15,3 +16,4 @@ __pycache__/
 qsf_output_files/
 install-test/github-token
 docs
+.Rproj.user

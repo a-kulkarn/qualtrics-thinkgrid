@@ -1,8 +1,8 @@
 
 load_dev_test_data <- function() {
-    setup_file <- system.file("test_data", "testQuestion.csv", package = "ThinkingGrid")
-    data_file <- system.file("test_data", "testQuestionOutput.csv", package = "ThinkingGrid")
-    expected_result <- system.file("test_data", "testExpectedResult.csv", package = "ThinkingGrid")
+    setup_file <- system.file("extdata", "sample_setup_file.csv", package = "ThinkingGrid")
+    data_file <- system.file("extdata", "sample_qualtrics_output.csv", package = "ThinkingGrid")
+    expected_result <- system.file("extdata", "sample_qualtrics_extracted.csv", package = "ThinkingGrid")
 
     dc <- sample(1:6, 100, replace = TRUE)
     ac <- sample(1:6, 100, replace = TRUE)

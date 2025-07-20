@@ -22,7 +22,7 @@ library(ThinkingGrid)
 Generating a Qualtrics survey requires path to setup file that contains the question text and IDs. This file *must* have an `id` column and each entry in this column needs to be unique. In the Qualtrics file, number of questions will be generated equal to the number of rows in the setup file. The `question` column will be used as the question text in the Qualtrics survey and is optional.
 
 ```{r load_setup_file}
-setup_file <- system.file("test_data", "testQuestion.csv", package = "ThinkingGrid")
+setup_file <- system.file("extdata", "sample_setup_file.csv", package = "ThinkingGrid")
 setup_data <- read.csv(setup_file)
 
 knitr::kable(setup_data, caption = "Sample Setup File")
@@ -30,17 +30,20 @@ knitr::kable(setup_data, caption = "Sample Setup File")
 
 The `generate_survey` function can be used to generate the Qualtrics survey. The output will be a `.qsf` file that can be imported into Qualtrics. The `question_text` argument determines whether the question text from the setup file is included in the survey. If set to `TRUE`, the question text will be included; if set to `FALSE`, "Insert text here" will be used as a placeholder for the question text.
 
-```{r generate_survey}
+```{r generate_survey, eval=FALSE}
 generate_survey(
   survey_setup_file = setup_file, # path to the setup file
-  output_file_name = "qualtrics_survey", # name of the output file. Note that the extension (".qsf") will be added automatically.
-  question_text = TRUE, # whether to include question text in the survey
+  output_file_name = "my_thinking_grid_survey", # custom name for the output file
+  question_text = TRUE # whether to include question text in the survey
 )
 
-file.remove("qualtrics_survey.qsf") # remove the file after generating to avoid clutter
+# Clean up the generated file
+file.remove("my_thinking_grid_survey-0.qsf")
 ```
 
-The above code will generate a file named `qualtrics_survey.qsf` in the current working directory. This file can be imported into Qualtrics to create the survey. Once imported, you can further customize the survey in Qualtrics as needed.
+Note: The above code is not executed during vignette building to avoid creating temporary files. When you run this code interactively, it will generate a file named `my_thinking_grid_survey-0.qsf` in your current working directory.
+
+The above code will generate a file named `my_thinking_grid_survey-0.qsf` in the current working directory. This file can be imported into Qualtrics to create the survey. The filename follows the pattern `{output_file_name}-{partition_number}.qsf`, where the partition number starts from 0. Once imported, you can further customize the survey in Qualtrics as needed.
 
 # Read Qualtrics Survey Data
 
@@ -48,13 +51,15 @@ Once data collection is complete, download the survey data from Qualtrics in CSV
 
 ```{r read_survey_data}
 # Path to the downloaded Qualtrics survey data CSV file
-qualtrics_data_file <- system.file("test_data", "testQuestionOutput.csv", package = "ThinkingGrid")
+qualtrics_data_file <- system.file("extdata", "sample_qualtrics_output.csv", package = "ThinkingGrid")
 
 survey_data <- read_qualtrics_data(
   data_file = qualtrics_data_file, # path to the Qualtrics data file
   setup_file = setup_file # path to the setup file
 )
 ```
+
+`read_qualtrics_data` returns a dataframe. `uid` is the unique identifier for each row in the Qualtrics output. `Deliberate.Constraints` and `Automatic.Constraints` columns correspond to the X and Y axes respectively; they span from one to six. Depths within each quadrant are denoted by `Free.Depth`, `Directed.Depth`, `AffDir.Depth`, and `Sticky.Depth`. These four columns represent the bottom-left, bottom-right, top-right, and top-left quadrants respectively. Values in these four columns range from zero to five.
 
 ```{r display_survey_data}
 knitr::kable(survey_data, caption = "Survey Data Read from Qualtrics")
