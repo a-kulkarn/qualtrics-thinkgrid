@@ -30,7 +30,7 @@ tg_data <- read.csv(data_file)
 knitr::kable(head(tg_data))
 ```
 
-In case data is already collected, users can automatically add the quadrant depths using the `add_depths` function. the deliberate and automatic constraints column names must be passed to the function and must range from one to six for it to work correctly. 
+In case data is already collected, users can automatically add the quadrant depths using the `add_depths` function. The deliberate and automatic constraints column names must be passed to the function and must range from one to six for it to work correctly. 
 
 ```{r add_depths}
 tg_data <- add_depths(
@@ -42,7 +42,7 @@ tg_data <- add_depths(
 knitr::kable(head(tg_data))
 ```
 
-The depths can be used as dependent variables in statistical analyses. The `thinkgrid_quadrant_plot` function provides a convenient way to visualize each of these analyses within their individual quadrants. Build the models and and their respective ggplot2 objects similar to the example shown below.
+The depths can be used as dependent variables in statistical analyses. The `thinkgrid_quadrant_plot` function provides a convenient way to visualize each of these analyses within their individual quadrants. Build the models and their respective ggplot2 objects similar to the example shown below.
 
 ```{r models_and_plots}
 free_model <- lmer(free ~ valence + (1|id), data = tg_data)
@@ -56,7 +56,7 @@ directed_plot <- plot_model(directed_model, type = "pred")
 salience_plot <- plot_model(salience_model, type = "pred")
 ```
 
-Once the plots are made, simply pas them to the `thinkigrid_quadrant_plot` function.
+Once the plots are made, simply pass them to the `thinkgrid_quadrant_plot` function.
 
 ```{r thinkgrid_quadrant_plot1}
 combined_plot1 <- thinkgrid_quadrant_plot(
