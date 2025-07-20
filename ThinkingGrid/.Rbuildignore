@@ -5,3 +5,16 @@
 ^\.Rproj\.user$
 ^doc$
 ^Meta$
+^README\.Rmd$
+^LICENSE\.md$
+^\.github$
+^\.R~$
+^.*\.R~$
+^\.Rcheck$
+^.*\.Rcheck$
+^\.tar\.gz$
+^.*\.tar\.gz$
+^test_data$
+^inst/test_data$
+^\.gif$
+^.*\.gif$

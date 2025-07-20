@@ -1,16 +1,3 @@
-check_install_package <- function(package_name) {
-    if (!requireNamespace(package_name, quietly = TRUE)) {
-        install_package <- readline(paste(package_name, "is required for this function. Would you like to install it? (y/n): "))
-        if (tolower(install_package) == "y") {
-            install.packages(package_name)
-        } else {
-            stop(paste(package_name, "is required for this function. Please install it before proceeding. Use command install.packages('", package_name, "') to install the package.", sep = ""))
-            return(NULL)
-        }
-    }
-}
-
-
 # Helper function to create grid and calculate proportions
 create_grid <- function(dc, ac, condition_filter = NULL, condition_col = NULL) {
     # Initialize grid
@@ -271,10 +258,6 @@ plot_tg <- function(survey_results,
     ac <- temp$ac
     condition_col <- temp$condition_col
     
-    # Check required packages
-    check_install_package("RColorBrewer")
-    check_install_package("ggplot2")
-    
     ## Options handling.
     ## ------------------------------------
     
@@ -480,10 +463,6 @@ create_tg_animation <- function(survey_results,
                                 height = 800,
                                 sorted_conditions = NULL,
                                 subset_condition = NULL) {
-  
-  check_install_package("RColorBrewer")
-  check_install_package("ggplot2")
-  check_install_package("gifski")
   
   temp <- check_dataframe(survey_results, dc_column, ac_column, TRUE, condition_column, subset_condition)
   dc <- temp$dc

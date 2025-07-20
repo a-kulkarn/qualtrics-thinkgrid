@@ -4,7 +4,7 @@
 \name{ThinkingGrid-package}
 \alias{ThinkingGrid}
 \alias{ThinkingGrid-package}
-\title{ThinkingGrid: Tools for Thinking Grid Style Statistics.}
+\title{ThinkingGrid: Tools for Thinking Grid Style Statistics}
 \description{
 A package providing utility functions for analyzing experiments using the Thinking Grid framework.
 }
