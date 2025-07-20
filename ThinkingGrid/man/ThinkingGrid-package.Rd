@@ -6,7 +6,15 @@
 \alias{ThinkingGrid-package}
 \title{ThinkingGrid: Tools for Thinking Grid Style Statistics}
 \description{
-A package providing utility functions for analyzing experiments using the Thinking Grid framework.
+Provides comprehensive tools for conducting research using the Thinking Grid framework, a psychological measurement approach for understanding deliberate and automatic cognitive constraints. Includes functions for generating Qualtrics surveys, processing survey responses, calculating quadrant depths, and creating various visualization types including heatmaps, animations, and statistical plots.
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/a-kulkarn/qualtrics-thinkgrid}
+  \item Report bugs at \url{https://github.com/a-kulkarn/qualtrics-thinkgrid/issues}
+}
+
 }
 \author{
 \strong{Maintainer}: Vishal Kuvar \email{kuvar001@umn.edu} (\href{https://orcid.org/0000-0002-6799-9790}{ORCID})
