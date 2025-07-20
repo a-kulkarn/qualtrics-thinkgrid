@@ -4,9 +4,9 @@
 \name{ThinkingGrid-package}
 \alias{ThinkingGrid}
 \alias{ThinkingGrid-package}
-\title{ThinkingGrid: What the Package Does (One Line, Title Case)}
+\title{ThinkingGrid: Tools for Thinking Grid Style Statistics.}
 \description{
-A description here.
+A package providing utility functions for analyzing experiments using the Thinking Grid framework.
 }
 \author{
 \strong{Maintainer}: Vishal Kuvar \email{kuvar001@umn.edu} (\href{https://orcid.org/0000-0002-6799-9790}{ORCID})
@@ -18,7 +18,7 @@ Authors:
 
 Other contributors:
 \itemize{
-  \item Irving Zac \email{zci7c@virginia.edu} [contributor, funder]
+  \item Zac Irving \email{zci7c@virginia.edu} [contributor, funder]
 }
 
 }

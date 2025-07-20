@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_2x2.R
 \name{thinkgrid_quadrant_background}
 \alias{thinkgrid_quadrant_background}
-\title{Illustration of thinkgrid_quadrant_background function.}
+\title{Creates the background for ThinkingGrid plots.}
 \usage{
 thinkgrid_quadrant_background(
   arrowwidth = 1,
@@ -22,5 +22,5 @@ A plot containing the 6x6 grid background image for the 2x2 thinkgrid plots
 which also contains the xy-axis arrows and labels.
 }
 \description{
-Illustration of thinkgrid_quadrant_background function.
+Creates the background for ThinkingGrid plots.
 }

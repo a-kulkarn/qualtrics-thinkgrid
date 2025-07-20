@@ -1,7 +1,7 @@
 ##################################################
 ## Quadrant background.
 
-#' Illustration of thinkgrid_quadrant_background function.
+#' Creates the background for ThinkingGrid plots.
 #' @param arrowwidth {integer, optional} The width of the arrow objects.
 #' @param xlab {character, optional} Label for the x-axis.
 #' @param ylab {character, optional} Label for the y-axis.
@@ -87,7 +87,7 @@ thinkgrid_quadrant_background <- function(arrowwidth = 1,
 ##################################################
 ## Quadrant plot.
 
-#' Illustration of thinkgrid_quadrant_plot function
+#' Default theme for subplots in a ThinkingGrid 2x2 quadrant plot.
 #'
 #' The default theme settings for the subplots of a 2x2 quadrant plot. In order to display
 #' correctly, the important properties of the theme are:
@@ -122,7 +122,7 @@ default_inner_theme <- function(inner_margin = 20) {
 }
 
 
-#' Illustration of thinkgrid_quadrant_plot function
+#' Creates a 2x2 plot grid overlayed on top of a ThinkingGrid background.
 #'
 #' Creates a 2x2 quadrant plot with four ggplot objects.
 #' @param p_sticky (ggplot or rastergrob) A ggplot object for the "Sticky" quadrant.

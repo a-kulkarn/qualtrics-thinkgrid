@@ -2,7 +2,7 @@
 % Please edit documentation in R/ThinkingGrid.R
 \name{read_qualtrics_data}
 \alias{read_qualtrics_data}
-\title{Illustration of read_qualtrics_data function}
+\title{Parses Qualtrics survey output into a dataframe.}
 \usage{
 read_qualtrics_data(data_file, setup_file)
 }
@@ -23,7 +23,7 @@ Deliberate.Constraints: The deliberate constraints provided by the participant. 
 Automatic.Constraints: The automatic constraints provided by the participant. (Y-axis on the thinking grid)
 }
 \description{
-Illustration of read_qualtrics_data function
+Parses Qualtrics survey output into a dataframe.
 }
 \examples{
 # Read Qualtrics survey data

@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_2x2.R
 \name{default_inner_theme}
 \alias{default_inner_theme}
-\title{Illustration of thinkgrid_quadrant_plot function}
+\title{Default theme for subplots in a ThinkingGrid 2x2 quadrant plot.}
 \usage{
 default_inner_theme(inner_margin = 20)
 }

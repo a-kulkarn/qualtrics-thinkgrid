@@ -2,7 +2,7 @@
 % Please edit documentation in R/ThinkingGrid.R
 \name{add_depths}
 \alias{add_depths}
-\title{Illustration of add_depths function}
+\title{Adds taxicab metric calculation columns to a dataframe.}
 \usage{
 add_depths(data, dc = "Deliberate.Constraints", ac = "Automatic.Constraints")
 }
@@ -17,7 +17,7 @@ add_depths(data, dc = "Deliberate.Constraints", ac = "Automatic.Constraints")
 data frame containing the quadrant depths. Columns include "sticky", "hybrid", "free", "directed", "total_depth", and "quadrant". The value of quadrant is 1-4, corresponding to top-left, top-right, bottom-left, bottom-right.
 }
 \description{
-Illustration of add_depths function
+Adds taxicab metric calculation columns to a dataframe.
 }
 \details{
 The function calculates the quadrant depths based on the deliberate and automatic constraints provided in the data file. The quadrant depths are calculated using the taxicab norm. Only one depth will be populated per observation, depending on the quadrant the observation falls into. The remaining three depths will be set to 0.

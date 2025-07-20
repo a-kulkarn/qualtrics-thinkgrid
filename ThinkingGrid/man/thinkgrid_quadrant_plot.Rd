@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_2x2.R
 \name{thinkgrid_quadrant_plot}
 \alias{thinkgrid_quadrant_plot}
-\title{Illustration of thinkgrid_quadrant_plot function}
+\title{Creates a 2x2 plot grid overlayed on top of a ThinkingGrid background.}
 \usage{
 thinkgrid_quadrant_plot(
   p_sticky,
