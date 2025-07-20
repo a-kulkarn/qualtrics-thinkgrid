@@ -188,45 +188,63 @@ test_that("plot_tg produces correct plot for condition (difference) with type = 
 ## ------------------------------------------------------------------------
 
 test_that("create_tg_animation is working with type = cells", {
+    temp_gif <- tempfile(fileext = ".gif")
     expect_type(
-        create_tg_animation(mock_tg_frame, condition_column = "id", proportion_type = "overall", type = "cells", filename = "gifs/cells.gif"),
+        create_tg_animation(mock_tg_frame, condition_column = "id", proportion_type = "overall", type = "cells", filename = temp_gif),
         "list"
     )
+    # Cleanup
+    if (file.exists(temp_gif)) file.remove(temp_gif)
 })
 
 test_that("create_tg_animation is working with type = quadrants", {
+    temp_gif <- tempfile(fileext = ".gif")
     expect_type(
-        create_tg_animation(mock_tg_frame, condition_column = "id", proportion_type = "overall", type = "quadrants", filename = "gifs/quadrants.gif"),
+        create_tg_animation(mock_tg_frame, condition_column = "id", proportion_type = "overall", type = "quadrants", filename = temp_gif),
         "list"
     )
+    # Cleanup
+    if (file.exists(temp_gif)) file.remove(temp_gif)
 })
 
 test_that("create_tg_animation is working with type = horizontal", {
+    temp_gif <- tempfile(fileext = ".gif")
     expect_type(
-        create_tg_animation(mock_tg_frame, condition_column = "id", proportion_type = "overall", type = "horizontal", filename = "gifs/horizontal.gif"),
+        create_tg_animation(mock_tg_frame, condition_column = "id", proportion_type = "overall", type = "horizontal", filename = temp_gif),
         "list"
     )
+    # Cleanup
+    if (file.exists(temp_gif)) file.remove(temp_gif)
 })
 
 test_that("create_tg_animation is working with type = vertical", {
+    temp_gif <- tempfile(fileext = ".gif")
     expect_type(
-        create_tg_animation(mock_tg_frame, condition_column = "id", proportion_type = "overall", type = "vertical", filename = "gifs/vertical.gif"),
+        create_tg_animation(mock_tg_frame, condition_column = "id", proportion_type = "overall", type = "vertical", filename = temp_gif),
         "list"
     )
+    # Cleanup
+    if (file.exists(temp_gif)) file.remove(temp_gif)
 })
 
 test_that("create_tg_animation is working with type = constraints", {
+    temp_gif <- tempfile(fileext = ".gif")
     expect_type(
-        create_tg_animation(mock_tg_frame, condition_column = "id", proportion_type = "overall", type = "constraints", filename = "gifs/constraints.gif"),
+        create_tg_animation(mock_tg_frame, condition_column = "id", proportion_type = "overall", type = "constraints", filename = temp_gif),
         "list"
     )
+    # Cleanup
+    if (file.exists(temp_gif)) file.remove(temp_gif)
 })
 
 test_that("create_tg_animation is working with type = depth", {
+    temp_gif <- tempfile(fileext = ".gif")
     expect_type(
-        create_tg_animation(mock_tg_frame, condition_column = "id", proportion_type = "overall", type = "depth", filename = "gifs/depth.gif"),
+        create_tg_animation(mock_tg_frame, condition_column = "id", proportion_type = "overall", type = "depth", filename = temp_gif),
         "list"
     )
+    # Cleanup
+    if (file.exists(temp_gif)) file.remove(temp_gif)
 })
 
 # Global cleanup - remove any QSF files that might have been left behind
