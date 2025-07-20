@@ -33,6 +33,11 @@ If all went well, you should have successfully downloaded the package source fro
 
 _TODO: Not implemented while repo is still private._
 
+Open an *R* session, and run the following:
+```
+devtools::install_github("a-kulkarn/qualtrics-thinkgrid", subdir = "ThinkingGrid")
+```
+
 ### Step 1. Install python dependencies.
 This package uses [reticulate](https://rstudio.github.io/reticulate/) to pass data
 from a python backend into **R**. 
@@ -53,7 +58,7 @@ ThinkingGrid::install_thinkgrid()
 library(ThinkingGrid)
 ```
 
-On the other hand, if you for some reason need everything to run in a common virtual
+On the other hand, if for some reason you need everything to run in a common virtual
 environment, run instead:
 ```
 ThinkingGrid::install_thinkgrid(YOUR_ENV_NAME_HERE)
@@ -81,14 +86,14 @@ Vignettes are available to help you get started with the package. You can access
 browseVignettes("ThinkingGrid")
 ```
 
-As of July 18, 2024, the package the following vignettes:
+As of July 18, 2024, the package has the following vignettes:
 - **generate_survey_read_data**: A walkthrough of how to generate a Qualtric survey and read the data back into R.
 - **plot_2x2**: A walkthrough of how to visualize the Thinking Grid data in a 2x2 plot and how to extract depths from the quadrants.
 - **plot_tg**: A walkthrough of how to visualize proportions of responses across the Thinking Grid and also how to create an animation of the proportions changing over time or conditions.
 
 One can access the inline documentation in the usual way. For example:
 ```r
-?install_thinkgrid()
+?install_thinkgrid
 ```
 
 ## Citation
