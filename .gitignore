@@ -17,3 +17,7 @@ qsf_output_files/
 install-test/github-token
 docs
 .Rproj.user
+ThinkingGrid/..Rcheck/
+ThinkingGrid/ThinkingGrid.Rcheck/
+ThinkingGrid/ThinkingGrid_0.0.0.9000.tar.gz
+ThinkingGrid/inst/test_data/remove_hashes.py
