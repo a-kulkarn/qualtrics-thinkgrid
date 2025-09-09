@@ -2,36 +2,11 @@
 
 An **R** package for analyzing data from "Thinking Grid" style experiments.
 Package that provides users functions to create qualtrics, extract and
-analyze data, and visualize effects related to the Thinking Grid (add
-Irving cite here).
+analyze data, and visualize effects related to the Thinking Grid.
 
 ## Installation
 
-### Step -2. Create the Personal Access Token (PAT)
-
-**NOTICE:** Once the repo goes public, we won't have to worry about the tokens
-
-Follow the instructions at the link below to create a *classic* PAT.
-
-https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic
-
-You'll want to grant _repo_ permissions to the token.
-
-### Step -1. Install the package using R.
-
-Open an *R* session, and run the following:
-```
-GITHUB_PAT <- YOUR_GENERATED_PAT_HERE
-devtools::install_github("a-kulkarn/qualtrics-thinkgrid",
-                         subdir = "ThinkingGrid",
-                         auth_token = GITHUB_PAT,
-                         INSTALL_opts = "--install-tests")
-```
-If all went well, you should have successfully downloaded the package source from the repo. 
-
 ### Step 0. Install the package using R. (Public)
-
-_TODO: Not implemented while repo is still private._
 
 Open an *R* session, and run the following:
 ```
