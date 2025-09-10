@@ -11,7 +11,7 @@ Provides comprehensive tools for conducting research using the Thinking Grid fra
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/a-kulkarn/qualtrics-thinkgrid}
+  \item \url{https://a-kulkarn.github.io/qualtrics-thinkgrid/}
   \item Report bugs at \url{https://github.com/a-kulkarn/qualtrics-thinkgrid/issues}
 }
 
