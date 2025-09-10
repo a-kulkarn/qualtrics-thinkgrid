@@ -34,6 +34,19 @@ jobs:
         with:
           use-public-rspm: true
 
+     # Python for reticulate-based vignettes
+      - id: setup-python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Python deps
+        run: |
+          python -V
+          pip install --upgrade pip
+          pip install pandas
+          
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           working-directory: ThinkingGrid
