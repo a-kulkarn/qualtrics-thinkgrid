@@ -61,7 +61,7 @@ Vignettes are available to help you get started with the package. You can access
 browseVignettes("ThinkingGrid")
 ```
 
-As of July 18, 2024, the package has the following vignettes:
+The package has the following vignettes:
 - **generate_survey_read_data**: A walkthrough of how to generate a Qualtric survey and read the data back into R.
 - **plot_2x2**: A walkthrough of how to visualize the Thinking Grid data in a 2x2 plot and how to extract depths from the quadrants.
 - **plot_tg**: A walkthrough of how to visualize proportions of responses across the Thinking Grid and also how to create an animation of the proportions changing over time or conditions.
