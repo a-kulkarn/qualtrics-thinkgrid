@@ -76,3 +76,22 @@ One can access the inline documentation in the usual way. For example:
 If you use this package please cite the manuscript below.
 
 **TODO: put citation info here.**
+
+## Troubleshooting
+
+### I tried installing the package, but got this error message:
+```
+> devtools::install_github("a-kulkarn/qualtrics-thinkgrid", auth_token = NULL)
+
+Error: Failed to install 'unknown package' from GitHub:
+  HTTP error 401.
+  Bad credentials
+
+  Rate limit remaining: X/60
+  Rate limit reset at: SOME_TIMESTAMP
+
+```
+
+We have observed that a stale value for `GITHUB_PAT` can cause this problem. Removing
+this variable from your environment sometimes fixes the issue. Please refer to
+troubleshooting for `install_github`.
