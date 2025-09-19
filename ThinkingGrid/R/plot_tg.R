@@ -370,6 +370,128 @@ plot_tg <- function(survey_results,
                    plot_title, legend_title, plot_subtitle))
 }
 
+
+##################################################
+## Animation GIFs.
+
+get_calculation_function <- function(type) {
+    ## Define helper functions to calculate proportions based on plot type
+    ## (These correspond to the functions in plot_types.R)
+    
+    ## Calculate proportion values for this subset using the existing create_grid function
+    ## from the parent scope, avoiding code duplication
+    
+    ## Function to calculate quadrant proportions
+    calculate_quadrant_props <- function(grid) {
+        ## Initialize matrix for 2x2 quadrants
+        quadrant_grid <- matrix(0, nrow = 2, ncol = 2) 
+        
+        ## Define quadrants (bottom-left, bottom-right, top-left, top-right)
+        ## Bottom-left
+        quadrant_grid[1,1] <- sum(grid[1:3, 1:3])  ## Bottom-left
+        ## Bottom-right
+        quadrant_grid[1,2] <- sum(grid[1:3, 4:6])  ## Bottom-right
+        ## Top-left
+        quadrant_grid[2,1] <- sum(grid[4:6, 1:3])  ## Top-left
+        ## Top-right
+        quadrant_grid[2,2] <- sum(grid[4:6, 4:6])  ## Top-right
+        
+        return(quadrant_grid)
+    }
+    
+    ## Function to calculate horizontal proportions
+    calculate_horizontal_props <- function(grid) {
+        ## Sum across each row (ac value)
+        row_sums <- rowSums(grid)
+        return(row_sums)
+    }
+    
+    ## Function to calculate vertical proportions
+    calculate_vertical_props <- function(grid) {
+        ## Sum across each column (dc value)
+        col_sums <- colSums(grid)
+        return(col_sums)
+    }
+    
+    ## Function to calculate constraint proportions
+    calculate_constraint_props <- function(grid) {
+        ## Initialize vector for constraint proportions
+        constraint_props <- numeric(11)  ## For constraints 2-12
+        
+        ## Constraint 2 (ac=1, dc=1)
+        constraint_props[1] <- grid[1, 1]
+        ## Constraint 3 (ac=1,dc=2 and ac=2,dc=1)
+        constraint_props[2] <- grid[1, 2] + grid[2, 1]
+        ## Constraint 4 (ac=1,dc=3 and ac=2,dc=2 and ac=3,dc=1)
+        constraint_props[3] <- grid[1, 3] + grid[2, 2] + grid[3, 1]
+        ## Constraint 5 (ac=1,dc=4 and ac=2,dc=3 and ac=3,dc=2 and ac=4,dc=1)
+        constraint_props[4] <- grid[1, 4] + grid[2, 3] + grid[3, 2] + grid[4, 1]
+        ## Constraint 6 (ac=1,dc=5 and ac=2,dc=4 and ac=3,dc=3 and ac=4,dc=2 and ac=5,dc=1)
+        constraint_props[5] <- grid[1, 5] + grid[2, 4] + grid[3, 3] + grid[4, 2] + grid[5, 1]
+        ## Constraint 7 (ac=1,dc=6 and ac=2,dc=5 and ac=3,dc=4 and ac=4,dc=3 and ac=5,dc=2 and ac=6,dc=1)
+        constraint_props[6] <- grid[1, 6] + grid[2, 5] + grid[3, 4] + grid[4, 3] + grid[5, 2] + grid[6, 1]
+        ## Constraint 8 (ac=2,dc=6 and ac=3,dc=5 and ac=4,dc=4 and ac=5,dc=3 and ac=6,dc=2)
+        constraint_props[7] <- grid[2, 6] + grid[3, 5] + grid[4, 4] + grid[5, 3] + grid[6, 2]
+        ## Constraint 9 (ac=3,dc=6 and ac=4,dc=5 and ac=5,dc=4 and ac=6,dc=3)
+        constraint_props[8] <- grid[3, 6] + grid[4, 5] + grid[5, 4] + grid[6, 3]
+        ## Constraint 10 (ac=4,dc=6 and ac=5,dc=5 and ac=6,dc=4)
+        constraint_props[9] <- grid[4, 6] + grid[5, 5] + grid[6, 4] 
+        ## Constraint 11 (ac=5,dc=6 and ac=6,dc=5)
+        constraint_props[10] <- grid[5, 6] + grid[6, 5]
+        
+        ## Constraint 12 (ac=6,dc=6)
+        constraint_props[11] <- grid[6, 6]
+        
+        return(constraint_props)
+    }
+    
+    ## Function to calculate depth proportions
+    calculate_depth_props <- function(grid) { 
+        ## Initialize matrix to store depth proportions for each quadrant (4 quadrants, 5 depths)
+        depth_props <- matrix(0, nrow = 4, ncol = 5)
+        
+        ## Quadrant 1 (bottom-left, dc 1-3, ac 1-3)
+        depth_props[1, 1] <- grid[3, 3]  ## Depth 1 - cell (3,3)
+        depth_props[1, 2] <- grid[3, 2] + grid[2, 3]  ## Depth 2 - cells (3,2) and (2,3)
+        depth_props[1, 3] <- grid[3, 1] + grid[2, 2] + grid[1, 3]  ## Depth 3 - cells (3,1), (2,2), (1,3)
+        depth_props[1, 4] <- grid[2, 1] + grid[1, 2]  ## Depth 4 - cells (2,1) and (1,2)
+        depth_props[1, 5] <- grid[1, 1]  ## Depth 5 - cell (1,1)
+        
+        ## Quadrant 2 (bottom-right, dc 4-6, ac 1-3)
+        depth_props[2, 1] <- grid[3, 4]  ## Depth 1
+        depth_props[2, 2] <- grid[3, 5] + grid[2, 4]  ## Depth 2
+        depth_props[2, 3] <- grid[3, 6] + grid[2, 5] + grid[1, 4]  ## Depth 3
+        depth_props[2, 4] <- grid[2, 6] + grid[1, 5]  ## Depth 4
+        depth_props[2, 5] <- grid[1, 6]  ## Depth 5
+        
+        ## Quadrant 3 (top-left, dc 1-3, ac 4-6)
+        depth_props[3, 1] <- grid[4, 3]  ## Depth 1
+        depth_props[3, 2] <- grid[4, 2] + grid[5, 3]  ## Depth 2
+        depth_props[3, 3] <- grid[4, 1] + grid[5, 2] + grid[6, 3]  ## Depth 3
+        depth_props[3, 4] <- grid[5, 1] + grid[6, 2]  ## Depth 4
+        depth_props[3, 5] <- grid[6, 1]  ## Depth 5
+        ## Quadrant 4 (top-right, dc 4-6, ac 4-6)
+        depth_props[4, 1] <- grid[4, 4]  ## Depth 1
+        depth_props[4, 2] <- grid[4, 5] + grid[5, 4]  ## Depth 2
+        depth_props[4, 3] <- grid[4, 6] + grid[5, 5] + grid[6, 4]  ## Depth 3
+        depth_props[4, 4] <- grid[5, 6] + grid[6, 5]  ## Depth 4
+        depth_props[4, 5] <- grid[6, 6]  ## Depth 5
+        
+        return(depth_props)
+    }
+    
+    ## Select the appropriate calculation function based on plot type
+    calc_function <- switch(type,
+                            "cells" = function(grid) grid,
+                            "quadrants" = calculate_quadrant_props,
+                            "horizontal" = calculate_horizontal_props,
+                            "vertical" = calculate_vertical_props,
+                            "constraints" = calculate_constraint_props,
+                            "depth" = calculate_depth_props)
+
+    return(calc_function)
+}
+
 #' Create Animated Thinking Grid Visualizations
 #' 
 #' Generate animated GIF showing Thinking Grid plots across different conditions or time points.
@@ -520,119 +642,7 @@ create_tg_animation <- function(survey_results,
     ##**************************    
     ## Start Legend Calculation.
     
-    ## Define helper functions to calculate proportions based on plot type
-    ## (These correspond to the functions in plot_types.R)
-    
-    ## Calculate proportion values for this subset using the existing create_grid function
-    ## from the parent scope, avoiding code duplication
-    
-    ## Function to calculate quadrant proportions
-    calculate_quadrant_props <- function(grid) {
-        ## Initialize matrix for 2x2 quadrants
-        quadrant_grid <- matrix(0, nrow = 2, ncol = 2) 
-        
-        ## Define quadrants (bottom-left, bottom-right, top-left, top-right)
-        ## Bottom-left
-        quadrant_grid[1,1] <- sum(grid[1:3, 1:3])  ## Bottom-left
-        ## Bottom-right
-        quadrant_grid[1,2] <- sum(grid[1:3, 4:6])  ## Bottom-right
-        ## Top-left
-        quadrant_grid[2,1] <- sum(grid[4:6, 1:3])  ## Top-left
-        ## Top-right
-        quadrant_grid[2,2] <- sum(grid[4:6, 4:6])  ## Top-right
-        
-        return(quadrant_grid)
-    }
-    
-    ## Function to calculate horizontal proportions
-    calculate_horizontal_props <- function(grid) {
-        ## Sum across each row (ac value)
-        row_sums <- rowSums(grid)
-        return(row_sums)
-    }
-    
-    ## Function to calculate vertical proportions
-    calculate_vertical_props <- function(grid) {
-        ## Sum across each column (dc value)
-        col_sums <- colSums(grid)
-        return(col_sums)
-    }
-    
-    ## Function to calculate constraint proportions
-    calculate_constraint_props <- function(grid) {
-        ## Initialize vector for constraint proportions
-        constraint_props <- numeric(11)  ## For constraints 2-12
-        
-        ## Constraint 2 (ac=1, dc=1)
-        constraint_props[1] <- grid[1, 1]
-        ## Constraint 3 (ac=1,dc=2 and ac=2,dc=1)
-        constraint_props[2] <- grid[1, 2] + grid[2, 1]
-        ## Constraint 4 (ac=1,dc=3 and ac=2,dc=2 and ac=3,dc=1)
-        constraint_props[3] <- grid[1, 3] + grid[2, 2] + grid[3, 1]
-        ## Constraint 5 (ac=1,dc=4 and ac=2,dc=3 and ac=3,dc=2 and ac=4,dc=1)
-        constraint_props[4] <- grid[1, 4] + grid[2, 3] + grid[3, 2] + grid[4, 1]
-        ## Constraint 6 (ac=1,dc=5 and ac=2,dc=4 and ac=3,dc=3 and ac=4,dc=2 and ac=5,dc=1)
-        constraint_props[5] <- grid[1, 5] + grid[2, 4] + grid[3, 3] + grid[4, 2] + grid[5, 1]
-        ## Constraint 7 (ac=1,dc=6 and ac=2,dc=5 and ac=3,dc=4 and ac=4,dc=3 and ac=5,dc=2 and ac=6,dc=1)
-        constraint_props[6] <- grid[1, 6] + grid[2, 5] + grid[3, 4] + grid[4, 3] + grid[5, 2] + grid[6, 1]
-        ## Constraint 8 (ac=2,dc=6 and ac=3,dc=5 and ac=4,dc=4 and ac=5,dc=3 and ac=6,dc=2)
-        constraint_props[7] <- grid[2, 6] + grid[3, 5] + grid[4, 4] + grid[5, 3] + grid[6, 2]
-        ## Constraint 9 (ac=3,dc=6 and ac=4,dc=5 and ac=5,dc=4 and ac=6,dc=3)
-        constraint_props[8] <- grid[3, 6] + grid[4, 5] + grid[5, 4] + grid[6, 3]
-        ## Constraint 10 (ac=4,dc=6 and ac=5,dc=5 and ac=6,dc=4)
-        constraint_props[9] <- grid[4, 6] + grid[5, 5] + grid[6, 4] 
-        ## Constraint 11 (ac=5,dc=6 and ac=6,dc=5)
-        constraint_props[10] <- grid[5, 6] + grid[6, 5]
-        
-        ## Constraint 12 (ac=6,dc=6)
-        constraint_props[11] <- grid[6, 6]
-        
-        return(constraint_props)
-    }
-    
-    ## Function to calculate depth proportions
-    calculate_depth_props <- function(grid) { 
-        ## Initialize matrix to store depth proportions for each quadrant (4 quadrants, 5 depths)
-        depth_props <- matrix(0, nrow = 4, ncol = 5)
-        
-        ## Quadrant 1 (bottom-left, dc 1-3, ac 1-3)
-        depth_props[1, 1] <- grid[3, 3]  ## Depth 1 - cell (3,3)
-        depth_props[1, 2] <- grid[3, 2] + grid[2, 3]  ## Depth 2 - cells (3,2) and (2,3)
-        depth_props[1, 3] <- grid[3, 1] + grid[2, 2] + grid[1, 3]  ## Depth 3 - cells (3,1), (2,2), (1,3)
-        depth_props[1, 4] <- grid[2, 1] + grid[1, 2]  ## Depth 4 - cells (2,1) and (1,2)
-        depth_props[1, 5] <- grid[1, 1]  ## Depth 5 - cell (1,1)
-        
-        ## Quadrant 2 (bottom-right, dc 4-6, ac 1-3)
-        depth_props[2, 1] <- grid[3, 4]  ## Depth 1
-        depth_props[2, 2] <- grid[3, 5] + grid[2, 4]  ## Depth 2
-        depth_props[2, 3] <- grid[3, 6] + grid[2, 5] + grid[1, 4]  ## Depth 3
-        depth_props[2, 4] <- grid[2, 6] + grid[1, 5]  ## Depth 4
-        depth_props[2, 5] <- grid[1, 6]  ## Depth 5
-        
-        ## Quadrant 3 (top-left, dc 1-3, ac 4-6)
-        depth_props[3, 1] <- grid[4, 3]  ## Depth 1
-        depth_props[3, 2] <- grid[4, 2] + grid[5, 3]  ## Depth 2
-        depth_props[3, 3] <- grid[4, 1] + grid[5, 2] + grid[6, 3]  ## Depth 3
-        depth_props[3, 4] <- grid[5, 1] + grid[6, 2]  ## Depth 4
-        depth_props[3, 5] <- grid[6, 1]  ## Depth 5
-        ## Quadrant 4 (top-right, dc 4-6, ac 4-6)
-        depth_props[4, 1] <- grid[4, 4]  ## Depth 1
-        depth_props[4, 2] <- grid[4, 5] + grid[5, 4]  ## Depth 2
-        depth_props[4, 3] <- grid[4, 6] + grid[5, 5] + grid[6, 4]  ## Depth 3
-        depth_props[4, 4] <- grid[5, 6] + grid[6, 5]  ## Depth 4
-        depth_props[4, 5] <- grid[6, 6]  ## Depth 5
-        
-        return(depth_props)
-    }
-    
-    ## Select the appropriate calculation function based on plot type
-    calc_function <- switch(type,
-                            "cells" = function(grid) grid,
-                            "quadrants" = calculate_quadrant_props,
-                            "horizontal" = calculate_horizontal_props,
-                            "vertical" = calculate_vertical_props,
-                            "constraints" = calculate_constraint_props,
-                            "depth" = calculate_depth_props)
+    calc_function <- get_calculation_function(type)
     
     ## If legend limits are not provided, calculate them from all conditions
     if(is.null(max_legend) || is.null(min_legend)) {
@@ -665,7 +675,7 @@ create_tg_animation <- function(survey_results,
 
     ##**************************
     ## Plot Creation.
-    
+
     ## Generate individual plots for each condition
     plot_list <- list()
     for(i in seq_along(ordered_conditions)) {
@@ -679,22 +689,16 @@ create_tg_animation <- function(survey_results,
             Automatic.Constraints = df_subset$ac
         )
 
-        ## TODO: XXX: The split up logic for the sub/title creation is very stupid.
-        ## Should be combined and simplifield.
-        
-        ## Determine subtitle for this condition
-        current_subtitle <- NULL
-        if (!is.null(plot_subtitle)) {
-            if (length(plot_subtitle) == 1) {
-                ## Use the same subtitle for all conditions
-                current_subtitle <- plot_subtitle
-                message(paste("Condition '", cond, "' uses subtitle: '", current_subtitle, "'", sep=""))
+        ## Add a subtitle based on either user input or the condition column.
+        current_subtitle <- (
+            if (is.null(plot_subtitle)) {
+                paste(condition_column, ": ", cond)  
+            } else if (length(plot_subtitle) == 1) {
+                plot_subtitle
             } else {
-                ## Use condition-specific subtitle (by index, not name)
-                current_subtitle <- plot_subtitle[i]
-                message(paste("Condition '", cond, "' uses subtitle: '", current_subtitle, "'", sep=""))
+                plot_subtitle[i]
             }
-        }
+        )
         
         ## Create plot using plot_tg function
         p <- plot_tg(df_subset_relabelled, 
@@ -708,27 +712,7 @@ create_tg_animation <- function(survey_results,
                      plot_title = plot_title,
                      legend_title = legend_title,
                      plot_subtitle = current_subtitle)
-        
-        ## Only add the "Condition: X" title if no subtitle is provided
-        if (is.null(current_subtitle)) {
-            ## Create a combined title with user's plot_title and condition information
-            combined_title <- if (!is.null(plot_title)) {
-                                  paste0(plot_title, "\nCondition: ", cond)
-                              } else {
-                                  paste("Condition:", cond)
-                              }
-            
-            ## Set the title only if we're not using user-provided subtitles
-            p$plot <- p$plot + 
-                ggplot2::ggtitle(combined_title) +
-                ggplot2::theme(plot.title = ggplot2::element_text(size = 16, face = "bold", hjust = 0.5))
-        } else if (!is.null(plot_title)) {
-            ## If we have a subtitle and a plot_title, just set the plot_title
-            p$plot <- p$plot + 
-                ggplot2::ggtitle(plot_title) +
-                ggplot2::theme(plot.title = ggplot2::element_text(size = 16, face = "bold", hjust = 0.5))
-        }
-        
+
         ## Add to list
         plot_list[[as.character(cond)]] <- p$plot
     }
