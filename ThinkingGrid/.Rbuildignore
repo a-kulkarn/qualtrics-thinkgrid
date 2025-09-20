@@ -18,3 +18,11 @@
 ^inst/test_data$
 ^\.gif$
 ^.*\.gif$
+^\.DS_Store$
+^.*\.DS_Store$
+^\.Rhistory$
+^.*\.Rhistory$
+^__pycache__$
+^.*__pycache__$
+^.*\.pyc$
+^.*~$
