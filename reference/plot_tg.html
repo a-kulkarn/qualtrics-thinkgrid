@@ -170,8 +170,8 @@
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Create sample data for testing</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span>  <span class="co"># For reproducible examples</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## Create sample data for testing</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span>  <span class="co">## For reproducible examples</span></span></span>
 <span class="r-in"><span><span class="va">survey_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  Deliberate.Constraints <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span>, <span class="fl">100</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  Automatic.Constraints <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span>, <span class="fl">100</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span></span>
@@ -180,23 +180,23 @@
 <span class="r-in"><span>  experience <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">100</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Basic overall plot</span></span></span>
+<span class="r-in"><span><span class="co">## Basic overall plot</span></span></span>
 <span class="r-in"><span><span class="va">result1</span> <span class="op">&lt;-</span> <span class="fu">plot_tg</span><span class="op">(</span><span class="va">survey_data</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Cell-level heatmap with enhanced scaling for small values</span></span></span>
+<span class="r-in"><span><span class="co">## Cell-level heatmap with enhanced scaling for small values</span></span></span>
 <span class="r-in"><span><span class="va">result2</span> <span class="op">&lt;-</span> <span class="fu">plot_tg</span><span class="op">(</span><span class="va">survey_data</span>, </span></span>
 <span class="r-in"><span>                   type <span class="op">=</span> <span class="st">"cells"</span>, </span></span>
 <span class="r-in"><span>                   gradient_scaling <span class="op">=</span> <span class="st">"enhanced"</span>,</span></span>
 <span class="r-in"><span>                   enhanced_threshold_pct <span class="op">=</span> <span class="fl">30</span>,</span></span>
 <span class="r-in"><span>                   enhanced_expansion_factor <span class="op">=</span> <span class="fl">2.0</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Compare conditions side by side</span></span></span>
+<span class="r-in"><span><span class="co">## Compare conditions side by side</span></span></span>
 <span class="r-in"><span><span class="va">result3</span> <span class="op">&lt;-</span> <span class="fu">plot_tg</span><span class="op">(</span><span class="va">survey_data</span>, </span></span>
 <span class="r-in"><span>                   proportion_type <span class="op">=</span> <span class="st">"condition"</span>,</span></span>
 <span class="r-in"><span>                   condition_column <span class="op">=</span> <span class="st">"treatment_group"</span>,</span></span>
 <span class="r-in"><span>                   comparison_type <span class="op">=</span> <span class="st">"separate"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Subset data before analysis</span></span></span>
+<span class="r-in"><span><span class="co">## Subset data before analysis</span></span></span>
 <span class="r-in"><span><span class="va">result4</span> <span class="op">&lt;-</span> <span class="fu">plot_tg</span><span class="op">(</span><span class="va">survey_data</span>, </span></span>
 <span class="r-in"><span>                   subset_condition <span class="op">=</span> <span class="st">"age &gt; 25 &amp; experience &gt;= 2"</span>,</span></span>
 <span class="r-in"><span>                   type <span class="op">=</span> <span class="st">"quadrants"</span><span class="op">)</span></span></span>
