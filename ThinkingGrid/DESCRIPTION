@@ -1,6 +1,8 @@
 Package: ThinkingGrid
 Title: Tools for Thinking Grid Style Statistics
 Version: 0.0.0.9000
+Author: Avinash Kulkarni [aut], Vishal Kuvar [aut, cre], Zac Irving [ctb, fnd]
+Maintainer: Vishal Kuvar <kuvar001@umn.edu>
 Authors@R:
     c(
       person("Avinash", "Kulkarni", , "avi.kulkarni.2.71@gmail.com", role = c("aut")),
