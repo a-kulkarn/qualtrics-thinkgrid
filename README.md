@@ -6,10 +6,17 @@ analyze data, and visualize effects related to the Thinking Grid.
 
 ## Installation
 
-### Step 0. Install the package using R. (Public)
+### Step 0. Install the package using R.
 
+#### From CRAN (Recommended)
 Open an *R* session, and run the following:
+```r
+install.packages("ThinkingGrid")
 ```
+
+#### Development Version (GitHub)
+To install the development version:
+```r
 devtools::install_github("a-kulkarn/qualtrics-thinkgrid", subdir = "ThinkingGrid")
 ```
 
