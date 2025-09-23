@@ -1,8 +1,6 @@
 Package: ThinkingGrid
 Title: Tools for Thinking Grid Statistics
 Version: 0.1.0
-Author: Avinash Kulkarni [aut, cph], Vishal Kuvar [aut, cre], Zac Irving [ctb, fnd]
-Maintainer: Vishal Kuvar <kuvar001@umn.edu>
 Authors@R:
     c(
       person("Avinash", "Kulkarni", , "avi.kulkarni.2.71@gmail.com", role = c("aut", "cph")),
@@ -10,6 +8,7 @@ Authors@R:
              comment = c(ORCID = "0000-0002-6799-9790")),
       person( "Zac", "Irving", , "zci7c@virginia.edu", role = c("ctb", "fnd"))
     )
+Depends: R (>= 3.5.0)
 Description: Provides comprehensive tools for conducting research using the Thinking Grid
     framework, a psychological measurement approach for understanding deliberate and
     automatic cognitive constraints. Includes functions for generating 'Qualtrics'
