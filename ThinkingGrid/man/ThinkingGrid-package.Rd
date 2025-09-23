@@ -17,11 +17,11 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Vishal Kuvar \email{kuvar001@umn.edu} (\href{https://orcid.org/0000-0002-6799-9790}{ORCID})
+\strong{Maintainer}: Avinash Kulkarni \email{avi.kulkarni.2.71@gmail.com} [copyright holder]
 
 Authors:
 \itemize{
-  \item Avinash Kulkarni \email{avi.kulkarni.2.71@gmail.com} [copyright holder]
+  \item Vishal Kuvar \email{kuvar001@umn.edu} (\href{https://orcid.org/0000-0002-6799-9790}{ORCID})
 }
 
 Other contributors:
