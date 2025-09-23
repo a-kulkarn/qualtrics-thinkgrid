@@ -100,6 +100,20 @@ thinkgrid_quadrant_background <- function(arrowwidth = 1,
 #' 
 #' @return A theme object with the settings for the subplots of a 2x2 quadrant plot.
 #'
+#' @examples
+#' plots <- ThinkingGrid:::create_test_2x2_plots()
+#' p1 <- plots[[1]]
+#' p2 <- plots[[2]]
+#' p3 <- plots[[3]]
+#' p4 <- plots[[4]]
+#'
+#' # Here we can customize the theme.
+#' itheme <- default_inner_theme(inner_margin = 10)
+#'
+#' # This is the usual syntax.
+#' thinkgrid_quadrant_plot(p1, p2, p3, p4, inner_theme = itheme)
+#' 
+#' 
 #' @export
 default_inner_theme <- function(inner_margin = 20) {
     im <- inner_margin
@@ -146,16 +160,19 @@ default_inner_theme <- function(inner_margin = 20) {
 #' p2 <- plots[[2]]
 #' p3 <- plots[[3]]
 #' p4 <- plots[[4]]
-#' 
+#'
 #' # This is the usual syntax.
 #' thinkgrid_quadrant_plot(p1, p2, p3, p4)
 #'
+#' @examplesIf requireNamespace("png", quietly = TRUE)
 #' # However, it is possible to use images as the subplots. IDEALLY, one uses an image
 #' # type without backgrounds such as a PNG.
 #' img_path <- system.file("extdata", "rabbiduck.png", package = "ThinkingGrid")
 #' rabbi <- png::readPNG(img_path)
 #' rabbigrob <- grid::rasterGrob(rabbi)  # Note you must raster the image!
 #'
+#' # Create sample plots for demonstration
+#' plots <- ThinkingGrid:::create_test_2x2_plots()
 #' thinkgrid_quadrant_plot(p1, p2, p3, rabbigrob)
 #'
 #' @export
