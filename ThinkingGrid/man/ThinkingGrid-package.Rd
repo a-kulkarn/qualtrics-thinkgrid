@@ -6,7 +6,7 @@
 \alias{ThinkingGrid-package}
 \title{ThinkingGrid: Tools for Thinking Grid Statistics}
 \description{
-Provides comprehensive tools for conducting research using the Thinking Grid framework, a psychological measurement approach for understanding deliberate and automatic cognitive constraints. Includes functions for generating Qualtrics surveys, processing survey responses, calculating quadrant depths, and creating various visualization types including heatmaps, animations, and statistical plots.
+Provides comprehensive tools for conducting research using the Thinking Grid framework, a psychological measurement approach for understanding deliberate and automatic cognitive constraints. Includes functions for generating 'Qualtrics' surveys, processing survey responses, calculating quadrant depths, and creating various visualization types including heatmaps, animations, and statistical plots.
 }
 \seealso{
 Useful links:
