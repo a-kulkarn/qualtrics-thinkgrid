@@ -1,7 +1,7 @@
 # ThinkingGrid <img src="ThinkingGrid/man/figures/logo.jpg" align="right" />
 
 An **R** package for analyzing data from "Thinking Grid" style experiments.
-Package that provides users functions to create qualtrics, extract and
+This package provides functions to create Qualtrics surveys, extract and
 analyze data, and visualize effects related to the Thinking Grid.
 
 ## Installation
@@ -31,7 +31,7 @@ library(ThinkingGrid)
 reticulate::install_python(version = "3.13:latest")
 ```
 
-_WARNING:_ Our package does not work with python <=3.10. We can look into the issue on request.
+_WARNING:_ This package requires Python 3.11 or higher.
 
 #### (b). Setting up the virtual environment.
 If you do not care about which python virtual environment you are using, run
@@ -69,7 +69,7 @@ browseVignettes("ThinkingGrid")
 ```
 
 The package has the following vignettes:
-- **generate_survey_read_data**: A walkthrough of how to generate a Qualtric survey and read the data back into R.
+- **generate_survey_read_data**: A walkthrough of how to generate a Qualtrics survey and read the data back into R.
 - **plot_2x2**: A walkthrough of how to visualize the Thinking Grid data in a 2x2 plot and how to extract depths from the quadrants.
 - **plot_tg**: A walkthrough of how to visualize proportions of responses across the Thinking Grid and also how to create an animation of the proportions changing over time or conditions.
 
@@ -78,17 +78,12 @@ One can access the inline documentation in the usual way. For example:
 ?install_thinkgrid
 ```
 
-## Citation
-
-If you use this package please cite the manuscript below.
-
-**TODO: put citation info here.**
 
 ## Troubleshooting
 
-### I tried installing the package, but got this error message:
+### I tried installing the developer version of this package, but got this error message:
 ```
-> devtools::install_github("a-kulkarn/qualtrics-thinkgrid", auth_token = NULL)
+> devtools::install_github("a-kulkarn/qualtrics-thinkgrid", subdir = "ThinkingGrid")
 
 Error: Failed to install 'unknown package' from GitHub:
   HTTP error 401.
