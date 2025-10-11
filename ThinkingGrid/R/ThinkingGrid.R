@@ -28,11 +28,14 @@ generate_survey_mod <- NULL
 read_qualtrics_data_mod <- NULL
 
 .onLoad <- function(libname, pkgname) {
-    # Use delay_load = TRUE for all Python modules
-    # This defers loading until first use, allowing reticulate to configure Python first
+    reticulate::py_require("matplotlib")
+    reticulate::py_require("scikit-image")
+    reticulate::py_require("pandas")
 
     # Import Python modules with delay_load = TRUE
     pandas <<- reticulate::import("pandas", delay_load = TRUE)
+    pandas <<- reticulate::import("skimage", delay_load = TRUE)
+    pandas <<- reticulate::import("matplotlib", delay_load = TRUE)
 
     # Import custom Python modules from package
     py_path <- system.file("python", package = pkgname)
@@ -50,35 +53,6 @@ read_qualtrics_data_mod <- NULL
     }
 }
 
-
-#' Checks status of Python dependency.
-#'
-#' Checks if python is available. Installs python if appropriate flag is set.
-#'
-#' @param install_if_NA {logical, optional} If TRUE, installs python 3.13 and required packages. Default is FALSE.
-#'
-#' @return None
-#'
-#' @examples
-#' \dontrun{
-#' check_python_available()
-#' check_python_available(install_if_NA = TRUE)
-#' }
-#'
-#' @export
-check_python_available <- function(install_if_NA = FALSE){
-    config <- reticulate::py_discover_config()
-    if(!is.null(config$python)){
-        py_ver <- config$version
-        message(paste("Python version", py_ver, "is available at:", config$python))
-    } else {
-        message("Python is not available")
-        if(install_if_NA == TRUE){
-            reticulate::install_python(version = "3.13:latest",)
-            install_thinkgrid("r-reticulate")
-        }
-    }
-}
 
 ################################################################################
 ## Survey functions.

@@ -1,4 +1,4 @@
-# ThinkingGrid 0.0.0.9000
+# ThinkingGrid 0.1.0
 
 ## New Features
 
@@ -9,8 +9,6 @@
 * `create_tg_animation()` - Generate animated GIF visualizations across conditions
 * `add_depths()` - Calculate quadrant depths using taxicab metric
 * `thinkgrid_quadrant_plot()` - Create 2x2 quadrant plots for statistical models
-* `install_thinkgrid()` - Set up Python virtual environment with required dependencies
-* `check_python_available()` - Check Python installation status
 
 ## Visualization Types
 
