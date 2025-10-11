@@ -50,4 +50,4 @@ RUN Rscript -e 'install.packages(c("lme4", "sjPlot"))'
 # All layers above will be cached and reused
 COPY ThinkingGrid_0.1.0.tar.gz .
 
-CMD ["R", "CMD", "check", "ThinkingGrid_0.1.0.tar.gz"]
+CMD ["R", "CMD", "check", "--as-cran", "ThinkingGrid_0.1.0.tar.gz"]
