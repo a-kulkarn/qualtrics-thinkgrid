@@ -66,6 +66,18 @@ skip_if_no_python_deps <- function() {
   }
 }
 
+# Skip visual tests on CI and CRAN - they're platform-specific and fail due to
+# minor rendering differences in fonts, graphics devices, etc.
+skip_visual_on_ci <- function() {
+  # Skip on CRAN
+  testthat::skip_on_cran()
+
+  # Skip on CI
+  if (identical(Sys.getenv("CI"), "true")) {
+    testthat::skip("Visual tests skipped on CI due to platform rendering differences")
+  }
+}
+
 test_that("generate_survey does not crash", {
     # During R CMD check, we skip the actual function call to avoid file creation
     # but still test that the function can be called without errors in normal testing
@@ -107,31 +119,37 @@ test_that("test pandas availability", {
 ## ------------------------------------------------------------------------
 
 test_that("plot_tg produces correct plot", {
+    skip_visual_on_ci()
     res <- plot_tg(mock_tg_frame, proportion_type = "overall", type = "cells")
     vdiffr::expect_doppelganger("plot_tg_overall_cells", res$plot)
 })
 
 test_that("plot_tg produces correct plot for quadrants", {
+    skip_visual_on_ci()
     res <- plot_tg(mock_tg_frame, proportion_type = "overall", type = "quadrants")
     vdiffr::expect_doppelganger("plot_tg_overall_quadrants", res$plot)
 })
 
 test_that("plot_tg produces correct plot for horizontal", {
+    skip_visual_on_ci()
     res <- plot_tg(mock_tg_frame, proportion_type = "overall", type = "horizontal")
     vdiffr::expect_doppelganger("plot_tg_overall_horizontal", res$plot)
 })
 
 test_that("plot_tg produces correct plot for vertical", {
+    skip_visual_on_ci()
     res <- plot_tg(mock_tg_frame, proportion_type = "overall", type = "vertical")
     vdiffr::expect_doppelganger("plot_tg_overall_vertical", res$plot)
 })
 
 test_that("plot_tg produces correct plot for constraints", {
+    skip_visual_on_ci()
     res <- plot_tg(mock_tg_frame, proportion_type = "overall", type = "constraints")
     vdiffr::expect_doppelganger("plot_tg_overall_constraints", res$plot)
 })
 
 test_that("plot_tg produces correct plot for depth", {
+    skip_visual_on_ci()
     res <- plot_tg(mock_tg_frame, proportion_type = "overall", type = "depth")
     vdiffr::expect_doppelganger("plot_tg_overall_depth", res$plot)
 })
@@ -140,31 +158,37 @@ test_that("plot_tg produces correct plot for depth", {
 
 #Tests for condition plots without comparison_type (use "separate")
 test_that("plot_tg produces correct plot for condition (separate) with type = cells", {
+  skip_visual_on_ci()
   res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "cells", condition_column = "condition")
   vdiffr::expect_doppelganger("plot_tg_separate_cells", res$plot)
 })
 
 test_that("plot_tg produces correct plot for condition (separate) with type = quadrants", {
+  skip_visual_on_ci()
   res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "quadrants", condition_column = "condition")
   vdiffr::expect_doppelganger("plot_tg_separate_quadrants", res$plot)
 })
 
 test_that("plot_tg produces correct plot for condition (separate) with type = horizontal", {
+  skip_visual_on_ci()
   res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "horizontal", condition_column = "condition")
   vdiffr::expect_doppelganger("plot_tg_separate_horizontal", res$plot)
 })
 
 test_that("plot_tg produces correct plot for condition (separate) with type = vertical", {
+  skip_visual_on_ci()
   res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "vertical", condition_column = "condition")
   vdiffr::expect_doppelganger("plot_tg_separate_vertical", res$plot)
 })
 
 test_that("plot_tg produces correct plot for condition (separate) with type = constraints", {
+  skip_visual_on_ci()
   res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "constraints", condition_column = "condition")
   vdiffr::expect_doppelganger("plot_tg_separate_constraints", res$plot)
 })
 
 test_that("plot_tg produces correct plot for condition (separate) with type = depth", {
+  skip_visual_on_ci()
   res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "depth", condition_column = "condition")
   vdiffr::expect_doppelganger("plot_tg_separate_depth", res$plot)
 })
@@ -173,31 +197,37 @@ test_that("plot_tg produces correct plot for condition (separate) with type = de
 ## Tests for condition plots with comparison_type = "difference"
 
 test_that("plot_tg produces correct plot for condition (difference) with type = cells", {
+  skip_visual_on_ci()
   res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "cells", condition_column = "condition", comparison_type = "difference")
   vdiffr::expect_doppelganger("plot_tg_difference_cells", res$plot)
 })
 
 test_that("plot_tg produces correct plot for condition (difference) with type = quadrants", {
+  skip_visual_on_ci()
   res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "quadrants", condition_column = "condition", comparison_type = "difference")
   vdiffr::expect_doppelganger("plot_tg_difference_quadrants", res$plot)
 })
 
 test_that("plot_tg produces correct plot for condition (difference) with type = horizontal", {
+  skip_visual_on_ci()
   res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "horizontal", condition_column = "condition", comparison_type = "difference")
   vdiffr::expect_doppelganger("plot_tg_difference_horizontal", res$plot)
 })
 
 test_that("plot_tg produces correct plot for condition (difference) with type = vertical", {
+  skip_visual_on_ci()
   res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "vertical", condition_column = "condition", comparison_type = "difference")
   vdiffr::expect_doppelganger("plot_tg_difference_vertical", res$plot)
 })
 
 test_that("plot_tg produces correct plot for condition (difference) with type = constraints", {
+  skip_visual_on_ci()
   res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "constraints", condition_column = "condition", comparison_type = "difference")
   vdiffr::expect_doppelganger("plot_tg_difference_constraints", res$plot)
 })
 
 test_that("plot_tg produces correct plot for condition (difference) with type = depth", {
+  skip_visual_on_ci()
   res <- plot_tg(mock_tg_frame, proportion_type = "condition", type = "depth", condition_column = "condition", comparison_type = "difference")
   vdiffr::expect_doppelganger("plot_tg_difference_depth", res$plot)
 })
