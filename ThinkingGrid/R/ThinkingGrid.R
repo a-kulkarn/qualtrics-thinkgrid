@@ -20,12 +20,34 @@ py_module_path <- function(){
     return(system.file("python", package="ThinkingGrid"))
 }
 
+# Module-level variables for delay-loaded Python modules
 pandas <- NULL
 skimage <- NULL
 matplotlib <- NULL
+generate_survey_mod <- NULL
+read_qualtrics_data_mod <- NULL
 
 .onLoad <- function(libname, pkgname) {
-    reticulate::use_virtualenv("r-thinkgrid", required = FALSE)
+    # Use delay_load = TRUE for all Python modules
+    # This defers loading until first use, allowing reticulate to configure Python first
+
+    # Import Python modules with delay_load = TRUE
+    pandas <<- reticulate::import("pandas", delay_load = TRUE)
+
+    # Import custom Python modules from package
+    py_path <- system.file("python", package = pkgname)
+    if (nzchar(py_path)) {
+        generate_survey_mod <<- reticulate::import_from_path(
+            "generate_survey",
+            path = py_path,
+            delay_load = TRUE
+        )
+        read_qualtrics_data_mod <<- reticulate::import_from_path(
+            "read_qualtrics_data",
+            path = py_path,
+            delay_load = TRUE
+        )
+    }
 }
 
 #' Package setup.
@@ -146,8 +168,13 @@ check_python_available <- function(install_if_NA = FALSE){
 generate_survey <- function(survey_setup_file,
                             output_file_name="output_survey",
                             question_text = TRUE) {
-    mod <- reticulate::import_from_path("generate_survey", path = py_module_path())
-    mod$generate_survey(survey_setup_file, output_file_name, question_text)
+    # Check if Python module is available
+    if (is.null(generate_survey_mod)) {
+        stop("Python modules not loaded. This may occur if the package is not properly installed. ",
+             "Try reinstalling the package or running install_thinkgrid().")
+    }
+
+    generate_survey_mod$generate_survey(survey_setup_file, output_file_name, question_text)
     return(0)
 }
 
@@ -178,8 +205,13 @@ generate_survey <- function(survey_setup_file,
 #' 
 #' @export
 read_qualtrics_data <- function(data_file, setup_file){
-    mod <- reticulate::import_from_path("read_qualtrics_data", path = py_module_path())
-    res <- reticulate::py_to_r(mod$read_qualtrics_data(data_file, setup_file))
+    # Check if Python module is available
+    if (is.null(read_qualtrics_data_mod)) {
+        stop("Python modules not loaded. This may occur if the package is not properly installed. ",
+             "Try reinstalling the package or running install_thinkgrid().")
+    }
+
+    res <- reticulate::py_to_r(read_qualtrics_data_mod$read_qualtrics_data(data_file, setup_file))
 
     ## Fixup attributes for comparison's sake.
     attr(res, "pandas.index") <- NULL
