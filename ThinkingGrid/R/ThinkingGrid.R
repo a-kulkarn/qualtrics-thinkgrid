@@ -50,47 +50,6 @@ read_qualtrics_data_mod <- NULL
     }
 }
 
-#' Package setup.
-#'
-#' Creates a virtual environment and installs the required python packages
-#'
-#' @param envname {character, optional} Name of the virtual environment to be created. Default is "r-thinkgrid".
-#'
-#' @return None
-#'
-#' @examples
-#' \dontrun{
-#' install_thinkgrid()
-#' install_thinkgrid("new_environment_name")
-#' }
-#'
-#' @export
-install_thinkgrid <- function(envname = "r-thinkgrid") {
-    if(reticulate::virtualenv_exists(envname = envname) == FALSE) {
-        reticulate::virtualenv_create(
-                        envname,
-                        packages = c("numpy", "pandas", "scikit-image", "matplotlib")
-                    )
-        print(paste("Created virtual environment", envname))
-    } else {
-        print(paste("Virtual environment", envname, "already exists"))
-    }
-
-    ## Install dependencies.
-    reticulate::py_install("pandas", envname = envname)
-    reticulate::py_install("scikit-image", envname = envname)
-    reticulate::py_install("matplotlib", envname = envname)
-
-    ## Inform.
-    writeLines(
-        paste(
-            "",
-            "ThinkingGrid installed successfully! to activate, run",
-            "    library(ThinkingGrid)",
-            sep = "\n\n"
-        )
-    )
-}
 
 #' Checks status of Python dependency.
 #'
