@@ -81,12 +81,14 @@ read_qualtrics_data_mod <- NULL
 #' @return None
 #'
 #' @examples
-#' # Generate survey from sample setup file
+#' \dontrun{
+#' # Generate survey from sample setup file (requires Python)
 #' setup_file <- system.file("extdata", "sample_setup_file.csv", package = "ThinkingGrid")
 #' if (file.exists(setup_file)) {
 #'   generate_survey(setup_file, "_temp_output_")
 #'   # Clean up
 #'   file.remove("_temp_output_-0.qsf")
+#' }
 #' }
 #' 
 #' @export
@@ -121,11 +123,13 @@ generate_survey <- function(survey_setup_file,
 #' Automatic.Constraints: The automatic constraints provided by the participant. (Y-axis on the thinking grid)
 #' 
 #' @examples
-#' # Read Qualtrics survey data
+#' \dontrun{
+#' # Read Qualtrics survey data (requires Python)
 #' setup_file <- system.file("extdata", "sample_setup_file.csv", package = "ThinkingGrid")
 #' data_file <- system.file("extdata", "sample_qualtrics_output.csv", package = "ThinkingGrid")
 #' if (file.exists(setup_file) && file.exists(data_file)) {
 #'   survey_data <- read_qualtrics_data(data_file, setup_file)
+#' }
 #' }
 #' 
 #' @export

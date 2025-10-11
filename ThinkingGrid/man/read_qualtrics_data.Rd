@@ -26,11 +26,13 @@ Automatic.Constraints: The automatic constraints provided by the participant. (Y
 Parses Qualtrics survey output into a dataframe.
 }
 \examples{
-# Read Qualtrics survey data
+\dontrun{
+# Read Qualtrics survey data (requires Python)
 setup_file <- system.file("extdata", "sample_setup_file.csv", package = "ThinkingGrid")
 data_file <- system.file("extdata", "sample_qualtrics_output.csv", package = "ThinkingGrid")
 if (file.exists(setup_file) && file.exists(data_file)) {
   survey_data <- read_qualtrics_data(data_file, setup_file)
+}
 }
 
 }

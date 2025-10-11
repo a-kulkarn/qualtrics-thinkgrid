@@ -43,10 +43,27 @@ mock_tg_frame <- data.frame(
     condition = condition
 )
 
-skip_if_no_pandas <- function() {
-  have_pandas <- reticulate::py_module_available("pandas")
-  if (!have_pandas)
-    testthat::skip("pandas not available for testing")
+skip_if_no_python_deps <- function() {
+  # Check if Python is available
+  have_python <- reticulate::py_available(initialize = FALSE)
+  if (!have_python) {
+    testthat::skip("Python not available for testing")
+  }
+
+  # Check all required Python packages
+  required_packages <- c("pandas", "numpy", "matplotlib", "skimage")
+  missing_packages <- character(0)
+
+  for (pkg in required_packages) {
+    if (!reticulate::py_module_available(pkg)) {
+      missing_packages <- c(missing_packages, pkg)
+    }
+  }
+
+  if (length(missing_packages) > 0) {
+    testthat::skip(paste("Required Python packages not available:",
+                        paste(missing_packages, collapse = ", ")))
+  }
 }
 
 test_that("generate_survey does not crash", {
@@ -73,12 +90,13 @@ test_that("generate_survey does not crash", {
 })
 
 test_that("read_qualtrics_data does not crash", {
+    skip_if_no_python_deps()
     expect_equal(read_qualtrics_data(data_file, setup_file),
                  read.csv(expected_result, header = TRUE))
 })
 
 test_that("test pandas availability", {
-    skip_if_no_pandas()
+    skip_if_no_python_deps()
     expect_type(
         reticulate::import("pandas"),
         "environment"

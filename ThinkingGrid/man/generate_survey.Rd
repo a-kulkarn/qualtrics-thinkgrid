@@ -44,12 +44,14 @@ None
 Creates a Qualtrics importable survey file from a CSV file of questions.
 }
 \examples{
-# Generate survey from sample setup file
+\dontrun{
+# Generate survey from sample setup file (requires Python)
 setup_file <- system.file("extdata", "sample_setup_file.csv", package = "ThinkingGrid")
 if (file.exists(setup_file)) {
   generate_survey(setup_file, "_temp_output_")
   # Clean up
   file.remove("_temp_output_-0.qsf")
+}
 }
 
 }
