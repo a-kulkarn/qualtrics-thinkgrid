@@ -1,17 +1,6 @@
 ################################################################################
 ## Python env management.
 
-
-## run terminal command in R
-## py_path <- system("python -c 'import os, sys; print(os.path.dirname(sys.executable))'", intern = TRUE)
-## # check if default python installation exists
-## if (py_path == ""){
-##     py_path <- system("which python", intern = TRUE)
-## }
-## use_python(paste0(py_path, "/python"))
-## check if pandas is installed in the python environment
-## py_pandas <- system("python -c 'import pandas as pd; print(pd.__version__)'", intern = TRUE)
-
 py_script_path <- function(script_name){
     return(system.file("python", script_name, package="ThinkingGrid"))
 }
@@ -20,7 +9,8 @@ py_module_path <- function(){
     return(system.file("python", package="ThinkingGrid"))
 }
 
-# Module-level variables for delay-loaded Python modules
+## Module-level variables for delay-loaded Python modules
+numpy <- NULL
 pandas <- NULL
 skimage <- NULL
 matplotlib <- NULL
@@ -30,12 +20,14 @@ read_qualtrics_data_mod <- NULL
 .onLoad <- function(libname, pkgname) {
     reticulate::py_require("matplotlib")
     reticulate::py_require("scikit-image")
+    reticulate::py_require("numpy")    
     reticulate::py_require("pandas")
 
-    # Import Python modules with delay_load = TRUE
+    ## Import Python modules with delay_load = TRUE
+    numpy <<- reticulate::import("numpy", delay_load = TRUE)
     pandas <<- reticulate::import("pandas", delay_load = TRUE)
-    pandas <<- reticulate::import("skimage", delay_load = TRUE)
-    pandas <<- reticulate::import("matplotlib", delay_load = TRUE)
+    skimage <<- reticulate::import("skimage", delay_load = TRUE)
+    matplotlib <<- reticulate::import("matplotlib", delay_load = TRUE)
 
     # Import custom Python modules from package
     py_path <- system.file("python", package = pkgname)
