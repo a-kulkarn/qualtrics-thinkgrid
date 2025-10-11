@@ -24,7 +24,7 @@ devtools::install_github("a-kulkarn/qualtrics-thinkgrid", subdir = "ThinkingGrid
 This package uses [reticulate](https://rstudio.github.io/reticulate/) to pass data
 from a python backend into **R**. 
 
-#### (a). (Optional) Installing python.
+#### (Optional) Installing python.
 If you do not have Python, run
 ```
 library(ThinkingGrid)
@@ -33,20 +33,6 @@ reticulate::install_python(version = "3.13:latest")
 
 _WARNING:_ This package requires Python 3.11 or higher.
 
-#### (b). Setting up the virtual environment.
-If you do not care about which python virtual environment you are using, run
-```
-ThinkingGrid::install_thinkgrid()
-library(ThinkingGrid)
-```
-
-On the other hand, if for some reason you need everything to run in a common virtual
-environment, run instead:
-```
-ThinkingGrid::install_thinkgrid(YOUR_ENV_NAME_HERE)
-library(ThinkingGrid)
-```
-We make no guarantees about package conflicts with the existing environment.
 
 ## Usage
 
