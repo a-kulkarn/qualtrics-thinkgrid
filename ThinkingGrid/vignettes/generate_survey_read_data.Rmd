@@ -46,7 +46,7 @@ The above code will generate a file named `my_thinking_grid_survey-0.qsf` in the
 
 Once data collection is complete, download the survey data from Qualtrics in CSV format. The `read_survey_data` function can be used to read this data into R. The function requires the path to the setup file and the path to the downloaded CSV file from Qualtrics. The function will return a data frame with the survey responses.
 
-```{r read_survey_data}
+```{r read_survey_data, eval = identical(Sys.getenv("NOT_CRAN"), "true")}
 # Path to the downloaded Qualtrics survey data CSV file
 qualtrics_data_file <- system.file("extdata", "sample_qualtrics_output.csv", package = "ThinkingGrid")
 
@@ -58,6 +58,6 @@ survey_data <- read_qualtrics_data(
 
 `read_qualtrics_data` returns a dataframe. `uid` is the unique identifier for each row in the Qualtrics output. `Deliberate.Constraints` and `Automatic.Constraints` columns correspond to the X and Y axes respectively; they span from one to six. Depths within each quadrant are denoted by `Free.Depth`, `Directed.Depth`, `AffDir.Depth`, and `Sticky.Depth`. These four columns represent the bottom-left, bottom-right, top-right, and top-left quadrants respectively. Values in these four columns range from zero to five.
 
-```{r display_survey_data}
+```{r display_survey_data, eval = identical(Sys.getenv("NOT_CRAN"), "true")}
 knitr::kable(survey_data, caption = "Survey Data Read from Qualtrics")
 ```

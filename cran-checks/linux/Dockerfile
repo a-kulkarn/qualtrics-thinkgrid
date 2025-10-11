@@ -21,6 +21,9 @@ RUN apt-get update && apt-get install -y \
     texlive-fonts-recommended \
     texlive-fonts-extra \
     texlive-latex-extra \
+    qpdf \
+    tidy \
+    pandoc \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python (CRAN servers have Python available)
