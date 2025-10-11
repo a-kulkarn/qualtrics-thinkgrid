@@ -236,6 +236,7 @@ test_that("plot_tg produces correct plot for condition (difference) with type = 
 ## ------------------------------------------------------------------------
 
 test_that("create_tg_animation is working with type = cells", {
+    skip_on_os("mac")  # Cairo/XQuartz issues on macOS CI
     temp_gif <- tempfile(fileext = ".gif")
     expect_type(
         create_tg_animation(mock_tg_frame, condition_column = "id", proportion_type = "overall", type = "cells", filename = temp_gif),
