@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_2x2.R
 \name{default_inner_theme}
 \alias{default_inner_theme}
-\title{Illustration of thinkgrid_quadrant_plot function}
+\title{Default theme for subplots in a ThinkingGrid 2x2 quadrant plot.}
 \usage{
 default_inner_theme(inner_margin = 20)
 }
@@ -21,4 +21,19 @@ correctly, the important properties of the theme are:
 \item The aspect ratio is set to 1.00.
 \item Margins are adjusted to set the plot within the background squares.
 }
+}
+\examples{
+plots <- ThinkingGrid:::create_test_2x2_plots()
+p1 <- plots[[1]]
+p2 <- plots[[2]]
+p3 <- plots[[3]]
+p4 <- plots[[4]]
+
+# Here we can customize the theme.
+itheme <- default_inner_theme(inner_margin = 10)
+
+# This is the usual syntax.
+thinkgrid_quadrant_plot(p1, p2, p3, p4, inner_theme = itheme)
+
+
 }

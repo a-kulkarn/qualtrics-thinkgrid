@@ -4,21 +4,29 @@
 \name{ThinkingGrid-package}
 \alias{ThinkingGrid}
 \alias{ThinkingGrid-package}
-\title{ThinkingGrid: What the Package Does (One Line, Title Case)}
+\title{ThinkingGrid: Tools for Thinking Grid Statistics}
 \description{
-A description here.
+Provides comprehensive tools for conducting research using the Thinking Grid framework, a psychological measurement approach for understanding deliberate and automatic cognitive constraints. Includes functions for generating 'Qualtrics' surveys, processing survey responses, calculating quadrant depths, and creating various visualization types including heatmaps, animations, and statistical plots.
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://a-kulkarn.github.io/qualtrics-thinkgrid/}
+  \item Report bugs at \url{https://github.com/a-kulkarn/qualtrics-thinkgrid/issues}
+}
+
 }
 \author{
 \strong{Maintainer}: Vishal Kuvar \email{kuvar001@umn.edu} (\href{https://orcid.org/0000-0002-6799-9790}{ORCID})
 
 Authors:
 \itemize{
-  \item Avinash Kulkarni \email{avi.kulkarni.2.71@gmail.com}
+  \item Avinash Kulkarni \email{avi.kulkarni.2.71@gmail.com} [copyright holder]
 }
 
 Other contributors:
 \itemize{
-  \item Irving Zac \email{zci7c@virginia.edu} [contributor, funder]
+  \item Zac Irving \email{zci7c@virginia.edu} [contributor, funder]
 }
 
 }

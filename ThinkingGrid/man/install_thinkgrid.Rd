@@ -2,7 +2,7 @@
 % Please edit documentation in R/ThinkingGrid.R
 \name{install_thinkgrid}
 \alias{install_thinkgrid}
-\title{Illustration of install_thinkgrid function}
+\title{Package setup.}
 \usage{
 install_thinkgrid(envname = "r-thinkgrid")
 }

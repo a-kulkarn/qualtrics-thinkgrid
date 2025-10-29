@@ -1,15 +1,24 @@
 Package: ThinkingGrid
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Title: Tools for Thinking Grid Statistics
+Version: 0.1.0
+Author: Avinash Kulkarni [aut, cph], Vishal Kuvar [aut, cre], Zac Irving [ctb, fnd]
+Maintainer: Vishal Kuvar <kuvar001@umn.edu>
 Authors@R:
     c(
-      person("Avinash", "Kulkarni", , "avi.kulkarni.2.71@gmail.com", role = c("aut")),
+      person("Avinash", "Kulkarni", , "avi.kulkarni.2.71@gmail.com", role = c("aut", "cph")),
       person("Vishal", "Kuvar", , "kuvar001@umn.edu", role = c("aut", "cre"),
              comment = c(ORCID = "0000-0002-6799-9790")),
-      person("Irving", "Zac", , "zci7c@virginia.edu", role = c("ctb", "fnd"))
+      person( "Zac", "Irving", , "zci7c@virginia.edu", role = c("ctb", "fnd"))
     )
-Description: A description here.
+Description: Provides comprehensive tools for conducting research using the Thinking Grid
+    framework, a psychological measurement approach for understanding deliberate and
+    automatic cognitive constraints. Includes functions for generating 'Qualtrics'
+    surveys, processing survey responses, calculating quadrant depths, and creating
+    various visualization types including heatmaps, animations, and statistical plots.
+URL: https://a-kulkarn.github.io/qualtrics-thinkgrid/
+BugReports: https://github.com/a-kulkarn/qualtrics-thinkgrid/issues
 Imports:
+    colorspace,
     cowplot,
     ggplot2,
     gifski,
@@ -20,12 +29,11 @@ Imports:
     scales,
     stats,
     utils
-License: GPL (>= 3)
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Suggests: 
-    colorspace,
     png,
     testthat (>= 3.0.0),
     vdiffr,

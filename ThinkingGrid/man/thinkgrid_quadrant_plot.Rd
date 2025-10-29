@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_2x2.R
 \name{thinkgrid_quadrant_plot}
 \alias{thinkgrid_quadrant_plot}
-\title{Illustration of thinkgrid_quadrant_plot function}
+\title{Creates a 2x2 plot grid overlayed on top of a ThinkingGrid background.}
 \usage{
 thinkgrid_quadrant_plot(
   p_sticky,
@@ -52,12 +52,15 @@ p4 <- plots[[4]]
 # This is the usual syntax.
 thinkgrid_quadrant_plot(p1, p2, p3, p4)
 
+\dontshow{if (requireNamespace("png", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 # However, it is possible to use images as the subplots. IDEALLY, one uses an image
 # type without backgrounds such as a PNG.
 img_path <- system.file("extdata", "rabbiduck.png", package = "ThinkingGrid")
 rabbi <- png::readPNG(img_path)
 rabbigrob <- grid::rasterGrob(rabbi)  # Note you must raster the image!
 
+# Create sample plots for demonstration
+plots <- ThinkingGrid:::create_test_2x2_plots()
 thinkgrid_quadrant_plot(p1, p2, p3, rabbigrob)
-
+\dontshow{\}) # examplesIf}
 }

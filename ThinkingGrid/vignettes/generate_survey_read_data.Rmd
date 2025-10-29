@@ -19,7 +19,7 @@ library(ThinkingGrid)
 ```
 
 # Generate Qualtrics Survey
-Generating a Qualtrics survey requires path to setup file that contains the question text and IDs. This file *must* have an `id` column and each entry in this column needs to be unique. In the Qualtrics file, number of questions will be generated equal to the number of rows in the setup file. The `question` column will be used as the question text in the Qualtrics survey and is optional.
+Generating a Qualtrics survey requires a path to a setup file that contains the question text and IDs. This file *must* have an `id` column and each entry in this column needs to be unique. In the Qualtrics file, the number of questions generated will be equal to the number of rows in the setup file. The `question` column will be used as the question text in the Qualtrics survey and is optional.
 
 ```{r load_setup_file}
 setup_file <- system.file("extdata", "sample_setup_file.csv", package = "ThinkingGrid")
@@ -36,18 +36,15 @@ generate_survey(
   output_file_name = "my_thinking_grid_survey", # custom name for the output file
   question_text = TRUE # whether to include question text in the survey
 )
-
-# Clean up the generated file
-file.remove("my_thinking_grid_survey-0.qsf")
 ```
 
-Note: The above code is not executed during vignette building to avoid creating temporary files. When you run this code interactively, it will generate a file named `my_thinking_grid_survey-0.qsf` in your current working directory.
+When you run this code interactively, it will generate a file named `my_thinking_grid_survey-0.qsf` in your current working directory.
 
 The above code will generate a file named `my_thinking_grid_survey-0.qsf` in the current working directory. This file can be imported into Qualtrics to create the survey. The filename follows the pattern `{output_file_name}-{partition_number}.qsf`, where the partition number starts from 0. Once imported, you can further customize the survey in Qualtrics as needed.
 
 # Read Qualtrics Survey Data
 
-Once data collection is complete, download the survey data from Qualtrics in CSV format. The `read_survey_data` function can be used to read this data into R. The function requires path to the setup file and the path to the downloaded CSV file from Qualtrics. The function will return a data frame with the survey responses.
+Once data collection is complete, download the survey data from Qualtrics in CSV format. The `read_survey_data` function can be used to read this data into R. The function requires the path to the setup file and the path to the downloaded CSV file from Qualtrics. The function will return a data frame with the survey responses.
 
 ```{r read_survey_data}
 # Path to the downloaded Qualtrics survey data CSV file

@@ -2,36 +2,16 @@
 
 An **R** package for analyzing data from "Thinking Grid" style experiments.
 Package that provides users functions to create qualtrics, extract and
-analyze data, and visualize effects related to the Thinking Grid (add
-Irving cite here).
+analyze data, and visualize effects related to the Thinking Grid.
 
 ## Installation
 
-### Step -2. Create the Personal Access Token (PAT)
-
-**NOTICE:** Once the repo goes public, we won't have to worry about the tokens
-
-Follow the instructions at the link below to create a *classic* PAT.
-
-https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic
-
-You'll want to grant _repo_ permissions to the token.
-
-### Step -1. Install the package using R.
+### Step 0. Install the package using R. (Public)
 
 Open an *R* session, and run the following:
 ```
-GITHUB_PAT <- YOUR_GENERATED_PAT_HERE
-devtools::install_github("a-kulkarn/qualtrics-thinkgrid",
-                         subdir = "ThinkingGrid",
-                         auth_token = GITHUB_PAT,
-                         INSTALL_opts = "--install-tests")
+devtools::install_github("a-kulkarn/qualtrics-thinkgrid", subdir = "ThinkingGrid")
 ```
-If all went well, you should have successfully downloaded the package source from the repo. 
-
-### Step 0. Install the package using R. (Public)
-
-_TODO: Not implemented while repo is still private._
 
 ### Step 1. Install python dependencies.
 This package uses [reticulate](https://rstudio.github.io/reticulate/) to pass data
@@ -53,7 +33,7 @@ ThinkingGrid::install_thinkgrid()
 library(ThinkingGrid)
 ```
 
-On the other hand, if you for some reason need everything to run in a common virtual
+On the other hand, if for some reason you need everything to run in a common virtual
 environment, run instead:
 ```
 ThinkingGrid::install_thinkgrid(YOUR_ENV_NAME_HERE)
@@ -81,14 +61,14 @@ Vignettes are available to help you get started with the package. You can access
 browseVignettes("ThinkingGrid")
 ```
 
-As of July 18, 2024, the package the following vignettes:
+The package has the following vignettes:
 - **generate_survey_read_data**: A walkthrough of how to generate a Qualtric survey and read the data back into R.
 - **plot_2x2**: A walkthrough of how to visualize the Thinking Grid data in a 2x2 plot and how to extract depths from the quadrants.
 - **plot_tg**: A walkthrough of how to visualize proportions of responses across the Thinking Grid and also how to create an animation of the proportions changing over time or conditions.
 
 One can access the inline documentation in the usual way. For example:
 ```r
-?install_thinkgrid()
+?install_thinkgrid
 ```
 
 ## Citation
@@ -96,3 +76,22 @@ One can access the inline documentation in the usual way. For example:
 If you use this package please cite the manuscript below.
 
 **TODO: put citation info here.**
+
+## Troubleshooting
+
+### I tried installing the package, but got this error message:
+```
+> devtools::install_github("a-kulkarn/qualtrics-thinkgrid", auth_token = NULL)
+
+Error: Failed to install 'unknown package' from GitHub:
+  HTTP error 401.
+  Bad credentials
+
+  Rate limit remaining: X/60
+  Rate limit reset at: SOME_TIMESTAMP
+
+```
+
+We have observed that a stale value for `GITHUB_PAT` can cause this problem. Removing
+this variable from your environment sometimes fixes the issue. Please refer to
+troubleshooting for `install_github`.

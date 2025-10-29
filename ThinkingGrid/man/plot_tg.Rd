@@ -83,8 +83,8 @@ The function expects constraint responses on a 1-6 scale where deliberate constr
 For enhanced scaling, the algorithm compresses small values in the color space to give them more visual distinction. This is useful when most responses are in lower ranges.
 }
 \examples{
-# Create sample data for testing
-set.seed(123)  # For reproducible examples
+## Create sample data for testing
+set.seed(123)  ## For reproducible examples
 survey_data <- data.frame(
   Deliberate.Constraints = sample(1:6, 100, replace = TRUE),
   Automatic.Constraints = sample(1:6, 100, replace = TRUE),
@@ -93,23 +93,23 @@ survey_data <- data.frame(
   experience = sample(1:5, 100, replace = TRUE)
 )
 
-# Basic overall plot
+## Basic overall plot
 result1 <- plot_tg(survey_data)
 
-# Cell-level heatmap with enhanced scaling for small values
+## Cell-level heatmap with enhanced scaling for small values
 result2 <- plot_tg(survey_data, 
                    type = "cells", 
                    gradient_scaling = "enhanced",
                    enhanced_threshold_pct = 30,
                    enhanced_expansion_factor = 2.0)
 
-# Compare conditions side by side
+## Compare conditions side by side
 result3 <- plot_tg(survey_data, 
                    proportion_type = "condition",
                    condition_column = "treatment_group",
                    comparison_type = "separate")
 
-# Subset data before analysis
+## Subset data before analysis
 result4 <- plot_tg(survey_data, 
                    subset_condition = "age > 25 & experience >= 2",
                    type = "quadrants")

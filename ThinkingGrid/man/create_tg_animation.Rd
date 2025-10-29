@@ -93,8 +93,8 @@ Generate animated GIF showing Thinking Grid plots across different conditions or
 The function creates one frame per unique value in condition_column. All frames use the same legend scale (calculated from all conditions) to ensure comparability across frames. Requires the 'gifski' package for GIF creation. Will prompt to install if missing.
 }
 \examples{
-# Create sample data with time points for animation
-set.seed(123)  # For reproducible examples
+## Create sample data with time points for animation
+set.seed(123)  ## For reproducible examples
 survey_data <- data.frame(
   Deliberate.Constraints = sample(1:6, 300, replace = TRUE),
   Automatic.Constraints = sample(1:6, 300, replace = TRUE),
@@ -104,15 +104,15 @@ survey_data <- data.frame(
 )
 
 \donttest{
-# Basic animation across time points (creates temporary GIF file)
+## Basic animation across time points (creates temporary GIF file)
 temp_gif1 <- tempfile(fileext = ".gif")
 create_tg_animation(survey_data, 
                     condition_column = "time_point",
                     filename = temp_gif1)
-# Clean up temporary file
+## Clean up temporary file
 if (file.exists(temp_gif1)) file.remove(temp_gif1)
 
-# Enhanced scaling for small differences
+## Enhanced scaling for small differences
 temp_gif2 <- tempfile(fileext = ".gif")
 create_tg_animation(survey_data,
                     condition_column = "week",
@@ -121,7 +121,7 @@ create_tg_animation(survey_data,
                     enhanced_expansion_factor = 2.0,
                     subset_condition = "completed_training == TRUE",
                     filename = temp_gif2)
-# Clean up temporary file
+## Clean up temporary file
 if (file.exists(temp_gif2)) file.remove(temp_gif2)
 }
 

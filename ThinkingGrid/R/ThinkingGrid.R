@@ -28,7 +28,7 @@ matplotlib <- NULL
     reticulate::use_virtualenv("r-thinkgrid", required = FALSE)
 }
 
-#' Illustration of install_thinkgrid function
+#' Package setup.
 #'
 #' Creates a virtual environment and installs the required python packages
 #'
@@ -70,7 +70,7 @@ install_thinkgrid <- function(envname = "r-thinkgrid") {
     )
 }
 
-#' Illustration of check_python_available function
+#' Checks status of Python dependency.
 #'
 #' Checks if python is available. Installs python if appropriate flag is set.
 #'
@@ -86,11 +86,12 @@ install_thinkgrid <- function(envname = "r-thinkgrid") {
 #'
 #' @export
 check_python_available <- function(install_if_NA = FALSE){
-    if(!is.null(reticulate::py_discover_config()$python)){
-        py_ver <- reticulate::py_discover_config()$version
-        print(paste("Python version", py_ver, "is available"))
+    config <- reticulate::py_discover_config()
+    if(!is.null(config$python)){
+        py_ver <- config$version
+        message(paste("Python version", py_ver, "is available at:", config$python))
     } else {
-        print("Python is not available")
+        message("Python is not available")
         if(install_if_NA == TRUE){
             reticulate::install_python(version = "3.13:latest",)
             install_thinkgrid("r-reticulate")
@@ -101,7 +102,7 @@ check_python_available <- function(install_if_NA = FALSE){
 ################################################################################
 ## Survey functions.
 
-#' Illustration of generate_survey function
+#' Creates a Qualtrics importable survey file from a CSV file of questions.
 #'
 #' @param survey_setup_file {character, required} Path to a csv file containing the survey setup. This file MUST have a column called "id". Each row in this column should be unique. Indivudial thinking grids will be created for each row in this column. The other column is called "question". This column contains the question text. Quotes around question text is not required. If the question text is not provided, the function will use default text. Please note that these columns are case sensitive.
 #' 
@@ -151,7 +152,7 @@ generate_survey <- function(survey_setup_file,
 }
 
 
-#' Illustration of read_qualtrics_data function
+#' Parses Qualtrics survey output into a dataframe. 
 #' 
 #' @param data_file {character, needed} The path to where the Qualtrics output is located. This should be a csv file that needs to be provided to this function UNEDITED. 
 #' 
@@ -200,7 +201,7 @@ depth_6x6 <- function(x, y) {
     round(abs(x - 3.5) + abs(y - 3.5))
 }
 
-#' Illustration of add_depths function
+#' Adds taxicab metric calculation columns to a dataframe.
 #' 
 #' @param data {data.frame, needed} Data frame containing columns for deliberate constraints and automatic constraints.
 #' 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/ThinkingGrid.R
 \name{generate_survey}
 \alias{generate_survey}
-\title{Illustration of generate_survey function}
+\title{Creates a Qualtrics importable survey file from a CSV file of questions.}
 \usage{
 generate_survey(
   survey_setup_file,
@@ -41,7 +41,7 @@ If a file with the same name exists, it will be overwritten.}
 None
 }
 \description{
-Illustration of generate_survey function
+Creates a Qualtrics importable survey file from a CSV file of questions.
 }
 \examples{
 # Generate survey from sample setup file

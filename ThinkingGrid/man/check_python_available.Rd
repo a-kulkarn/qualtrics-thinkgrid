@@ -2,7 +2,7 @@
 % Please edit documentation in R/ThinkingGrid.R
 \name{check_python_available}
 \alias{check_python_available}
-\title{Illustration of check_python_available function}
+\title{Checks status of Python dependency.}
 \usage{
 check_python_available(install_if_NA = FALSE)
 }
