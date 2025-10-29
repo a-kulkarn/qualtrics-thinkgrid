@@ -709,7 +709,7 @@ compile_cells_plot_creator <- function() {
   }
   # For cells plot, the proportioner simply returns the cell values in vector form
   proportioner <- function(grid) {
-    as.vector(t(grid))  # Convert matrix to vector in column-major order
+    as.vector(grid)  # Convert matrix to vector in column-major order
   }
 
   # Create data frame for cells plot

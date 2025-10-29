@@ -25,6 +25,7 @@
   </clipPath>
 </defs>
 <g clip-path='url(#cpMC4wMHw3MjAuMDB8ODEuMzl8NDk0LjYx)'>
+<rect x='0.00' y='81.39' width='720.00' height='413.21' style='stroke-width: 1.07; stroke: none; fill: #FFFFFF;' />
 </g>
 <g clip-path='url(#cpMC4wMHw3MjAuMDB8MC4wMHw1NzYuMDA=)'>
 <rect x='48.08' y='292.14' width='121.13' height='121.13' style='stroke-width: 1.07; stroke-linecap: butt; stroke-linejoin: miter; fill: #0788A7;' />
@@ -43,8 +44,26 @@
 <polygon points='612.15,427.01 621.97,421.34 612.15,415.67 ' style='stroke-width: 1.49; stroke-linecap: butt; fill: #000000;' />
 <line x1='351.44' y1='421.34' x2='351.44' y2='150.82' style='stroke-width: 1.49; stroke-linecap: butt;' />
 <polygon points='357.11,160.64 351.44,150.82 345.77,160.64 ' style='stroke-width: 1.49; stroke-linecap: butt; fill: #000000;' />
+</g>
+<defs>
+  <clipPath id='cpMjcuODl8MzEwLjUzfDEyOS41MXwxNTAuODI='>
+    <rect x='27.89' y='129.51' width='282.64' height='21.31' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpMjcuODl8MzEwLjUzfDEyOS41MXwxNTAuODI=)'>
 <text x='169.21' y='144.98' text-anchor='middle' style='font-size: 14.00px; font-weight: bold; fill: #1A1A1A; font-family: sans;' textLength='7.79px' lengthAdjust='spacingAndGlyphs'>a</text>
+</g>
+<g clip-path='url(#cpMC4wMHw3MjAuMDB8MC4wMHw1NzYuMDA=)'>
+</g>
+<defs>
+  <clipPath id='cpMzM5LjMzfDYyMS45N3wxMjkuNTF8MTUwLjgy'>
+    <rect x='339.33' y='129.51' width='282.64' height='21.31' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpMzM5LjMzfDYyMS45N3wxMjkuNTF8MTUwLjgy)'>
 <text x='480.65' y='144.98' text-anchor='middle' style='font-size: 14.00px; font-weight: bold; fill: #1A1A1A; font-family: sans;' textLength='7.79px' lengthAdjust='spacingAndGlyphs'>b</text>
+</g>
+<g clip-path='url(#cpMC4wMHw3MjAuMDB8MC4wMHw1NzYuMDA=)'>
 <text x='324.93' y='458.61' text-anchor='middle' style='font-size: 12.00px; font-style: italic; font-family: sans;' textLength='70.05px' lengthAdjust='spacingAndGlyphs'>Directedness</text>
 <text transform='translate(23.90,292.14) rotate(-90)' text-anchor='middle' style='font-size: 12.00px; font-style: italic; font-family: sans;' textLength='54.04px' lengthAdjust='spacingAndGlyphs'>Stickiness</text>
 <text x='667.38' y='201.27' text-anchor='middle' style='font-size: 11.00px; font-family: sans;' textLength='76.43px' lengthAdjust='spacingAndGlyphs'>Percentage (%)</text>
