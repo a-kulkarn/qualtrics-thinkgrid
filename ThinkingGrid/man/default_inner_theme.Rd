@@ -23,7 +23,7 @@ correctly, the important properties of the theme are:
 }
 }
 \examples{
-plots <- ThinkingGrid:::create_test_2x2_plots()
+plots <- ThinkingGrid::create_test_2x2_plots()
 p1 <- plots[[1]]
 p2 <- plots[[2]]
 p3 <- plots[[3]]

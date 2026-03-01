@@ -2,6 +2,7 @@
 
 export(add_depths)
 export(create_custom_colorer)
+export(create_test_2x2_plots)
 export(create_tg_animation)
 export(default_inner_theme)
 export(generate_survey)

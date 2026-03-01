@@ -1,5 +1,5 @@
 test_that("Grid draws 2x2 overlay", {
-    foo <- ThinkingGrid:::create_test_2x2_plots()
+    foo <- ThinkingGrid::create_test_2x2_plots()
     p_sticky <- foo$p_sticky
     p_salience <- foo$p_salience
     p_free <- foo$p_free
@@ -11,7 +11,7 @@ test_that("Grid draws 2x2 overlay", {
 
 
 test_that("Grid overlays images", {
-    foo <- ThinkingGrid:::create_test_2x2_plots()
+    foo <- ThinkingGrid::create_test_2x2_plots()
     p_sticky <- foo$p_sticky
     p_salience <- foo$p_salience
     p_free <- foo$p_free
@@ -26,7 +26,7 @@ test_that("Grid overlays images", {
 })
 
 test_that("Image can be first", {
-    foo <- ThinkingGrid:::create_test_2x2_plots()
+    foo <- ThinkingGrid::create_test_2x2_plots()
     p_sticky <- foo$p_sticky
     p_salience <- foo$p_salience
     p_free <- foo$p_free
@@ -40,7 +40,7 @@ test_that("Image can be first", {
 })
 
 test_that("All plots can be images.", {
-    foo <- ThinkingGrid:::create_test_2x2_plots()
+    foo <- ThinkingGrid::create_test_2x2_plots()
     p_sticky <- foo$p_sticky
     p_salience <- foo$p_salience
     p_free <- foo$p_free
